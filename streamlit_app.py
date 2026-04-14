@@ -68,26 +68,22 @@ if uploaded_file:
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
-            
             with st.chat_message("assistant"):
-                # --- 核心改进：逐个尝试最可能的模型名称 ---
-         # --- 核心改进：根据你的自检列表，换成最新的模型名称 ---
                 response_text = ""
-                # 这里的名字必须和你自检列表里看到的一模一样
+                # 为了绝对安全，我们这次把 "models/" 前缀也加上，和自检列表保持100%一致
                 test_models = [
-                    'gemini-2.5-flash', 
-                    'gemini-2.0-flash', 
-                    'gemini-1.5-flash',
-                    'gemini-pro'
+                    'models/gemini-2.5-flash', 
+                    'models/gemini-2.0-flash', 
+                    'models/gemini-1.5-flash', 
+                    'models/gemini-pro'
                 ]
                 
                 success = False
+                error_logs = [] # 专门用来收集真实的报错原因
+                
                 for m_name in test_models:
                     try:
-                        # 尝试连接当前最先进的模型
                         model = genai.GenerativeModel(m_name)
-                        
-                        # 稍微精简一下提示词，让它更专注
                         context = f"你是一个博学的共读伙伴。正在阅读的内容：\n{current_text[:1200]}\n\n读者感悟：{prompt}"
                         
                         response = model.generate_content(context)
@@ -95,10 +91,19 @@ if uploaded_file:
                         success = True
                         break 
                     except Exception as e:
-                        # 记录一下到底是什么错，方便我们在后台观察
-                        print(f"尝试模型 {m_name} 失败: {e}")
-                        continue
+                        # 如果失败，把真实的错误记录下来
+                        error_logs.append(f"【{m_name}】真实报错: {str(e)}")
+                        continue 
                 
+                if success:
+                    st.write(response_text)
+                    st.session_state.messages.append({"role": "assistant", "content": response_text})
+                else:
+                    # 如果全失败了，把底裤都脱下来给我们看！
+                    st.error("⚠️ 核心连接失败！请把下面这个灰色的错误代码截图发给你的助手：")
+                    for err in error_logs:
+                        st.code(err)
+           
                 if success:
                     st.write(response_text)
                     st.session_state.messages.append({"role": "assistant", "content": response_text})
