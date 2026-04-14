@@ -71,21 +71,33 @@ if uploaded_file:
             
             with st.chat_message("assistant"):
                 # --- 核心改进：逐个尝试最可能的模型名称 ---
+         # --- 核心改进：根据你的自检列表，换成最新的模型名称 ---
                 response_text = ""
-                # 尝试顺序：Flash 1.5 -> Pro 1.5 -> 经典 Pro
-                test_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+                # 这里的名字必须和你自检列表里看到的一模一样
+                test_models = [
+                    'gemini-2.5-flash', 
+                    'gemini-2.0-flash', 
+                    'gemini-1.5-flash',
+                    'gemini-pro'
+                ]
                 
                 success = False
                 for m_name in test_models:
                     try:
+                        # 尝试连接当前最先进的模型
                         model = genai.GenerativeModel(m_name)
-                        context = f"内容：{current_text[:1200]}\n问题：{prompt}"
+                        
+                        # 稍微精简一下提示词，让它更专注
+                        context = f"你是一个博学的共读伙伴。正在阅读的内容：\n{current_text[:1200]}\n\n读者感悟：{prompt}"
+                        
                         response = model.generate_content(context)
                         response_text = response.text
                         success = True
-                        break # 成功就跳出循环
-                    except Exception:
-                        continue # 失败就试下一个
+                        break 
+                    except Exception as e:
+                        # 记录一下到底是什么错，方便我们在后台观察
+                        print(f"尝试模型 {m_name} 失败: {e}")
+                        continue
                 
                 if success:
                     st.write(response_text)
