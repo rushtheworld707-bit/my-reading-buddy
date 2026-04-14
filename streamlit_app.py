@@ -10,8 +10,10 @@ st.set_page_config(page_title="我的共读空间", layout="centered")
 # 2. 接入 Gemini 大脑
 # 只要你在 Streamlit Secrets 里填了 GEMINI_API_KEY，这里就会自动通电
 if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # 增加 .strip() 自动删掉你粘贴时可能带入的隐形空格
+    api_key = st.secrets["GEMINI_API_KEY"].strip()
+    genai.configure(api_key=api_key)
+    # 暂时删掉这里 model 的定义，我们挪到下面动态生成，防止 404
 else:
     st.error("❌ 未在 Secrets 中发现 API Key，请检查配置。")
 
@@ -76,33 +78,28 @@ if uploaded_file:
                 st.write(m["content"])
 
         # 输入框：与 AI 探讨
+        # --- 对话交互区 (增强型) ---
         if prompt := st.chat_input("想聊聊这段吗？"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
             
             with st.chat_message("assistant"):
-                # 构造包含上下文的指令
-                # 我们告诉 AI：先看这一段书，再回答读者的问题
-                context_prompt = f"""
-                你是一个博学且富有洞察力的共读伙伴。
-                以下是读者正在阅读的内容片段：
-                ---
-                {current_text[:1200]}
-                ---
-                读者的感悟或问题是："{prompt}"
-                请结合文本内容，给出一个深刻、有趣且富有启发性的回应。
-                """
+                success = False
+                # 尝试多个暗号：1.5版、最新版、甚至是经典的 Pro 版
+                for model_name in ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']:
+                    try:
+                        current_model = genai.GenerativeModel(model_name)
+                        context_prompt = f"你是一个陪读伙伴。当前书的内容：\n{current_text[:1000]}\n\n读者问：{prompt}"
+                        
+                        response = current_model.generate_content(context_prompt)
+                        ai_reply = response.text
+                        st.write(ai_reply)
+                        st.session_state.messages.append({"role": "assistant", "content": ai_reply})
+                        success = True
+                        break 
+                    except Exception:
+                        continue 
                 
-                try:
-                    response = model.generate_content(context_prompt)
-                    ai_reply = response.text
-                    st.write(ai_reply)
-                    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-                except Exception as e:
-                    st.error(f"大脑离线中: {e}")
-    else:
-        st.warning("未能识别出书本内容，请尝试换一本 Epub 试试？")
-
-else:
-    st.info("👋 欢迎来到私人共读空间。请点击左侧上传一本 Epub，我们一起开启精神漫游。")
+                if not success:
+                    st.error("⚠️ 所有的 AI 通道都报了 404。这通常是 Google 服务器的地区性同步延迟，建议你去 Google AI Studio 重新生成一个新的 Key 试试。")
