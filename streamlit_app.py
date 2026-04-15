@@ -210,65 +210,71 @@ def extract_text_from_pdf(file_bytes):
     except Exception:
         return None
 
+def _read_file_with_auto_encoding(filepath):
+    """读取文件并自动检测编码"""
+    with open(filepath, 'rb') as f:
+        raw = f.read()
+    detected = chardet.detect(raw)
+    encoding = detected.get('encoding', 'utf-8') or 'utf-8'
+    # 尝试检测到的编码，再依次尝试常见中文编码
+    for enc in [encoding, 'utf-8', 'gb18030', 'gbk', 'gb2312', 'big5', 'shift_jis']:
+        try:
+            return raw.decode(enc)
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return raw.decode('utf-8', errors='replace')
+
+def _extract_mobi_content(file_bytes, suffix):
+    """MOBI/AZW3 通用提取逻辑"""
+    import mobi
+    import glob
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(file_bytes)
+        tmp_path = tmp.name
+    try:
+        tempdir, filepath = mobi.extract(tmp_path)
+        # 在提取目录中搜索所有 HTML 文件，选内容最多的那个
+        html_files = glob.glob(os.path.join(tempdir, '**', '*.html'), recursive=True)
+        html_files += glob.glob(os.path.join(tempdir, '**', '*.htm'), recursive=True)
+        best_content = ""
+        # 优先尝试 mobi.extract 返回的文件路径
+        for fpath in [filepath] + html_files:
+            if not os.path.isfile(fpath):
+                continue
+            content = _read_file_with_auto_encoding(fpath)
+            if len(content) > len(best_content):
+                best_content = content
+        if not best_content:
+            return None
+        soup = BeautifulSoup(best_content, 'html.parser')
+        text = soup.get_text(separator='\n\n', strip=True)
+        chapters = []
+        current_chunk = ""
+        for para in text.split('\n\n'):
+            para = para.strip()
+            if not para:
+                continue
+            current_chunk += para + "\n\n"
+            if len(current_chunk) > 3000:
+                chapters.append(current_chunk.strip())
+                current_chunk = ""
+        if current_chunk.strip():
+            chapters.append(current_chunk.strip())
+        return chapters if chapters else None
+    finally:
+        os.unlink(tmp_path)
+
 @st.cache_data
 def extract_text_from_mobi(file_bytes):
     try:
-        import mobi
-        with tempfile.NamedTemporaryFile(suffix='.mobi', delete=False) as tmp:
-            tmp.write(file_bytes)
-            tmp_path = tmp.name
-        try:
-            tempdir, filepath = mobi.extract(tmp_path)
-            with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
-                content = f.read()
-            soup = BeautifulSoup(content, 'html.parser')
-            text = soup.get_text(separator='\n\n', strip=True)
-            chapters = []
-            current_chunk = ""
-            for para in text.split('\n\n'):
-                para = para.strip()
-                if not para:
-                    continue
-                current_chunk += para + "\n\n"
-                if len(current_chunk) > 3000:
-                    chapters.append(current_chunk.strip())
-                    current_chunk = ""
-            if current_chunk.strip():
-                chapters.append(current_chunk.strip())
-            return chapters if chapters else None
-        finally:
-            os.unlink(tmp_path)
+        return _extract_mobi_content(file_bytes, '.mobi')
     except Exception:
         return None
 
 @st.cache_data
 def extract_text_from_azw3(file_bytes):
     try:
-        import mobi
-        with tempfile.NamedTemporaryFile(suffix='.azw3', delete=False) as tmp:
-            tmp.write(file_bytes)
-            tmp_path = tmp.name
-        try:
-            tempdir, filepath = mobi.extract(tmp_path)
-            with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
-                content = f.read()
-            soup = BeautifulSoup(content, 'html.parser')
-            text = soup.get_text(separator='\n\n', strip=True)
-            chapters = []
-            current_chunk = ""
-            for para in text.split('\n\n'):
-                para = para.strip()
-                if not para:
-                    continue
-                current_chunk += para + "\n\n"
-                if len(current_chunk) > 3000:
-                    chapters.append(current_chunk.strip())
-                    current_chunk = ""
-            if current_chunk.strip():
-                chapters.append(current_chunk.strip())
-            return chapters if chapters else None
-        finally:
-            os.unlink(tmp_path)
+        return _extract_mobi_content(file_bytes, '.azw3')
     except Exception:
         return None
 
