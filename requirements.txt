@@ -2,3 +2,6 @@ streamlit
 ebooklib
 beautifulsoup4
 openai
+PyPDF2
+mobi
+chardet
