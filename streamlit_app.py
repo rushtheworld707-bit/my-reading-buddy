@@ -2,87 +2,100 @@ import streamlit as st
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import io
-import google.generativeai as genai
+from openai import OpenAI
 
 # 1. 页面基础配置
-st.set_page_config(page_title="我的共读空间", layout="centered")
+st.set_page_config(page_title="深度阅读伴侣", layout="wide")
+st.title("📚 深度共读伴侣")
 
-# 2. 接入 Gemini 大脑 (增强型)
-if "GEMINI_API_KEY" in st.secrets:
-    # 彻底清理可能存在的任何隐形字符
-    raw_key = st.secrets["GEMINI_API_KEY"].replace('"', '').replace("'", "").strip()
-    genai.configure(api_key=raw_key)
-else:
-    st.error("❌ 未在 Secrets 中发现 API Key，请检查配置。")
+# 2. 侧边栏：上传文件
+uploaded_file = st.sidebar.file_uploader("上传你的 Epub 电子书", type=['epub'])
 
-# 3. 样式优化
-st.markdown("""
-    <style>
-    .stApp { background-color: #FDFCFB; }
-    .book-content {
-        background: white; padding: 24px; border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        font-size: 19px; line-height: 1.8; color: #2C3E50;
-        margin-bottom: 30px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# 3. 解析 Epub 电子书的函数
+@st.cache_data
+def extract_text_from_epub(file_bytes):
+    try:
+        book = epub.read_epub(io.BytesIO(file_bytes))
+        chapters = []
+        for item in book.get_items():
+            if item.get_type() == 9: # 9 代表 ITEM_DOCUMENT
+                soup = BeautifulSoup(item.get_body_content(), 'html.parser')
+                text = soup.get_text(separator='\n\n', strip=True)
+                if len(text) > 50: # 过滤掉极短的废话或空白页
+                    chapters.append(text)
+        return chapters
+    except Exception as e:
+        return None
 
-# 4. 侧边栏
-with st.sidebar:
-    st.title("📚 阅读配置")
-    uploaded_file = st.file_uploader("上传 Epub 电子书", type="epub")
-    st.divider()
-    # 调试模式：看看大脑能不能认出模型
-    if st.checkbox("开启大脑自检"):
-        try:
-            models = [m.name for m in genai.list_models()]
-            st.write("可用模型列表:", models)
-        except Exception as e:
-            st.error(f"自检失败: {e}")
-
-# 5. 核心逻辑：解析与展示
+# 4. 主逻辑控制
 if uploaded_file:
-    book = epub.read_epub(io.BytesIO(uploaded_file.read()))
-    chapters = []
-    for item in book.get_items_of_type(9):
-        soup = BeautifulSoup(item.get_content(), 'html.parser')
-        text = soup.get_text().strip()
-        if len(text) > 100:
-            chapters.append(text)
+    chapters = extract_text_from_epub(uploaded_file.getvalue())
     
     if chapters:
-        chapter_idx = st.select_slider("当前进度", options=range(len(chapters)), value=0)
+        # 选择章节
+        chapter_idx = st.sidebar.selectbox("选择章节", range(len(chapters)), format_func=lambda x: f"第 {x+1} 章节")
         current_text = chapters[chapter_idx]
-        st.markdown(f'<div class="book-content">{current_text[:3000]}</div>', unsafe_allow_html=True)
-
+        
+        # 主界面：显示正文（使用折叠面板，让页面更清爽）
+        with st.expander("📖 展开阅读当前章节正文", expanded=False):
+            st.write(current_text)
+            
         st.divider()
+        st.subheader("💬 与 AI 探讨本章内容")
+        
+        # --- 核心：对话逻辑 ---
+        
+        # 初始化聊天记录
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
+        # 在屏幕上显示之前的历史聊天记录
         for m in st.session_state.messages:
             with st.chat_message(m["role"]):
                 st.write(m["content"])
 
-        if prompt := st.chat_input("聊聊这段吧..."):
+        # 等待用户输入感悟
+        if prompt := st.chat_input("输入你的感悟，聊聊这段吧..."):
+            
+            # 1. 存入并立刻在屏幕上显示用户发的消息
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
+
+            # 2. 召唤豆包大脑开始思考并回复
             with st.chat_message("assistant"):
                 try:
-                    # 直接锁定唯一通关的真神！
-                    model = genai.GenerativeModel('models/gemini-2.0-flash')
+                    # 建立连接
+                    client = OpenAI(
+                        api_key=st.secrets["ARK_API_KEY"],
+                        base_url="https://ark.cn-beijing.volces.com/api/v3",
+                    )
                     
-                    context = f"你是一个博学的共读伙伴。正在阅读的内容：\n{current_text[:1200]}\n\n读者感悟：{prompt}"
+                    # 组织发送给AI的内容 (截取当前章节前1200字作为语境)
+                    context_msg = f"你是一个博学的共读伙伴，擅长从哲学、生物学或行为因果的角度深度分析文本。正在阅读的内容：\n{current_text[:1200]}\n\n读者感悟：{prompt}"
                     
-                    response = model.generate_content(context)
+                    # 发送请求
+                    completion = client.chat.completions.create(
+                        model=st.secrets["ARK_MODEL_ID"],
+                        messages=[
+                            {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"},
+                            {"role": "user", "content": context_msg}
+                        ],
+                    )
                     
-                    st.write(response.text)
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                
+                    # 获取并展示 AI 的回答
+                    response_text = completion.choices[0].message.content
+                    st.write(response_text)
+                    
+                    # 把 AI 的回答存入历史记录，方便它记住上下文
+                    st.session_state.messages.append({"role": "assistant", "content": response_text})
+                    
                 except Exception as e:
-                    st.error(f"发生了一点小意外：{str(e)}")
+                    # 如果网络波动或其他问题，温柔地提示
+                    st.error(f"大脑连接出现了一点小状况：{str(e)}")
+                    
     else:
-        st.warning("书本解析失败，请换一本书试试。")
+        st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
 else:
-    st.info("👋 欢迎！上传一本 Epub 开启共读之旅。")
+    # 刚进网页时的默认欢迎语
+    st.info("👋 欢迎！上传一本 Epub （比如《冰与火之歌》或《行为》）开启属于你的共读之旅。")
