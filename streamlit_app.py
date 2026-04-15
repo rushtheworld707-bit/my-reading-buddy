@@ -224,43 +224,86 @@ def _read_file_with_auto_encoding(filepath):
             continue
     return raw.decode('utf-8', errors='replace')
 
+def _text_from_html_files(file_list):
+    """从一组 HTML/XHTML 文件中提取文本，返回章节列表"""
+    chapters = []
+    for fpath in sorted(file_list):
+        content = _read_file_with_auto_encoding(fpath)
+        soup = BeautifulSoup(content, 'html.parser')
+        text = soup.get_text(separator='\n\n', strip=True)
+        if len(text) > 50:
+            chapters.append(text)
+    return chapters if chapters else None
+
 def _extract_mobi_content(file_bytes, suffix):
     """MOBI/AZW3 通用提取逻辑"""
     import mobi
     import glob
+    import zipfile
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         tmp.write(file_bytes)
         tmp_path = tmp.name
     try:
         tempdir, filepath = mobi.extract(tmp_path)
-        # 在提取目录中搜索所有 HTML 文件，选内容最多的那个
-        html_files = glob.glob(os.path.join(tempdir, '**', '*.html'), recursive=True)
-        html_files += glob.glob(os.path.join(tempdir, '**', '*.htm'), recursive=True)
-        best_content = ""
-        # 优先尝试 mobi.extract 返回的文件路径
-        for fpath in [filepath] + html_files:
-            if not os.path.isfile(fpath):
+
+        # 策略1：在提取目录中找 .epub 文件，用 epub 解析器读取
+        epub_files = glob.glob(os.path.join(tempdir, '**', '*.epub'), recursive=True)
+        for ef in epub_files:
+            try:
+                with open(ef, 'rb') as f:
+                    return extract_text_from_epub(f.read())
+            except Exception:
                 continue
-            content = _read_file_with_auto_encoding(fpath)
-            if len(content) > len(best_content):
-                best_content = content
-        if not best_content:
-            return None
-        soup = BeautifulSoup(best_content, 'html.parser')
-        text = soup.get_text(separator='\n\n', strip=True)
-        chapters = []
-        current_chunk = ""
-        for para in text.split('\n\n'):
-            para = para.strip()
-            if not para:
-                continue
-            current_chunk += para + "\n\n"
-            if len(current_chunk) > 3000:
-                chapters.append(current_chunk.strip())
+
+        # 策略2：查找 OEBPS/Text 等目录中的 xhtml/html 文件（KF8 解包结构）
+        xhtml_files = glob.glob(os.path.join(tempdir, '**', '*.xhtml'), recursive=True)
+        xhtml_files += glob.glob(os.path.join(tempdir, '**', '*.html'), recursive=True)
+        xhtml_files += glob.glob(os.path.join(tempdir, '**', '*.htm'), recursive=True)
+        if xhtml_files:
+            result = _text_from_html_files(xhtml_files)
+            if result:
+                return result
+
+        # 策略3：mobi.extract 返回的主文件可能是个 zip/epub，尝试解压
+        if os.path.isfile(filepath):
+            try:
+                if zipfile.is_zipfile(filepath):
+                    extract_dir = os.path.join(tempdir, '_unzipped')
+                    with zipfile.ZipFile(filepath, 'r') as zf:
+                        zf.extractall(extract_dir)
+                    xhtml_files = glob.glob(os.path.join(extract_dir, '**', '*.xhtml'), recursive=True)
+                    xhtml_files += glob.glob(os.path.join(extract_dir, '**', '*.html'), recursive=True)
+                    if xhtml_files:
+                        result = _text_from_html_files(xhtml_files)
+                        if result:
+                            return result
+            except Exception:
+                pass
+
+        # 策略4：直接读取主文件作为 HTML（老式 MOBI）
+        if os.path.isfile(filepath):
+            content = _read_file_with_auto_encoding(filepath)
+            soup = BeautifulSoup(content, 'html.parser')
+            text = soup.get_text(separator='\n\n', strip=True)
+            # 检查是否大部分是可读文本（非乱码）
+            cjk_count = sum(1 for c in text[:500] if '\u4e00' <= c <= '\u9fff')
+            latin_count = sum(1 for c in text[:500] if c.isalpha())
+            if cjk_count > 20 or latin_count > 100:
+                chapters = []
                 current_chunk = ""
-        if current_chunk.strip():
-            chapters.append(current_chunk.strip())
-        return chapters if chapters else None
+                for para in text.split('\n\n'):
+                    para = para.strip()
+                    if not para:
+                        continue
+                    current_chunk += para + "\n\n"
+                    if len(current_chunk) > 3000:
+                        chapters.append(current_chunk.strip())
+                        current_chunk = ""
+                if current_chunk.strip():
+                    chapters.append(current_chunk.strip())
+                return chapters if chapters else None
+
+        return None
     finally:
         os.unlink(tmp_path)
 
