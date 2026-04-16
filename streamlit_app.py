@@ -135,6 +135,79 @@ st.markdown("""
     font-size: 18px;
     color: #888;
 }
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 768px) {
+    /* 阅读区域：缩小内边距，调整字体 */
+    .reading-area {
+        padding: 20px 16px;
+        font-size: 16px;
+        line-height: 1.8;
+        min-height: 300px;
+        border-radius: 12px;
+    }
+
+    /* 按钮缩小 */
+    .stButton > button {
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 28px !important;
+    }
+
+    /* 欢迎页面 */
+    .welcome-box {
+        padding: 40px 16px;
+    }
+    .welcome-box h1 {
+        font-size: 36px;
+    }
+    .welcome-box p {
+        font-size: 15px;
+    }
+
+    /* 时间显示 */
+    .time-display {
+        font-size: 12px;
+    }
+
+    /* 隐藏侧边栏默认展开，移动端用汉堡菜单 */
+    .css-1d391kg, [data-testid="stSidebar"] {
+        min-width: 0px;
+    }
+
+    /* 标题缩小 */
+    h1 {
+        font-size: 24px !important;
+    }
+    h2, .stSubheader {
+        font-size: 18px !important;
+    }
+}
+
+/* 小屏手机（<480px） */
+@media (max-width: 480px) {
+    .reading-area {
+        padding: 16px 12px;
+        font-size: 15px;
+        line-height: 1.75;
+        min-height: 250px;
+        border-radius: 8px;
+    }
+
+    .stButton > button {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 24px !important;
+    }
+
+    .cat-label {
+        font-size: 10px;
+    }
+
+    .page-indicator {
+        font-size: 12px;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
