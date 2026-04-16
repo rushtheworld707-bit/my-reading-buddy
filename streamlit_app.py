@@ -426,8 +426,14 @@ def split_into_pages(text, chars_per_page=600):
     return pages if pages else [text]
 
 # 5. 主逻辑控制
+# 将上传文件缓存到 session_state，防止翻页时丢失
 if uploaded_file:
-    chapters = extract_chapters(uploaded_file.getvalue(), uploaded_file.name)
+    st.session_state.file_bytes = uploaded_file.getvalue()
+    st.session_state.file_name = uploaded_file.name
+
+has_file = "file_bytes" in st.session_state and st.session_state.file_bytes
+if has_file:
+    chapters = extract_chapters(st.session_state.file_bytes, st.session_state.file_name)
 
     if chapters:
         # 侧边栏：章节选择
@@ -570,7 +576,7 @@ if uploaded_file:
 
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
-else:
+elif not has_file:
     # 欢迎页面
     st.markdown("""
     <div class="welcome-box">
