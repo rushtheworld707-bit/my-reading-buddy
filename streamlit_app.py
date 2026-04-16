@@ -105,6 +105,27 @@ st.markdown("""
     margin-top: -4px;
 }
 
+/* 翻页导航栏 */
+.nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    margin: 4px 0;
+}
+.nav-btn-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+.nav-center {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    flex: 1;
+}
+
 /* 隐藏 Streamlit 默认按钮样式，美化 */
 .stButton > button {
     background: transparent !important;
@@ -565,15 +586,26 @@ if has_file:
         </div>
         """, unsafe_allow_html=True)
 
+        # 阅读主题样式映射
+        theme_styles = {
+            "深海蓝": "background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #e0e0e0;",
+            "暖光黄": "background: linear-gradient(135deg, #3e2f1a 0%, #4a3728 50%, #5c4433 100%); color: #f5e6c8;",
+            "护眼绿": "background: linear-gradient(135deg, #1a2e1a 0%, #1e3e21 50%, #1a4a2e 100%); color: #d0e8c8;",
+            "纯黑":   "background: #0a0a0a; color: #c0c0c0;",
+        }
+        current_theme = st.session_state.get("reading_theme", "深海蓝")
+        fs = st.session_state.get("font_size", 18)
+        theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
+
         # 阅读区域
         page_content = pages[current_page] if current_page < total_pages else pages[-1]
-        st.markdown(f'<div class="reading-area">{page_content}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="reading-area" style="{theme_css} font-size: {fs}px;">{page_content}</div>', unsafe_allow_html=True)
 
         # 页码显示
         st.markdown(f'<div class="page-indicator">第 {current_page + 1} / {total_pages} 页</div>', unsafe_allow_html=True)
 
-        # 翻页按钮：猫猫头
-        nav_col1, nav_col2, nav_col3 = st.columns([1, 3, 1])
+        # 翻页按钮：猫猫头，紧贴两端
+        nav_col1, nav_col2, nav_col3 = st.columns([1, 4, 1])
 
         with nav_col1:
             if current_page > 0:
@@ -581,9 +613,10 @@ if has_file:
                     st.session_state[page_key] = current_page - 1
                     st.rerun()
                 st.markdown('<div class="cat-label">上一页</div>', unsafe_allow_html=True)
+            else:
+                st.write("")  # 占位
 
         with nav_col2:
-            # 中间留白，显示整体阅读进度
             total_all_pages = sum(len(split_into_pages(ch)) for ch in chapters)
             read_pages = sum(len(split_into_pages(chapters[i])) for i in range(chapter_idx)) + current_page + 1
             overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
@@ -595,10 +628,29 @@ if has_file:
                     st.session_state[page_key] = current_page + 1
                     st.rerun()
                 st.markdown('<div class="cat-label">下一页</div>', unsafe_allow_html=True)
+            else:
+                st.write("")  # 占位
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
         st.sidebar.markdown("**阅读设置**")
+
+        # 字体大小
+        if "font_size" not in st.session_state:
+            st.session_state.font_size = 18
+        font_size = st.sidebar.slider("字体大小", 14, 28, st.session_state.font_size, step=2)
+        if font_size != st.session_state.font_size:
+            st.session_state.font_size = font_size
+            st.rerun()
+
+        # 阅读主题
+        if "reading_theme" not in st.session_state:
+            st.session_state.reading_theme = "深海蓝"
+        theme = st.sidebar.selectbox("阅读主题", ["深海蓝", "暖光黄", "护眼绿", "纯黑"], index=["深海蓝", "暖光黄", "护眼绿", "纯黑"].index(st.session_state.reading_theme))
+        if theme != st.session_state.reading_theme:
+            st.session_state.reading_theme = theme
+            st.rerun()
+
         # 页码跳转
         jump_page = st.sidebar.number_input(
             "跳转到页码",
