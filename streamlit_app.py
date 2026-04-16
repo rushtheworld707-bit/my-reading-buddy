@@ -25,36 +25,80 @@ st.markdown("""
     margin: 8px 0 16px 0;
     letter-spacing: 2px;
 }
-/* 整体阅读区域 */
-.reading-area {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    border-radius: 16px;
-    padding: 36px 44px;
+/* 书本展开布局 */
+.book-container {
+    display: flex;
+    align-items: stretch;
     margin: 10px 0;
-    min-height: 420px;
-    color: #e0e0e0;
-    font-size: 18px;
-    line-height: 1.9;
-    letter-spacing: 0.3px;
+    gap: 0;
+}
+
+/* 猫猫翻页按钮 */
+.cat-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    cursor: pointer;
+    user-select: none;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+.cat-nav:hover {
+    opacity: 1;
+}
+.cat-nav .cat-icon {
+    font-size: 36px;
+    transition: transform 0.2s;
+}
+.cat-nav:hover .cat-icon {
+    animation: wiggle 0.5s ease-in-out infinite;
+}
+.cat-nav .cat-text {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+}
+.cat-nav-hidden {
+    min-width: 56px;
+}
+
+/* 书页区域 */
+.book-spread {
+    display: flex;
+    flex: 1;
+    border-radius: 12px;
+    overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.book-page {
+    flex: 1;
+    padding: 32px 36px;
+    min-height: 420px;
+    line-height: 1.85;
+    letter-spacing: 0.3px;
     word-wrap: break-word;
     position: relative;
 }
-.reading-area p {
-    text-indent: 2em;
-    margin: 0.6em 0;
+.book-page-left {
+    border-right: 1px solid rgba(255,255,255,0.08);
 }
-.reading-area p:first-child {
+.book-page p {
+    text-indent: 2em;
+    margin: 0.5em 0;
+}
+.book-page p:first-child {
     margin-top: 0;
 }
-
-/* 页码标签 */
-.page-indicator {
-    text-align: center;
-    color: #888;
-    font-size: 14px;
-    margin: 8px 0;
+.book-page .page-num {
+    position: absolute;
+    bottom: 12px;
+    font-size: 12px;
+    opacity: 0.4;
 }
+.book-page-left .page-num { left: 36px; }
+.book-page-right .page-num { right: 36px; }
 
 /* 进度条容器 */
 .progress-container {
@@ -69,6 +113,14 @@ st.markdown("""
     height: 100%;
     border-radius: 10px;
     transition: width 0.3s ease;
+}
+
+/* 页码和进度信息 */
+.page-indicator {
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    margin: 8px 0;
 }
 
 /* 时间显示 */
@@ -92,53 +144,9 @@ st.markdown("""
     50% { transform: translateY(-8px); }
 }
 
-.cat-btn {
-    font-size: 48px;
-    cursor: pointer;
-    display: inline-block;
-    transition: transform 0.2s;
-    user-select: none;
-}
-.cat-btn:hover {
-    animation: wiggle 0.5s ease-in-out infinite;
-}
-
-/* 猫猫按钮下方文字 */
-.cat-label {
-    text-align: center;
-    color: #888;
-    font-size: 12px;
-    margin-top: -4px;
-}
-
-/* 翻页导航栏：让按钮贴边 */
-[data-testid="column"]:first-child {
-    display: flex;
-    justify-content: flex-start;
-}
-[data-testid="column"]:last-child {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* 隐藏 Streamlit 默认按钮样式，美化 */
+/* Streamlit 按钮（用于侧边栏等） */
 .stButton > button {
-    background: transparent !important;
-    border: 2px solid #333 !important;
-    border-radius: 50% !important;
-    width: 72px !important;
-    height: 72px !important;
-    font-size: 36px !important;
-    padding: 0 !important;
     transition: all 0.3s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-.stButton > button:hover {
-    border-color: #e94560 !important;
-    background: rgba(233, 69, 96, 0.1) !important;
-    animation: bounce 0.6s ease-in-out infinite;
 }
 
 /* 侧边栏美化 */
@@ -228,85 +236,49 @@ st.markdown("""
 
 /* ===== 移动端适配 ===== */
 @media (max-width: 768px) {
-    /* 阅读区域：缩小内边距，调整字体 */
-    .reading-area {
-        padding: 20px 16px;
-        font-size: 16px;
-        line-height: 1.8;
-        min-height: 300px;
-        border-radius: 12px;
+    /* 移动端：单页模式 */
+    .book-spread {
+        flex-direction: column;
     }
-
-    /* 按钮缩小 */
-    .stButton > button {
-        width: 56px !important;
-        height: 56px !important;
-        font-size: 28px !important;
+    .book-page {
+        padding: 20px 16px;
+        min-height: 280px;
+        font-size: 16px;
+    }
+    .book-page-left {
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .cat-nav {
+        min-width: 40px;
+    }
+    .cat-nav .cat-icon {
+        font-size: 28px;
     }
 
     /* 欢迎页面 */
-    .welcome-box {
-        padding: 40px 16px;
-    }
-    .welcome-cat {
-        font-size: 56px;
-    }
-    .welcome-title {
-        font-size: 22px;
-    }
-    .welcome-desc {
-        font-size: 14px;
-    }
-    .welcome-formats {
-        gap: 8px;
-    }
-    .format-tag {
-        padding: 4px 12px;
-        font-size: 12px;
-    }
+    .welcome-box { padding: 40px 16px; }
+    .welcome-cat { font-size: 56px; }
+    .welcome-title { font-size: 22px; }
+    .welcome-desc { font-size: 14px; }
+    .welcome-formats { gap: 8px; }
+    .format-tag { padding: 4px 12px; font-size: 12px; }
+    .time-display { font-size: 12px; }
 
-    /* 时间显示 */
-    .time-display {
-        font-size: 12px;
-    }
-
-    /* 隐藏侧边栏默认展开，移动端用汉堡菜单 */
-    .css-1d391kg, [data-testid="stSidebar"] {
-        min-width: 0px;
-    }
-
-    /* 标题缩小 */
-    h1 {
-        font-size: 24px !important;
-    }
-    h2, .stSubheader {
-        font-size: 18px !important;
-    }
+    h1 { font-size: 24px !important; }
+    h2, .stSubheader { font-size: 18px !important; }
 }
 
-/* 小屏手机（<480px） */
 @media (max-width: 480px) {
-    .reading-area {
+    .book-page {
         padding: 16px 12px;
+        min-height: 220px;
         font-size: 15px;
-        line-height: 1.75;
-        min-height: 250px;
-        border-radius: 8px;
     }
-
-    .stButton > button {
-        width: 48px !important;
-        height: 48px !important;
-        font-size: 24px !important;
-    }
-
-    .cat-label {
-        font-size: 10px;
-    }
-
-    .page-indicator {
-        font-size: 12px;
-    }
+    .cat-nav { min-width: 32px; }
+    .cat-nav .cat-icon { font-size: 22px; }
+    .cat-nav .cat-text { font-size: 9px; }
+    .page-indicator { font-size: 12px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -638,56 +610,75 @@ if has_file:
         </div>
         """, unsafe_allow_html=True)
 
-        # 阅读主题样式映射
+        # 阅读主题样式映射（背景 + 对比度好的字体颜色）
         theme_styles = {
-            "深海蓝": "background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #e0e0e0;",
-            "暖光黄": "background: linear-gradient(135deg, #3e2f1a 0%, #4a3728 50%, #5c4433 100%); color: #f5e6c8;",
-            "护眼绿": "background: linear-gradient(135deg, #1a2e1a 0%, #1e3e21 50%, #1a4a2e 100%); color: #d0e8c8;",
-            "纯黑":   "background: #0a0a0a; color: #c0c0c0;",
+            "深海蓝": "background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #d4d4e0;",
+            "暖光黄": "background: linear-gradient(135deg, #2c2416 0%, #3a2e1c 50%, #453622 100%); color: #e8d5b5;",
+            "护眼绿": "background: linear-gradient(135deg, #1a261a 0%, #1e301e 50%, #223a22 100%); color: #c8dcc0;",
+            "纯黑":   "background: #0e0e0e; color: #b0b0b0;",
         }
         current_theme = st.session_state.get("reading_theme", "深海蓝")
         fs = st.session_state.get("font_size", 18)
         theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
 
-        # 阅读区域：将文本转为 <p> 标签，优化排版
-        page_content = pages[current_page] if current_page < total_pages else pages[-1]
-        # 按换行拆分为段落，用 <p> 包裹
-        paragraphs_html = ""
-        for para in page_content.split('\n'):
-            para = para.strip()
-            if para:
-                paragraphs_html += f"<p>{para}</p>"
-        st.markdown(f'<div class="reading-area" style="{theme_css} font-size: {fs}px;">{paragraphs_html}</div>', unsafe_allow_html=True)
+        # 双页展示：当前页 = 左页，下一页 = 右页
+        left_idx = current_page
+        right_idx = current_page + 1 if current_page + 1 < total_pages else None
 
-        # 页码显示
-        st.markdown(f'<div class="page-indicator">第 {current_page + 1} / {total_pages} 页</div>', unsafe_allow_html=True)
+        def _to_html(page_text):
+            html = ""
+            for para in page_text.split('\n'):
+                para = para.strip()
+                if para:
+                    html += f"<p>{para}</p>"
+            return html
 
-        # 翻页按钮：猫猫头，紧贴两端
-        nav_col1, nav_col2, nav_col3 = st.columns([1, 4, 1])
+        left_html = _to_html(pages[left_idx])
+        right_html = _to_html(pages[right_idx]) if right_idx is not None else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>'
 
-        with nav_col1:
+        # 猫猫按钮
+        prev_cat = f'<div class="cat-nav" id="cat-prev"><span class="cat-icon">🐱</span><span class="cat-text">上一页</span></div>' if current_page > 0 else '<div class="cat-nav-hidden"></div>'
+        next_cat = f'<div class="cat-nav" id="cat-next"><span class="cat-icon">😺</span><span class="cat-text">下一页</span></div>' if current_page < total_pages - 1 else '<div class="cat-nav-hidden"></div>'
+
+        # 页码
+        left_num = left_idx + 1
+        right_num = right_idx + 1 if right_idx is not None else ""
+
+        book_html = f'''
+        <div class="book-container">
+            {prev_cat}
+            <div class="book-spread" style="{theme_css} font-size: {fs}px;">
+                <div class="book-page book-page-left">
+                    {left_html}
+                    <div class="page-num">{left_num}</div>
+                </div>
+                <div class="book-page book-page-right">
+                    {right_html}
+                    <div class="page-num">{right_num}</div>
+                </div>
+            </div>
+            {next_cat}
+        </div>
+        '''
+        st.markdown(book_html, unsafe_allow_html=True)
+
+        # 用隐藏的 Streamlit 按钮实现真正的翻页（因为 HTML 点击无法触发 session_state）
+        btn_col1, btn_col2, btn_col3 = st.columns([1, 6, 1])
+        with btn_col1:
             if current_page > 0:
-                if st.button("🐱", key="prev", help="上一页"):
-                    st.session_state[page_key] = current_page - 1
+                if st.button("⬅", key="prev", help="上一页"):
+                    st.session_state[page_key] = max(0, current_page - 2)
                     st.rerun()
-                st.markdown('<div class="cat-label">上一页</div>', unsafe_allow_html=True)
-            else:
-                st.write("")  # 占位
-
-        with nav_col2:
+        with btn_col2:
             total_all_pages = sum(len(split_into_pages(ch["text"])) for ch in chapters)
             read_pages = sum(len(split_into_pages(chapters[i]["text"])) for i in range(chapter_idx)) + current_page + 1
             overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
-            st.markdown(f'<div style="text-align:center; color:#666; font-size:13px;">全书进度 {overall:.1f}%</div>', unsafe_allow_html=True)
-
-        with nav_col3:
+            st.markdown(f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""} / {total_pages} 页 · 全书 {overall:.1f}%</div>', unsafe_allow_html=True)
+        with btn_col3:
             if current_page < total_pages - 1:
-                if st.button("😺", key="next", help="下一页"):
-                    st.session_state[page_key] = current_page + 1
+                if st.button("➡", key="next", help="下一页"):
+                    st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                     st.rerun()
-                st.markdown('<div class="cat-label">下一页</div>', unsafe_allow_html=True)
-            else:
-                st.write("")  # 占位
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
