@@ -9,11 +9,22 @@ from datetime import datetime
 from openai import OpenAI
 
 # 1. 页面基础配置
-st.set_page_config(page_title="深度阅读伴侣", layout="wide")
+st.set_page_config(page_title="嘟哒", layout="wide")
 
 # 2. 全局自定义样式
 st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <style>
+/* 主标题手绘体 */
+.handwrite-title {
+    font-family: 'Caveat', cursive;
+    font-size: 52px;
+    font-weight: 700;
+    color: #ff6b6b;
+    text-align: center;
+    margin: 8px 0 16px 0;
+    letter-spacing: 2px;
+}
 /* 整体阅读区域 */
 .reading-area {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -284,12 +295,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📚 深度共读伴侣")
+st.markdown('<div class="handwrite-title">Sweet Sweet Homeland</div>', unsafe_allow_html=True)
 
 # 3. 侧边栏：上传文件（支持多种格式）
 SUPPORTED_FORMATS = ['epub', 'txt', 'pdf', 'mobi', 'azw3']
 uploaded_file = st.sidebar.file_uploader(
-    "上传你的电子书",
+    "请上传一本电子书吧(๑•̀ㅂ•́)و✧",
     type=SUPPORTED_FORMATS,
     help="支持格式：EPUB、TXT、PDF、MOBI、AZW3"
 )
@@ -614,7 +625,7 @@ if has_file:
                 st.write(m["content"])
 
         # 等待用户输入感悟
-        if prompt := st.chat_input("输入你的感悟，聊聊这段吧..."):
+        if prompt := st.chat_input("请尽情与我交谈ฅ՞•ﻌ•՞ฅ"):
 
             # 1. 存入并立刻在屏幕上显示用户发的消息
             st.session_state.messages.append({"role": "user", "content": prompt})
