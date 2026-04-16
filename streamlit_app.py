@@ -29,17 +29,23 @@ st.markdown("""
 .reading-area {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     border-radius: 16px;
-    padding: 40px 48px;
+    padding: 36px 44px;
     margin: 10px 0;
     min-height: 420px;
     color: #e0e0e0;
     font-size: 18px;
-    line-height: 2;
-    letter-spacing: 0.5px;
+    line-height: 1.9;
+    letter-spacing: 0.3px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    white-space: pre-wrap;
     word-wrap: break-word;
     position: relative;
+}
+.reading-area p {
+    text-indent: 2em;
+    margin: 0.6em 0;
+}
+.reading-area p:first-child {
+    margin-top: 0;
 }
 
 /* 页码标签 */
@@ -105,25 +111,14 @@ st.markdown("""
     margin-top: -4px;
 }
 
-/* 翻页导航栏 */
-.nav-row {
+/* 翻页导航栏：让按钮贴边 */
+[data-testid="column"]:first-child {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
-    margin: 4px 0;
+    justify-content: flex-start;
 }
-.nav-btn-area {
+[data-testid="column"]:last-child {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 80px;
-}
-.nav-center {
-    text-align: center;
-    color: #666;
-    font-size: 13px;
-    flex: 1;
+    justify-content: flex-end;
 }
 
 /* 隐藏 Streamlit 默认按钮样式，美化 */
@@ -328,20 +323,59 @@ uploaded_file = st.sidebar.file_uploader(
 
 # 4. 各格式解析函数
 
+import re
+
+def _clean_text(text):
+    """清理文本：合并多余空行，去除首尾空白"""
+    # 将连续3个以上换行合并为2个
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    # 去除每行首尾多余空格
+    lines = [line.strip() for line in text.split('\n')]
+    return '\n'.join(lines).strip()
+
+def _extract_chapter_title(soup):
+    """从 HTML 中提取章节标题"""
+    # 尝试从 h1, h2, h3, title 标签获取标题
+    for tag in ['h1', 'h2', 'h3', 'title']:
+        heading = soup.find(tag)
+        if heading:
+            title = heading.get_text(strip=True)
+            if title and len(title) < 60:
+                return title
+    return None
+
 @st.cache_data
 def extract_text_from_epub(file_bytes):
     try:
         book = epub.read_epub(io.BytesIO(file_bytes))
-        chapters = []
+        chapters = []  # list of (title, text)
         for item in book.get_items():
             if item.get_type() == 9:
                 soup = BeautifulSoup(item.get_body_content(), 'html.parser')
                 text = soup.get_text(separator='\n\n', strip=True)
+                text = _clean_text(text)
                 if len(text) > 50:
-                    chapters.append(text)
+                    title = _extract_chapter_title(soup)
+                    # 如果没有标题，取前20个字作为标题
+                    if not title:
+                        first_line = text.split('\n')[0].strip()
+                        title = first_line[:20] + ('...' if len(first_line) > 20 else '')
+                    chapters.append({"title": title, "text": text})
         return chapters
     except Exception:
         return None
+
+def _make_chapter_dict(text, idx):
+    """从文本块创建章节字典，尝试提取标题"""
+    text = _clean_text(text)
+    first_line = text.split('\n')[0].strip()
+    # 检测是否像章节标题
+    title_match = re.match(r'^(第.{1,5}[章节回篇].*|Chapter\s*\d+.*|CHAPTER\s*\d+.*)', first_line)
+    if title_match and len(first_line) < 50:
+        title = first_line
+    else:
+        title = first_line[:20] + ('...' if len(first_line) > 20 else '')
+    return {"title": title, "text": text}
 
 @st.cache_data
 def extract_text_from_txt(file_bytes):
@@ -353,16 +387,18 @@ def extract_text_from_txt(file_bytes):
         raw_chapters = text.split('\n\n\n')
         chapters = []
         current_chunk = ""
+        chunk_idx = 0
         for part in raw_chapters:
             part = part.strip()
             if not part:
                 continue
             current_chunk += part + "\n\n"
             if len(current_chunk) > 2000:
-                chapters.append(current_chunk.strip())
+                chapters.append(_make_chapter_dict(current_chunk.strip(), chunk_idx))
                 current_chunk = ""
+                chunk_idx += 1
         if current_chunk.strip():
-            chapters.append(current_chunk.strip())
+            chapters.append(_make_chapter_dict(current_chunk.strip(), chunk_idx))
 
         return chapters if chapters else None
     except Exception:
@@ -375,15 +411,23 @@ def extract_text_from_pdf(file_bytes):
         reader = PdfReader(io.BytesIO(file_bytes))
         chapters = []
         current_chunk = ""
+        page_start = 1
+        page_num = 0
         for page in reader.pages:
+            page_num += 1
             page_text = page.extract_text()
             if page_text:
                 current_chunk += page_text + "\n\n"
                 if len(current_chunk) > 3000:
-                    chapters.append(current_chunk.strip())
+                    ch = _make_chapter_dict(current_chunk.strip(), len(chapters))
+                    ch["title"] = f"第 {page_start}-{page_num} 页"
+                    chapters.append(ch)
                     current_chunk = ""
+                    page_start = page_num + 1
         if current_chunk.strip():
-            chapters.append(current_chunk.strip())
+            ch = _make_chapter_dict(current_chunk.strip(), len(chapters))
+            ch["title"] = f"第 {page_start}-{page_num} 页"
+            chapters.append(ch)
         return chapters if chapters else None
     except Exception:
         return None
@@ -409,8 +453,13 @@ def _text_from_html_files(file_list):
         content = _read_file_with_auto_encoding(fpath)
         soup = BeautifulSoup(content, 'html.parser')
         text = soup.get_text(separator='\n\n', strip=True)
+        text = _clean_text(text)
         if len(text) > 50:
-            chapters.append(text)
+            title = _extract_chapter_title(soup)
+            if not title:
+                first_line = text.split('\n')[0].strip()
+                title = first_line[:20] + ('...' if len(first_line) > 20 else '')
+            chapters.append({"title": title, "text": text})
     return chapters if chapters else None
 
 def _extract_mobi_content(file_bytes, suffix):
@@ -463,22 +512,24 @@ def _extract_mobi_content(file_bytes, suffix):
             content = _read_file_with_auto_encoding(filepath)
             soup = BeautifulSoup(content, 'html.parser')
             text = soup.get_text(separator='\n\n', strip=True)
-            # 检查是否大部分是可读文本（非乱码）
+            text = _clean_text(text)
             cjk_count = sum(1 for c in text[:500] if '\u4e00' <= c <= '\u9fff')
             latin_count = sum(1 for c in text[:500] if c.isalpha())
             if cjk_count > 20 or latin_count > 100:
                 chapters = []
                 current_chunk = ""
+                chunk_idx = 0
                 for para in text.split('\n\n'):
                     para = para.strip()
                     if not para:
                         continue
                     current_chunk += para + "\n\n"
                     if len(current_chunk) > 3000:
-                        chapters.append(current_chunk.strip())
+                        chapters.append(_make_chapter_dict(current_chunk.strip(), chunk_idx))
                         current_chunk = ""
+                        chunk_idx += 1
                 if current_chunk.strip():
-                    chapters.append(current_chunk.strip())
+                    chapters.append(_make_chapter_dict(current_chunk.strip(), chunk_idx))
                 return chapters if chapters else None
 
         return None
@@ -541,13 +592,14 @@ if has_file:
     chapters = extract_chapters(st.session_state.file_bytes, st.session_state.file_name)
 
     if chapters:
-        # 侧边栏：章节选择
+        # 侧边栏：章节选择（显示真实标题）
+        chapter_titles = [ch["title"] for ch in chapters]
         chapter_idx = st.sidebar.selectbox(
             "选择章节",
             range(len(chapters)),
-            format_func=lambda x: f"第 {x+1} 章"
+            format_func=lambda x: chapter_titles[x]
         )
-        current_text = chapters[chapter_idx]
+        current_text = chapters[chapter_idx]["text"]
 
         # 将当前章节分页
         pages = split_into_pages(current_text)
@@ -573,7 +625,7 @@ if has_file:
         # 顶部：时间 + 章节信息
         top_col1, top_col2 = st.columns([1, 1])
         with top_col1:
-            st.markdown(f"**第 {chapter_idx + 1} 章**")
+            st.markdown(f"**{chapter_titles[chapter_idx]}**")
         with top_col2:
             now = datetime.now().strftime("%H:%M")
             st.markdown(f'<div class="time-display">🕐 {now}</div>', unsafe_allow_html=True)
@@ -597,9 +649,15 @@ if has_file:
         fs = st.session_state.get("font_size", 18)
         theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
 
-        # 阅读区域
+        # 阅读区域：将文本转为 <p> 标签，优化排版
         page_content = pages[current_page] if current_page < total_pages else pages[-1]
-        st.markdown(f'<div class="reading-area" style="{theme_css} font-size: {fs}px;">{page_content}</div>', unsafe_allow_html=True)
+        # 按换行拆分为段落，用 <p> 包裹
+        paragraphs_html = ""
+        for para in page_content.split('\n'):
+            para = para.strip()
+            if para:
+                paragraphs_html += f"<p>{para}</p>"
+        st.markdown(f'<div class="reading-area" style="{theme_css} font-size: {fs}px;">{paragraphs_html}</div>', unsafe_allow_html=True)
 
         # 页码显示
         st.markdown(f'<div class="page-indicator">第 {current_page + 1} / {total_pages} 页</div>', unsafe_allow_html=True)
@@ -617,8 +675,8 @@ if has_file:
                 st.write("")  # 占位
 
         with nav_col2:
-            total_all_pages = sum(len(split_into_pages(ch)) for ch in chapters)
-            read_pages = sum(len(split_into_pages(chapters[i])) for i in range(chapter_idx)) + current_page + 1
+            total_all_pages = sum(len(split_into_pages(ch["text"])) for ch in chapters)
+            read_pages = sum(len(split_into_pages(chapters[i]["text"])) for i in range(chapter_idx)) + current_page + 1
             overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
             st.markdown(f'<div style="text-align:center; color:#666; font-size:13px;">全书进度 {overall:.1f}%</div>', unsafe_allow_html=True)
 
