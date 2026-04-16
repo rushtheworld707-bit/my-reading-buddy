@@ -122,18 +122,81 @@ st.markdown("""
 }
 
 /* 欢迎页面 */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes glow {
+    0%, 100% { text-shadow: 0 0 10px rgba(233,69,96,0.3); }
+    50% { text-shadow: 0 0 25px rgba(233,69,96,0.6), 0 0 50px rgba(233,69,96,0.2); }
+}
+@keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
 .welcome-box {
     text-align: center;
-    padding: 80px 40px;
+    padding: 60px 40px 80px;
     color: #ccc;
 }
-.welcome-box h1 {
-    font-size: 48px;
-    margin-bottom: 8px;
+.welcome-cat {
+    font-size: 72px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+    margin-bottom: 16px;
 }
-.welcome-box p {
-    font-size: 18px;
+.welcome-title {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #e94560, #ff6b6b, #ffa07a, #e94560);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite, fadeInUp 1s ease-out;
+    margin-bottom: 20px;
+}
+.welcome-desc {
+    font-size: 16px;
     color: #888;
+    animation: fadeInUp 1s ease-out 0.3s both;
+    line-height: 1.8;
+}
+.welcome-formats {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    animation: fadeInUp 1s ease-out 0.6s both;
+}
+.format-tag {
+    background: rgba(233, 69, 96, 0.12);
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    color: #ff6b6b;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+.format-tag:hover {
+    background: rgba(233, 69, 96, 0.25);
+    transform: scale(1.05);
+}
+.welcome-hint {
+    margin-top: 32px;
+    font-size: 14px;
+    color: #555;
+    animation: fadeInUp 1s ease-out 0.9s both;
+}
+.welcome-hint span {
+    animation: glow 2s ease-in-out infinite;
 }
 
 /* ===== 移动端适配 ===== */
@@ -158,11 +221,21 @@ st.markdown("""
     .welcome-box {
         padding: 40px 16px;
     }
-    .welcome-box h1 {
-        font-size: 36px;
+    .welcome-cat {
+        font-size: 56px;
     }
-    .welcome-box p {
-        font-size: 15px;
+    .welcome-title {
+        font-size: 22px;
+    }
+    .welcome-desc {
+        font-size: 14px;
+    }
+    .welcome-formats {
+        gap: 8px;
+    }
+    .format-tag {
+        padding: 4px 12px;
+        font-size: 12px;
     }
 
     /* 时间显示 */
@@ -580,11 +653,21 @@ elif not has_file:
     # 欢迎页面
     st.markdown("""
     <div class="welcome-box">
-        <h1>🐱</h1>
-        <p>欢迎来到深度共读伴侣</p>
-        <p style="font-size: 15px; margin-top: 12px;">
-            上传一本电子书（支持 EPUB、TXT、PDF、MOBI、AZW3 格式）<br>
-            开启属于你的共读之旅
-        </p>
+        <div class="welcome-cat">🐱</div>
+        <div class="welcome-title">欢迎来到深度共读伴侣</div>
+        <div class="welcome-desc">
+            在这里，每一本书都值得被深度对话<br>
+            上传你的电子书，开启属于你的共读之旅
+        </div>
+        <div class="welcome-formats">
+            <span class="format-tag">EPUB</span>
+            <span class="format-tag">TXT</span>
+            <span class="format-tag">PDF</span>
+            <span class="format-tag">MOBI</span>
+            <span class="format-tag">AZW3</span>
+        </div>
+        <div class="welcome-hint">
+            <span>← 点击左侧上传电子书开始</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
