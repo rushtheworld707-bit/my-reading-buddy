@@ -12,8 +12,8 @@ from openai import OpenAI
 st.set_page_config(page_title="嘟哒", layout="wide")
 
 # 2. 全局自定义样式
+st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* 主标题手绘体 */
 .handwrite-title {
