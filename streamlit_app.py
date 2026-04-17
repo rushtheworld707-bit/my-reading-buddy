@@ -339,20 +339,60 @@ def _extract_chapter_title(soup):
 def extract_text_from_epub(file_bytes):
     try:
         book = epub.read_epub(io.BytesIO(file_bytes))
-        chapters = []  # list of (title, text)
+
+        # href → item 映射（全路径 + basename 两种键）
+        href_map = {}
         for item in book.get_items():
             if item.get_type() == 9:
-                soup = BeautifulSoup(item.get_body_content(), 'html.parser')
-                text = soup.get_text(separator='\n\n', strip=True)
-                text = _clean_text(text)
-                if len(text) > 50:
-                    title = _extract_chapter_title(soup)
-                    # 如果没有标题，取前20个字作为标题
-                    if not title:
-                        first_line = text.split('\n')[0].strip()
-                        title = first_line[:20] + ('...' if len(first_line) > 20 else '')
-                    chapters.append({"title": title, "text": text})
-        return chapters
+                name = item.get_name()
+                href_map[name] = item
+                href_map[name.split('/')[-1]] = item
+
+        def item_text(item):
+            soup = BeautifulSoup(item.get_body_content(), 'html.parser')
+            return _clean_text(soup.get_text(separator='\n\n', strip=True))
+
+        def flatten_toc(toc):
+            result = []
+            for entry in toc:
+                if isinstance(entry, tuple):
+                    section, children = entry
+                    result.append((section.title or '', section.href or ''))
+                    result.extend(flatten_toc(children))
+                elif hasattr(entry, 'title'):
+                    result.append((entry.title or '', entry.href or ''))
+            return result
+
+        chapters = []
+        seen = set()
+
+        # 优先用 TOC 元数据获取真实章节名
+        if book.toc:
+            for title, href in flatten_toc(book.toc):
+                bare = href.split('#')[0]
+                if bare in seen:
+                    continue
+                seen.add(bare)
+                item = href_map.get(bare) or href_map.get(bare.split('/')[-1])
+                if item:
+                    text = item_text(item)
+                    if len(text) > 50:
+                        chapters.append({"title": title.strip() or bare, "text": text})
+
+        # 兜底：按 spine 顺序遍历，用标题标签提取章节名
+        if not chapters:
+            for item in book.get_items():
+                if item.get_type() == 9:
+                    text = item_text(item)
+                    if len(text) > 50:
+                        soup = BeautifulSoup(item.get_body_content(), 'html.parser')
+                        title = _extract_chapter_title(soup)
+                        if not title:
+                            first_line = text.split('\n')[0].strip()
+                            title = first_line[:20] + ('...' if len(first_line) > 20 else '')
+                        chapters.append({"title": title, "text": text})
+
+        return chapters if chapters else None
     except Exception:
         return None
 
@@ -512,15 +552,41 @@ def _soup_to_chapters_by_headings(soup, chunk_size=3000):
     return chapters if chapters else None
 
 
-def _text_from_html_files(file_list):
-    """从一组 HTML/XHTML 文件中提取文本，返回章节列表"""
+def _parse_ncx_titles(ncx_path):
+    """解析 NCX 文件，返回 {basename: title} 字典"""
+    try:
+        content = _read_file_with_auto_encoding(ncx_path)
+        soup = BeautifulSoup(content, 'xml')
+        result = {}
+        for np in soup.find_all('navPoint'):
+            label = np.find('navLabel')
+            src_tag = np.find('content')
+            if label and src_tag:
+                title = label.get_text(strip=True)
+                src = os.path.basename(src_tag.get('src', '').split('#')[0])
+                if title and src:
+                    result[src] = title
+        return result
+    except Exception:
+        return {}
+
+
+def _text_from_html_files(file_list, title_map=None):
+    """从一组 HTML/XHTML 文件中提取文本，返回章节列表。
+    title_map: {basename: title}，来自 NCX，优先于标题标签推断。"""
     chapters = []
     for fpath in sorted(file_list):
         file_content = _read_file_with_auto_encoding(fpath)
         soup = BeautifulSoup(file_content, 'html.parser')
-        sub = _soup_to_chapters_by_headings(soup)
-        if sub:
-            chapters.extend(sub)
+        basename = os.path.basename(fpath)
+        if title_map and basename in title_map:
+            text = _clean_text(soup.get_text(separator='\n\n', strip=True))
+            if len(text) > 50:
+                chapters.append({"title": title_map[basename], "text": text})
+        else:
+            sub = _soup_to_chapters_by_headings(soup)
+            if sub:
+                chapters.extend(sub)
     return chapters if chapters else None
 
 def _extract_mobi_content(file_bytes, suffix):
@@ -548,7 +614,9 @@ def _extract_mobi_content(file_bytes, suffix):
         xhtml_files += glob.glob(os.path.join(tempdir, '**', '*.html'), recursive=True)
         xhtml_files += glob.glob(os.path.join(tempdir, '**', '*.htm'), recursive=True)
         if xhtml_files:
-            result = _text_from_html_files(xhtml_files)
+            ncx_files = glob.glob(os.path.join(tempdir, '**', '*.ncx'), recursive=True)
+            title_map = _parse_ncx_titles(ncx_files[0]) if ncx_files else {}
+            result = _text_from_html_files(xhtml_files, title_map or None)
             if result:
                 return result
 
@@ -562,7 +630,9 @@ def _extract_mobi_content(file_bytes, suffix):
                     xhtml_files = glob.glob(os.path.join(extract_dir, '**', '*.xhtml'), recursive=True)
                     xhtml_files += glob.glob(os.path.join(extract_dir, '**', '*.html'), recursive=True)
                     if xhtml_files:
-                        result = _text_from_html_files(xhtml_files)
+                        ncx_files = glob.glob(os.path.join(extract_dir, '**', '*.ncx'), recursive=True)
+                        title_map = _parse_ncx_titles(ncx_files[0]) if ncx_files else {}
+                        result = _text_from_html_files(xhtml_files, title_map or None)
                         if result:
                             return result
             except Exception:
