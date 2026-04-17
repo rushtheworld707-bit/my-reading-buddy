@@ -99,45 +99,44 @@ st.markdown("""
 
 /* ===== 猫猫翻页按钮 ===== */
 
-/* 阅读行（3列）：列与书页等高，侧列垂直居中 */
+/* 书页包裹层：overflow visible 让猫猫伸出去 */
+.book-wrapper {
+    position: relative;
+    overflow: visible;
+}
+
+/* 猫猫 emoji：绝对定位在书侧，vertically centered */
+.cat-l, .cat-r {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 40px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    z-index: 10;
+    user-select: none;
+    line-height: 1;
+}
+.cat-l:hover, .cat-r:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.3);
+}
+.cat-l { left: -52px; }
+.cat-r { right: -52px; }
+
+/* 功能按钮列：宽度归零，隐藏但保留 DOM 可点击性 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3)) {
-    align-items: stretch !important;
     gap: 0 !important;
 }
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:first-child,
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* 猫头按钮：透明背景，只显示 emoji */
-[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:first-child button,
-[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:last-child button {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-size: 32px !important;
-    line-height: 1 !important;
-    padding: 8px 4px !important;
-    opacity: 0.55 !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
-}
-[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:first-child button:hover,
-[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:last-child button:hover {
-    opacity: 1 !important;
-    transform: scale(1.25) !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+    flex: 0 0 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
 }
 
 /* 欢迎页面 */
@@ -738,31 +737,48 @@ if has_file:
         right_html = (_to_html(pages[right_idx]) if right_idx is not None
                       else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>')
 
-        book_html = f'''
-        <div class="book-spread" style="{theme_css} font-size: {fs}px;">
-            <div class="book-page book-page-left">
-                {left_html}
-                <div class="page-num">{left_num}</div>
+        # 猫猫 emoji 绝对定位在书侧；JS 代理点击隐藏的功能按钮
+        cat_l = ('<div class="cat-l" onclick="triggerNav(\'◁\')">🐱</div>'
+                 if current_page > 0 else '')
+        cat_r = ('<div class="cat-r" onclick="triggerNav(\'▷\')">😺</div>'
+                 if current_page < total_pages - 1 else '')
+
+        full_html = f'''
+        <div class="book-wrapper">
+            {cat_l}
+            <div class="book-spread" style="{theme_css} font-size: {fs}px;">
+                <div class="book-page book-page-left">
+                    {left_html}
+                    <div class="page-num">{left_num}</div>
+                </div>
+                <div class="book-page book-page-right">
+                    {right_html}
+                    <div class="page-num">{right_num}</div>
+                </div>
             </div>
-            <div class="book-page book-page-right">
-                {right_html}
-                <div class="page-num">{right_num}</div>
-            </div>
+            {cat_r}
         </div>
+        <script>
+        function triggerNav(sym) {{
+            document.querySelectorAll("button").forEach(function(b) {{
+                if (b.textContent.trim() === sym) b.click();
+            }});
+        }}
+        </script>
         '''
 
-        # 猫耳翻页 + 书页：三列布局，两耳居中贴书侧
-        ear_l, book_col, ear_r = st.columns([1, 16, 1])
-        with ear_l:
+        # 0 宽侧列存放功能按钮（DOM 存在可被 JS 点击，视觉上隐藏）
+        nav_l, book_col, nav_r = st.columns([1, 60, 1])
+        with nav_l:
             if current_page > 0:
-                if st.button("🐱", key="prev", use_container_width=True):
+                if st.button("◁", key="prev"):
                     st.session_state[page_key] = max(0, current_page - 2)
                     st.rerun()
         with book_col:
-            st.markdown(book_html, unsafe_allow_html=True)
-        with ear_r:
+            st.markdown(full_html, unsafe_allow_html=True)
+        with nav_r:
             if current_page < total_pages - 1:
-                if st.button("😺", key="next", use_container_width=True):
+                if st.button("▷", key="next"):
                     st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                     st.rerun()
 
