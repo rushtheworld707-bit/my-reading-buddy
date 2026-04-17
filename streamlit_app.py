@@ -97,9 +97,9 @@ st.markdown("""
     padding: 4px 8px;
 }
 
-/* ===== 猫耳朵翻页按钮 ===== */
+/* ===== 猫猫翻页按钮 ===== */
 
-/* 阅读行（3列）：列高度对齐，侧列居中 */
+/* 阅读行（3列）：列与书页等高，侧列垂直居中 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3)) {
     align-items: stretch !important;
     gap: 0 !important;
@@ -109,55 +109,35 @@ st.markdown("""
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child {
     display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    overflow: visible !important;
 }
 
-/* 公共猫耳样式 — clip-path 三角形，无文字 */
+/* 猫头按钮：透明背景，只显示 emoji */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:first-child button,
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child button {
-    width: 58px !important;
-    height: 90px !important;
-    min-height: unset !important;
-    background:
-        radial-gradient(ellipse 22px 30px at 50% 68%,
-            rgba(255,228,240,0.95) 0%, transparent 100%),
-        linear-gradient(158deg,
-            #fff0f5 0%, #ffccd8 38%, #ff99b8 72%, #ff6b9d 100%) !important;
+    background: transparent !important;
     border: none !important;
-    color: transparent !important;
-    font-size: 0 !important;
-    padding: 0 !important;
-    filter: drop-shadow(2px 5px 10px rgba(255,100,140,0.45)) !important;
-    transition: all 0.25s cubic-bezier(.34,1.56,.64,1) !important;
+    box-shadow: none !important;
+    font-size: 32px !important;
+    line-height: 1 !important;
+    padding: 8px 4px !important;
+    opacity: 0.55 !important;
+    transition: all 0.2s ease !important;
     cursor: pointer !important;
 }
-
-/* 左耳：尖朝右上，整体左倾 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:first-child button {
-    clip-path: polygon(12% 100%, 46% 0%, 94% 100%) !important;
-    transform: rotate(-10deg) translateX(5px) !important;
-}
-[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:first-child button:hover {
-    transform: rotate(-10deg) translateX(5px) translateY(-8px) scale(1.18) !important;
-    filter: drop-shadow(2px 12px 18px rgba(255,80,130,0.7)) brightness(1.08) !important;
-}
-
-/* 右耳：尖朝左上，整体右倾 */
-[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
-    > [data-testid="column"]:last-child button {
-    clip-path: polygon(6% 100%, 54% 0%, 88% 100%) !important;
-    transform: rotate(10deg) translateX(-5px) !important;
-}
+    > [data-testid="column"]:first-child button:hover,
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child button:hover {
-    transform: rotate(10deg) translateX(-5px) translateY(-8px) scale(1.18) !important;
-    filter: drop-shadow(-2px 12px 18px rgba(255,80,130,0.7)) brightness(1.08) !important;
+    opacity: 1 !important;
+    transform: scale(1.25) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* 欢迎页面 */
@@ -775,14 +755,14 @@ if has_file:
         ear_l, book_col, ear_r = st.columns([1, 16, 1])
         with ear_l:
             if current_page > 0:
-                if st.button("\u200b", key="prev", use_container_width=True):
+                if st.button("🐱", key="prev", use_container_width=True):
                     st.session_state[page_key] = max(0, current_page - 2)
                     st.rerun()
         with book_col:
             st.markdown(book_html, unsafe_allow_html=True)
         with ear_r:
             if current_page < total_pages - 1:
-                if st.button("\u200b", key="next", use_container_width=True):
+                if st.button("😺", key="next", use_container_width=True):
                     st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                     st.rerun()
 
