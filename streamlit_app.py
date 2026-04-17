@@ -144,28 +144,76 @@ st.markdown("""
     50% { transform: translateY(-8px); }
 }
 
-/* 猫猫翻页按钮 */
-[data-testid="stButton"] > button {
-    transition: all 0.3s ease !important;
+/* ===== 猫耳朵翻页按钮 ===== */
+
+/* 阅读行（3列）：列高度对齐，侧列居中 */
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3)) {
+    align-items: stretch !important;
+    gap: 2px !important;
 }
-[data-testid="column"]:first-child [data-testid="stButton"] > button,
-[data-testid="column"]:last-child [data-testid="stButton"] > button {
-    background: transparent !important;
-    border: none !important;
-    color: #aaa !important;
-    font-size: 22px !important;
-    line-height: 1.3 !important;
-    padding: 8px 4px !important;
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:first-child,
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 公共猫耳底色 */
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:first-child button,
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:last-child button {
+    width: 46px !important;
+    height: 68px !important;
+    background: linear-gradient(165deg,
+        #fff5f8 0%, #ffdce8 35%, #ffb3c8 70%, #ff85a1 100%) !important;
+    border: 2px solid #ffb3c8 !important;
+    border-bottom: 3px solid #ff6b9d !important;
+    color: #b03060 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 1.6 !important;
+    padding: 6px 2px !important;
     white-space: pre-wrap !important;
-    box-shadow: none !important;
+    text-align: center !important;
+    box-shadow:
+        inset 0 -14px 18px rgba(255,107,157,0.25),
+        inset 0 4px 8px rgba(255,255,255,0.6),
+        0 6px 18px rgba(255,100,140,0.3) !important;
+    transition: all 0.25s cubic-bezier(.34,1.56,.64,1) !important;
+    cursor: pointer !important;
 }
-[data-testid="column"]:first-child [data-testid="stButton"] > button:hover,
-[data-testid="column"]:last-child [data-testid="stButton"] > button:hover {
-    color: #ff6b6b !important;
-    transform: scale(1.15) !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+
+/* 左耳：右上角突出，整体向左倾斜 */
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:first-child button {
+    border-radius: 48% 28% 18% 18% / 60% 55% 18% 18% !important;
+    transform: rotate(-13deg) !important;
+}
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:first-child button:hover {
+    transform: rotate(-13deg) translateY(-5px) scale(1.12) !important;
+    box-shadow:
+        inset 0 -14px 18px rgba(255,107,157,0.35),
+        inset 0 4px 8px rgba(255,255,255,0.7),
+        0 12px 28px rgba(255,100,140,0.55) !important;
+}
+
+/* 右耳：左上角突出，整体向右倾斜 */
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:last-child button {
+    border-radius: 28% 48% 18% 18% / 55% 60% 18% 18% !important;
+    transform: rotate(13deg) !important;
+}
+[data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
+    > [data-testid="column"]:last-child button:hover {
+    transform: rotate(13deg) translateY(-5px) scale(1.12) !important;
+    box-shadow:
+        inset 0 -14px 18px rgba(255,107,157,0.35),
+        inset 0 4px 8px rgba(255,255,255,0.7),
+        0 12px 28px rgba(255,100,140,0.55) !important;
 }
 
 /* 侧边栏美化 */
@@ -796,26 +844,27 @@ if has_file:
             </div>
         </div>
         '''
-        st.markdown(book_html, unsafe_allow_html=True)
 
-        # 猫猫翻页按钮（真正的 Streamlit 按钮）+ 页码指示
+        # 猫耳翻页 + 书页：三列布局，两耳居中贴书侧
+        ear_l, book_col, ear_r = st.columns([1, 16, 1])
+        with ear_l:
+            if current_page > 0:
+                if st.button("上\n一\n页", key="prev", use_container_width=True):
+                    st.session_state[page_key] = max(0, current_page - 2)
+                    st.rerun()
+        with book_col:
+            st.markdown(book_html, unsafe_allow_html=True)
+        with ear_r:
+            if current_page < total_pages - 1:
+                if st.button("下\n一\n页", key="next", use_container_width=True):
+                    st.session_state[page_key] = min(total_pages - 1, current_page + 2)
+                    st.rerun()
+
+        # 页码指示
         total_all_pages = sum(len(split_into_pages(ch["text"])) for ch in chapters)
         read_pages = sum(len(split_into_pages(chapters[i]["text"])) for i in range(chapter_idx)) + current_page + 1
         overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
-
-        cat_col1, cat_col2, cat_col3 = st.columns([1, 6, 1])
-        with cat_col1:
-            if current_page > 0:
-                if st.button("🐱\n上一页", key="prev", use_container_width=True):
-                    st.session_state[page_key] = max(0, current_page - 2)
-                    st.rerun()
-        with cat_col2:
-            st.markdown(f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""} / {total_pages} 页 · 全书 {overall:.1f}%</div>', unsafe_allow_html=True)
-        with cat_col3:
-            if current_page < total_pages - 1:
-                if st.button("😺\n下一页", key="next", use_container_width=True):
-                    st.session_state[page_key] = min(total_pages - 1, current_page + 2)
-                    st.rerun()
+        st.markdown(f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""} / {total_pages} 页 · 全书 {overall:.1f}%</div>', unsafe_allow_html=True)
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
