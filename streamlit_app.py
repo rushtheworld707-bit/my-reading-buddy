@@ -144,9 +144,28 @@ st.markdown("""
     50% { transform: translateY(-8px); }
 }
 
-/* Streamlit 按钮（用于侧边栏等） */
-.stButton > button {
+/* 猫猫翻页按钮 */
+[data-testid="stButton"] > button {
     transition: all 0.3s ease !important;
+}
+[data-testid="column"]:first-child [data-testid="stButton"] > button,
+[data-testid="column"]:last-child [data-testid="stButton"] > button {
+    background: transparent !important;
+    border: none !important;
+    color: #aaa !important;
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+    padding: 8px 4px !important;
+    white-space: pre-wrap !important;
+    box-shadow: none !important;
+}
+[data-testid="column"]:first-child [data-testid="stButton"] > button:hover,
+[data-testid="column"]:last-child [data-testid="stButton"] > button:hover {
+    color: #ff6b6b !important;
+    transform: scale(1.15) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* 侧边栏美化 */
@@ -418,6 +437,41 @@ def _read_file_with_auto_encoding(filepath):
             continue
     return raw.decode('utf-8', errors='replace')
 
+_CHAPTER_RE = re.compile(
+    r'^(第\s*[零一二三四五六七八九十百千\d]+\s*[章节回篇卷][^\n]{0,40}|'
+    r'Chapter\s+\d+[^\n]{0,40}|CHAPTER\s+\d+[^\n]{0,40}|'
+    r'Part\s+\d+[^\n]{0,40}|PART\s+\d+[^\n]{0,40})$',
+    re.MULTILINE
+)
+
+def _split_text_by_pattern(text, chunk_size=3000):
+    """先按中英文章节标题切，找不到再按大小切块"""
+    matches = list(_CHAPTER_RE.finditer(text))
+    chapters = []
+    if len(matches) >= 2:
+        for i, match in enumerate(matches):
+            title = match.group().strip()
+            start = match.end()
+            end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+            body = _clean_text(text[start:end].strip())
+            if len(body) > 30 or not chapters:
+                chapters.append({"title": title[:40], "text": body or title})
+        return chapters
+    # 按大小切块
+    current_chunk, idx = "", 0
+    for para in text.split('\n\n'):
+        para = para.strip()
+        if not para:
+            continue
+        current_chunk += para + "\n\n"
+        if len(current_chunk) > chunk_size:
+            chapters.append(_make_chapter_dict(current_chunk.strip(), idx))
+            current_chunk, idx = "", idx + 1
+    if current_chunk.strip():
+        chapters.append(_make_chapter_dict(current_chunk.strip(), idx))
+    return chapters
+
+
 def _soup_to_chapters_by_headings(soup, chunk_size=3000):
     """按 h1/h2/h3 标题标签将单个 HTML soup 切割成章节列表"""
     headings = soup.find_all(['h1', 'h2', 'h3'])
@@ -447,19 +501,13 @@ def _soup_to_chapters_by_headings(soup, chunk_size=3000):
             if len(body) > 30 or not chapters:
                 chapters.append({"title": title[:40], "text": body or title})
 
-    if not chapters:
-        text = _clean_text(soup.get_text(separator='\n\n', strip=True))
-        current_chunk, idx = "", 0
-        for para in text.split('\n\n'):
-            para = para.strip()
-            if not para:
-                continue
-            current_chunk += para + "\n\n"
-            if len(current_chunk) > chunk_size:
-                chapters.append(_make_chapter_dict(current_chunk.strip(), idx))
-                current_chunk, idx = "", idx + 1
-        if current_chunk.strip():
-            chapters.append(_make_chapter_dict(current_chunk.strip(), idx))
+    # 如果标题检测只得到 1 个章节（很可能只抓到目录标题），
+    # 用全文模式重新切割
+    if len(chapters) <= 1:
+        full_text = _clean_text(soup.get_text(separator='\n\n', strip=True))
+        fallback = _split_text_by_pattern(full_text, chunk_size)
+        if len(fallback) > len(chapters):
+            chapters = fallback
 
     return chapters if chapters else None
 
@@ -662,47 +710,40 @@ if has_file:
         left_html = _to_html(pages[left_idx])
         right_html = _to_html(pages[right_idx]) if right_idx is not None else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>'
 
-        # 猫猫按钮
-        prev_cat = f'<div class="cat-nav" id="cat-prev"><span class="cat-icon">🐱</span><span class="cat-text">上一页</span></div>' if current_page > 0 else '<div class="cat-nav-hidden"></div>'
-        next_cat = f'<div class="cat-nav" id="cat-next"><span class="cat-icon">😺</span><span class="cat-text">下一页</span></div>' if current_page < total_pages - 1 else '<div class="cat-nav-hidden"></div>'
-
         # 页码
         left_num = left_idx + 1
         right_num = right_idx + 1 if right_idx is not None else ""
 
         book_html = f'''
-        <div class="book-container">
-            {prev_cat}
-            <div class="book-spread" style="{theme_css} font-size: {fs}px;">
-                <div class="book-page book-page-left">
-                    {left_html}
-                    <div class="page-num">{left_num}</div>
-                </div>
-                <div class="book-page book-page-right">
-                    {right_html}
-                    <div class="page-num">{right_num}</div>
-                </div>
+        <div class="book-spread" style="{theme_css} font-size: {fs}px;">
+            <div class="book-page book-page-left">
+                {left_html}
+                <div class="page-num">{left_num}</div>
             </div>
-            {next_cat}
+            <div class="book-page book-page-right">
+                {right_html}
+                <div class="page-num">{right_num}</div>
+            </div>
         </div>
         '''
         st.markdown(book_html, unsafe_allow_html=True)
 
-        # 用隐藏的 Streamlit 按钮实现真正的翻页（因为 HTML 点击无法触发 session_state）
-        btn_col1, btn_col2, btn_col3 = st.columns([1, 6, 1])
-        with btn_col1:
+        # 猫猫翻页按钮（真正的 Streamlit 按钮）+ 页码指示
+        total_all_pages = sum(len(split_into_pages(ch["text"])) for ch in chapters)
+        read_pages = sum(len(split_into_pages(chapters[i]["text"])) for i in range(chapter_idx)) + current_page + 1
+        overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
+
+        cat_col1, cat_col2, cat_col3 = st.columns([1, 6, 1])
+        with cat_col1:
             if current_page > 0:
-                if st.button("⬅", key="prev", help="上一页"):
+                if st.button("🐱\n上一页", key="prev", use_container_width=True):
                     st.session_state[page_key] = max(0, current_page - 2)
                     st.rerun()
-        with btn_col2:
-            total_all_pages = sum(len(split_into_pages(ch["text"])) for ch in chapters)
-            read_pages = sum(len(split_into_pages(chapters[i]["text"])) for i in range(chapter_idx)) + current_page + 1
-            overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
+        with cat_col2:
             st.markdown(f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""} / {total_pages} 页 · 全书 {overall:.1f}%</div>', unsafe_allow_html=True)
-        with btn_col3:
+        with cat_col3:
             if current_page < total_pages - 1:
-                if st.button("➡", key="next", help="下一页"):
+                if st.button("😺\n下一页", key="next", use_container_width=True):
                     st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                     st.rerun()
 
