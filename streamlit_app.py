@@ -1,11 +1,16 @@
+import re
+import io
+import os
+import glob
+import html
+import tempfile
+import zipfile
+import chardet
+from datetime import datetime
+
 import streamlit as st
 from ebooklib import epub
 from bs4 import BeautifulSoup
-import io
-import os
-import tempfile
-import chardet
-from datetime import datetime
 from openai import OpenAI
 
 # 1. 页面基础配置
@@ -25,45 +30,6 @@ st.markdown("""
     margin: 8px 0 16px 0;
     letter-spacing: 2px;
 }
-/* 书本展开布局 */
-.book-container {
-    display: flex;
-    align-items: stretch;
-    margin: 10px 0;
-    gap: 0;
-}
-
-/* 猫猫翻页按钮 */
-.cat-nav {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 56px;
-    cursor: pointer;
-    user-select: none;
-    opacity: 0.6;
-    transition: opacity 0.3s;
-}
-.cat-nav:hover {
-    opacity: 1;
-}
-.cat-nav .cat-icon {
-    font-size: 36px;
-    transition: transform 0.2s;
-}
-.cat-nav:hover .cat-icon {
-    animation: wiggle 0.5s ease-in-out infinite;
-}
-.cat-nav .cat-text {
-    font-size: 11px;
-    color: #888;
-    margin-top: 4px;
-}
-.cat-nav-hidden {
-    min-width: 56px;
-}
-
 /* 书页区域 */
 .book-spread {
     display: flex;
@@ -129,19 +95,6 @@ st.markdown("""
     color: #666;
     font-size: 13px;
     padding: 4px 8px;
-}
-
-/* 猫猫按钮动画 */
-@keyframes wiggle {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(-15deg); }
-    50% { transform: rotate(15deg); }
-    75% { transform: rotate(-10deg); }
-    100% { transform: rotate(0deg); }
-}
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
 }
 
 /* ===== 猫耳朵翻页按钮 ===== */
@@ -214,13 +167,6 @@ st.markdown("""
         inset 0 -14px 18px rgba(255,107,157,0.35),
         inset 0 4px 8px rgba(255,255,255,0.7),
         0 12px 28px rgba(255,100,140,0.55) !important;
-}
-
-/* 侧边栏美化 */
-.sidebar-title {
-    font-size: 14px;
-    color: #aaa;
-    margin-bottom: 4px;
 }
 
 /* 欢迎页面 */
@@ -316,12 +262,6 @@ st.markdown("""
         border-right: none;
         border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-    .cat-nav {
-        min-width: 40px;
-    }
-    .cat-nav .cat-icon {
-        font-size: 28px;
-    }
 
     /* 欢迎页面 */
     .welcome-box { padding: 40px 16px; }
@@ -342,9 +282,6 @@ st.markdown("""
         min-height: 220px;
         font-size: 15px;
     }
-    .cat-nav { min-width: 32px; }
-    .cat-nav .cat-icon { font-size: 22px; }
-    .cat-nav .cat-text { font-size: 9px; }
     .page-indicator { font-size: 12px; }
 }
 </style>
@@ -361,8 +298,6 @@ uploaded_file = st.sidebar.file_uploader(
 )
 
 # 4. 各格式解析函数
-
-import re
 
 def _clean_text(text):
     """清理文本：合并多余空行，去除首尾空白"""
@@ -640,8 +575,6 @@ def _text_from_html_files(file_list, title_map=None):
 def _extract_mobi_content(file_bytes, suffix):
     """MOBI/AZW3 通用提取逻辑"""
     import mobi
-    import glob
-    import zipfile
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         tmp.write(file_bytes)
         tmp_path = tmp.name
@@ -745,6 +678,16 @@ def split_into_pages(text, chars_per_page=600):
         pages.append(current_page.strip())
     return pages if pages else [text]
 
+
+def _to_html(page_text):
+    """将纯文本段落转为 HTML <p> 标签，转义特殊字符"""
+    result = ""
+    for para in page_text.split('\n'):
+        para = para.strip()
+        if para:
+            result += f"<p>{html.escape(para)}</p>"
+    return result
+
 # 5. 主逻辑控制
 # 将上传文件缓存到 session_state，防止翻页时丢失
 if uploaded_file:
@@ -814,23 +757,15 @@ if has_file:
         theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
 
         # 双页展示：当前页 = 左页，下一页 = 右页
-        left_idx = current_page
+        left_idx  = current_page
         right_idx = current_page + 1 if current_page + 1 < total_pages else None
 
-        def _to_html(page_text):
-            html = ""
-            for para in page_text.split('\n'):
-                para = para.strip()
-                if para:
-                    html += f"<p>{para}</p>"
-            return html
-
-        left_html = _to_html(pages[left_idx])
-        right_html = _to_html(pages[right_idx]) if right_idx is not None else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>'
-
-        # 页码
         left_num = left_idx + 1
         right_num = right_idx + 1 if right_idx is not None else ""
+
+        left_html  = _to_html(pages[left_idx])
+        right_html = (_to_html(pages[right_idx]) if right_idx is not None
+                      else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>')
 
         book_html = f'''
         <div class="book-spread" style="{theme_css} font-size: {fs}px;">
@@ -861,10 +796,15 @@ if has_file:
                     st.rerun()
 
         # 页码指示
-        total_all_pages = sum(len(split_into_pages(ch["text"])) for ch in chapters)
-        read_pages = sum(len(split_into_pages(chapters[i]["text"])) for i in range(chapter_idx)) + current_page + 1
+        chapter_page_counts = [len(split_into_pages(ch["text"])) for ch in chapters]
+        total_all_pages = sum(chapter_page_counts)
+        read_pages = sum(chapter_page_counts[:chapter_idx]) + current_page + 1
         overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
-        st.markdown(f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""} / {total_pages} 页 · 全书 {overall:.1f}%</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""}'
+            f' / {total_pages} 页 · 全书 {overall:.1f}%</div>',
+            unsafe_allow_html=True,
+        )
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
@@ -947,7 +887,7 @@ if has_file:
 
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
-elif not has_file:
+else:
     # 欢迎页面
     st.markdown("""
     <div class="welcome-box">
