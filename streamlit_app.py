@@ -742,7 +742,7 @@ if has_file:
                     )
 
                     # 用当前页内容作为语境
-                    context_msg = f"你是一个博学的共读伙伴，擅长从哲学、生物学或行为因果的角度深度分析文本。正在阅读的内容：\n{page_content[:1200]}\n\n读者感悟：{prompt}"
+                    context_msg = f"你是一个博学的共读伙伴，擅长从哲学、生物学或行为因果的角度深度分析文本。正在阅读的内容：\n{pages[left_idx][:1200]}\n\n读者感悟：{prompt}"
 
                     completion = client.chat.completions.create(
                         model=st.secrets["ARK_MODEL_ID"],
