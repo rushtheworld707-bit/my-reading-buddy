@@ -102,7 +102,7 @@ st.markdown("""
 /* 阅读行（3列）：列高度对齐，侧列居中 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3)) {
     align-items: stretch !important;
-    gap: 2px !important;
+    gap: 0 !important;
 }
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:first-child,
@@ -111,62 +111,53 @@ st.markdown("""
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    overflow: visible !important;
 }
 
-/* 公共猫耳底色 */
+/* 公共猫耳样式 — clip-path 三角形，无文字 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:first-child button,
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child button {
-    width: 46px !important;
-    height: 68px !important;
-    background: linear-gradient(165deg,
-        #fff5f8 0%, #ffdce8 35%, #ffb3c8 70%, #ff85a1 100%) !important;
-    border: 2px solid #ffb3c8 !important;
-    border-bottom: 3px solid #ff6b9d !important;
-    color: #b03060 !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    line-height: 1.6 !important;
-    padding: 6px 2px !important;
-    white-space: pre-wrap !important;
-    text-align: center !important;
-    box-shadow:
-        inset 0 -14px 18px rgba(255,107,157,0.25),
-        inset 0 4px 8px rgba(255,255,255,0.6),
-        0 6px 18px rgba(255,100,140,0.3) !important;
+    width: 58px !important;
+    height: 90px !important;
+    min-height: unset !important;
+    background:
+        radial-gradient(ellipse 22px 30px at 50% 68%,
+            rgba(255,228,240,0.95) 0%, transparent 100%),
+        linear-gradient(158deg,
+            #fff0f5 0%, #ffccd8 38%, #ff99b8 72%, #ff6b9d 100%) !important;
+    border: none !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    padding: 0 !important;
+    filter: drop-shadow(2px 5px 10px rgba(255,100,140,0.45)) !important;
     transition: all 0.25s cubic-bezier(.34,1.56,.64,1) !important;
     cursor: pointer !important;
 }
 
-/* 左耳：右上角突出，整体向左倾斜 */
+/* 左耳：尖朝右上，整体左倾 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:first-child button {
-    border-radius: 48% 28% 18% 18% / 60% 55% 18% 18% !important;
-    transform: rotate(-13deg) !important;
+    clip-path: polygon(12% 100%, 46% 0%, 94% 100%) !important;
+    transform: rotate(-10deg) translateX(5px) !important;
 }
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:first-child button:hover {
-    transform: rotate(-13deg) translateY(-5px) scale(1.12) !important;
-    box-shadow:
-        inset 0 -14px 18px rgba(255,107,157,0.35),
-        inset 0 4px 8px rgba(255,255,255,0.7),
-        0 12px 28px rgba(255,100,140,0.55) !important;
+    transform: rotate(-10deg) translateX(5px) translateY(-8px) scale(1.18) !important;
+    filter: drop-shadow(2px 12px 18px rgba(255,80,130,0.7)) brightness(1.08) !important;
 }
 
-/* 右耳：左上角突出，整体向右倾斜 */
+/* 右耳：尖朝左上，整体右倾 */
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child button {
-    border-radius: 28% 48% 18% 18% / 55% 60% 18% 18% !important;
-    transform: rotate(13deg) !important;
+    clip-path: polygon(6% 100%, 54% 0%, 88% 100%) !important;
+    transform: rotate(10deg) translateX(-5px) !important;
 }
 [data-testid="stHorizontalBlock"]:has([data-testid="column"]:nth-child(3))
     > [data-testid="column"]:last-child button:hover {
-    transform: rotate(13deg) translateY(-5px) scale(1.12) !important;
-    box-shadow:
-        inset 0 -14px 18px rgba(255,107,157,0.35),
-        inset 0 4px 8px rgba(255,255,255,0.7),
-        0 12px 28px rgba(255,100,140,0.55) !important;
+    transform: rotate(10deg) translateX(-5px) translateY(-8px) scale(1.18) !important;
+    filter: drop-shadow(-2px 12px 18px rgba(255,80,130,0.7)) brightness(1.08) !important;
 }
 
 /* 欢迎页面 */
@@ -784,14 +775,14 @@ if has_file:
         ear_l, book_col, ear_r = st.columns([1, 16, 1])
         with ear_l:
             if current_page > 0:
-                if st.button("上\n一\n页", key="prev", use_container_width=True):
+                if st.button("\u200b", key="prev", use_container_width=True):
                     st.session_state[page_key] = max(0, current_page - 2)
                     st.rerun()
         with book_col:
             st.markdown(book_html, unsafe_allow_html=True)
         with ear_r:
             if current_page < total_pages - 1:
-                if st.button("下\n一\n页", key="next", use_container_width=True):
+                if st.button("\u200b", key="next", use_container_width=True):
                     st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                     st.rerun()
 
