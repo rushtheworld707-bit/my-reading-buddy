@@ -418,20 +418,61 @@ def _read_file_with_auto_encoding(filepath):
             continue
     return raw.decode('utf-8', errors='replace')
 
+def _soup_to_chapters_by_headings(soup, chunk_size=3000):
+    """按 h1/h2/h3 标题标签将单个 HTML soup 切割成章节列表"""
+    headings = soup.find_all(['h1', 'h2', 'h3'])
+    chapters = []
+
+    if headings:
+        for i, heading in enumerate(headings):
+            title = heading.get_text(strip=True)
+            if not title or len(title) > 80:
+                continue
+            parts = []
+            node = heading.next_sibling
+            next_heading = headings[i + 1] if i + 1 < len(headings) else None
+            while node:
+                if next_heading and node is next_heading:
+                    break
+                if hasattr(node, 'get_text'):
+                    t = node.get_text(separator='\n', strip=True)
+                    if t:
+                        parts.append(t)
+                elif isinstance(node, str):
+                    t = node.strip()
+                    if t:
+                        parts.append(t)
+                node = node.next_sibling
+            body = _clean_text('\n\n'.join(parts))
+            if len(body) > 30 or not chapters:
+                chapters.append({"title": title[:40], "text": body or title})
+
+    if not chapters:
+        text = _clean_text(soup.get_text(separator='\n\n', strip=True))
+        current_chunk, idx = "", 0
+        for para in text.split('\n\n'):
+            para = para.strip()
+            if not para:
+                continue
+            current_chunk += para + "\n\n"
+            if len(current_chunk) > chunk_size:
+                chapters.append(_make_chapter_dict(current_chunk.strip(), idx))
+                current_chunk, idx = "", idx + 1
+        if current_chunk.strip():
+            chapters.append(_make_chapter_dict(current_chunk.strip(), idx))
+
+    return chapters if chapters else None
+
+
 def _text_from_html_files(file_list):
     """从一组 HTML/XHTML 文件中提取文本，返回章节列表"""
     chapters = []
     for fpath in sorted(file_list):
-        content = _read_file_with_auto_encoding(fpath)
-        soup = BeautifulSoup(content, 'html.parser')
-        text = soup.get_text(separator='\n\n', strip=True)
-        text = _clean_text(text)
-        if len(text) > 50:
-            title = _extract_chapter_title(soup)
-            if not title:
-                first_line = text.split('\n')[0].strip()
-                title = first_line[:20] + ('...' if len(first_line) > 20 else '')
-            chapters.append({"title": title, "text": text})
+        file_content = _read_file_with_auto_encoding(fpath)
+        soup = BeautifulSoup(file_content, 'html.parser')
+        sub = _soup_to_chapters_by_headings(soup)
+        if sub:
+            chapters.extend(sub)
     return chapters if chapters else None
 
 def _extract_mobi_content(file_bytes, suffix):
@@ -479,30 +520,15 @@ def _extract_mobi_content(file_bytes, suffix):
             except Exception:
                 pass
 
-        # 策略4：直接读取主文件作为 HTML（老式 MOBI）
+        # 策略4：直接读取主文件作为 HTML（老式 MOBI），按标题标签切章节
         if os.path.isfile(filepath):
-            content = _read_file_with_auto_encoding(filepath)
-            soup = BeautifulSoup(content, 'html.parser')
-            text = soup.get_text(separator='\n\n', strip=True)
-            text = _clean_text(text)
-            cjk_count = sum(1 for c in text[:500] if '\u4e00' <= c <= '\u9fff')
-            latin_count = sum(1 for c in text[:500] if c.isalpha())
+            file_content = _read_file_with_auto_encoding(filepath)
+            soup = BeautifulSoup(file_content, 'html.parser')
+            text_probe = soup.get_text()
+            cjk_count = sum(1 for c in text_probe[:500] if '\u4e00' <= c <= '\u9fff')
+            latin_count = sum(1 for c in text_probe[:500] if c.isalpha())
             if cjk_count > 20 or latin_count > 100:
-                chapters = []
-                current_chunk = ""
-                chunk_idx = 0
-                for para in text.split('\n\n'):
-                    para = para.strip()
-                    if not para:
-                        continue
-                    current_chunk += para + "\n\n"
-                    if len(current_chunk) > 3000:
-                        chapters.append(_make_chapter_dict(current_chunk.strip(), chunk_idx))
-                        current_chunk = ""
-                        chunk_idx += 1
-                if current_chunk.strip():
-                    chapters.append(_make_chapter_dict(current_chunk.strip(), chunk_idx))
-                return chapters if chapters else None
+                return _soup_to_chapters_by_headings(soup)
 
         return None
     finally:
