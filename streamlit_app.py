@@ -782,39 +782,62 @@ if has_file:
         components.html(
             """
             <style>
+              body { margin: 0; background: transparent; }
+              .rb-kbd-wrap {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 4px 0;
+              }
               .rb-kbd-hint {
-                text-align: center;
-                font-size: 11px;
-                color: rgba(255,255,255,0.35);
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 12px;
+                border-radius: 999px;
+                background: rgba(255, 107, 107, 0.10);
+                border: 1px solid rgba(255, 107, 107, 0.28);
+                color: #ff9a9a;
+                font-size: 12px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
                 letter-spacing: 0.3px;
-                padding: 4px 0 2px;
                 user-select: none;
+                box-shadow: 0 1px 6px rgba(255, 107, 107, 0.10);
               }
               .rb-kbd-hint kbd {
                 display: inline-block;
+                min-width: 18px;
                 padding: 1px 6px;
-                margin: 0 2px;
-                border: 1px solid rgba(255,255,255,0.2);
-                border-radius: 4px;
-                background: rgba(255,255,255,0.04);
-                color: rgba(255,255,255,0.55);
+                border: 1px solid rgba(255, 154, 154, 0.45);
+                border-radius: 5px;
+                background: rgba(255, 154, 154, 0.12);
+                color: #ffc7c7;
                 font-size: 11px;
                 font-family: inherit;
                 line-height: 1.4;
-                box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+                text-align: center;
+                box-shadow: 0 1px 0 rgba(0,0,0,0.25), inset 0 -1px 0 rgba(255,154,154,0.25);
               }
-              .rb-kbd-hint.rb-err { color: #e57373; }
+              .rb-kbd-hint.rb-err {
+                background: rgba(244, 67, 54, 0.12);
+                border-color: rgba(244, 67, 54, 0.35);
+                color: #ff8a80;
+              }
             </style>
-            <div id="rb-kbd-status" class="rb-kbd-hint">加载中…</div>
+            <div class="rb-kbd-wrap">
+              <div id="rb-kbd-status" class="rb-kbd-hint">🐾 加载中…</div>
+            </div>
             <script>
             (function() {
                 const s = document.getElementById('rb-kbd-status');
                 function setReady() {
-                    if (s) s.innerHTML = '<kbd>←</kbd> <kbd>→</kbd> 翻页';
+                    if (s) {
+                        s.classList.remove('rb-err');
+                        s.innerHTML = '🐾 键盘翻页已启用 <kbd>←</kbd><kbd>→</kbd>';
+                    }
                 }
                 function setErr(msg) {
-                    if (s) { s.classList.add('rb-err'); s.innerText = '键盘翻页不可用: ' + msg; }
+                    if (s) { s.classList.add('rb-err'); s.innerText = '⚠ 键盘翻页不可用: ' + msg; }
                 }
                 function setMsg(txt, c) {
                     if (c === '#4caf50') { setReady(); return; }
@@ -867,7 +890,7 @@ if has_file:
             })();
             </script>
             """,
-            height=28,
+            height=36,
         )
 
         # 侧边栏：阅读设置
