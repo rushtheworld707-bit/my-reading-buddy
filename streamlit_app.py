@@ -778,38 +778,45 @@ if has_file:
                 st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                 st.rerun()
 
-        # 键盘 ← / → 翻页（向父文档挂一次性监听器）
+        # 键盘 ← / → 翻页（向父文档挂一次性监听器，含状态指示以便诊断）
         components.html(
             """
+            <div id="rb-kbd-status" style="font-size:11px;color:#888;text-align:center;padding:2px;font-family:monospace;">⌨ 键盘翻页加载中…</div>
             <script>
             (function() {
-                const parent = window.parent;
-                if (parent._readingKeyNavAttached) return;
-                parent._readingKeyNavAttached = true;
-                const doc = parent.document;
-                doc.addEventListener('keydown', function(e) {
-                    if (e.ctrlKey || e.metaKey || e.altKey) return;
-                    const t = e.target;
-                    if (!t) return;
-                    const tag = t.tagName;
-                    if (tag === 'INPUT' || tag === 'TEXTAREA' || t.isContentEditable) return;
-                    let label = null;
-                    if (e.key === 'ArrowLeft') label = '上一页';
-                    else if (e.key === 'ArrowRight') label = '下一页';
-                    if (!label) return;
-                    const btns = doc.querySelectorAll('button');
-                    for (const b of btns) {
-                        if (b.innerText && b.innerText.indexOf(label) !== -1 && !b.disabled) {
-                            b.click();
-                            e.preventDefault();
-                            return;
+                const s = document.getElementById('rb-kbd-status');
+                function setMsg(txt, c) { if (s) { s.innerText = txt; s.style.color = c || '#888'; } }
+                try {
+                    const p = window.parent;
+                    if (p._rb_kbd_v2) { setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50'); return; }
+                    p._rb_kbd_v2 = true;
+                    function handler(e) {
+                        if (e.ctrlKey || e.metaKey || e.altKey) return;
+                        const t = e.target;
+                        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+                        let label = null;
+                        if (e.key === 'ArrowLeft') label = '上一页';
+                        else if (e.key === 'ArrowRight') label = '下一页';
+                        if (!label) return;
+                        const btns = p.document.querySelectorAll('button');
+                        for (const b of btns) {
+                            if (b.innerText && b.innerText.indexOf(label) !== -1 && !b.disabled) {
+                                e.preventDefault();
+                                b.click();
+                                return;
+                            }
                         }
                     }
-                });
+                    p.document.addEventListener('keydown', handler, true);
+                    p.addEventListener('keydown', handler, true);
+                    setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
+                } catch (err) {
+                    setMsg('⌨ 键盘翻页不可用: ' + (err && err.message || err), '#f44336');
+                }
             })();
             </script>
             """,
-            height=0,
+            height=22,
         )
 
         # 侧边栏：阅读设置
