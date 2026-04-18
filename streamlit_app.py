@@ -874,6 +874,14 @@ if has_file:
         current_theme = st.session_state.get("reading_theme", "深海蓝")
         fs = st.session_state.get("font_size", 18)
         theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
+        # 字体族（基于 session_state，默认系统字体）
+        _font_stacks = {
+            "默认": 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+            "宋体": '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", "PingFang SC", serif',
+            "楷体": '"Kaiti SC", "STKaiti", "KaiTi", "BiauKai", serif',
+            "圆体": '"Yuanti SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+        }
+        ff_css = _font_stacks.get(st.session_state.get("font_family_name", "默认"), _font_stacks["默认"])
 
         # 双页展示：当前页 = 左页，下一页 = 右页
         left_idx  = current_page
@@ -914,7 +922,7 @@ if has_file:
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
         <div class="reading-area">
-            <div class="book-spread" style="{theme_css} font-size: {fs}px;">
+            <div class="book-spread" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
                 <div class="book-page book-page-left">
                     {left_html}
                     <div class="page-num">{left_num}</div>
@@ -1085,6 +1093,25 @@ if has_file:
         font_size = st.sidebar.slider("字体大小", 14, 28, st.session_state.font_size, step=2)
         if font_size != st.session_state.font_size:
             st.session_state.font_size = font_size
+            st.rerun()
+
+        # 字体 (基于系统自带中文字体，跨平台自动回退)
+        _font_options = {
+            "默认": 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+            "宋体": '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", "PingFang SC", serif',
+            "楷体": '"Kaiti SC", "STKaiti", "KaiTi", "BiauKai", serif',
+            "圆体": '"Yuanti SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+        }
+        if "font_family_name" not in st.session_state:
+            st.session_state.font_family_name = "默认"
+        _font_keys = list(_font_options.keys())
+        _ff = st.sidebar.selectbox(
+            "字体",
+            _font_keys,
+            index=_font_keys.index(st.session_state.font_family_name),
+        )
+        if _ff != st.session_state.font_family_name:
+            st.session_state.font_family_name = _ff
             st.rerun()
 
         # 阅读主题
