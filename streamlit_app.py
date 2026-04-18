@@ -663,7 +663,8 @@ if has_file:
         with top_col1:
             st.markdown(f"**{chapter_titles[chapter_idx]}**")
         with top_col2:
-            now = datetime.now().strftime("%H:%M")
+            from datetime import timezone, timedelta
+            now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
             st.markdown(f'<div class="time-display">🕐 {now}</div>', unsafe_allow_html=True)
 
         # 进度条
