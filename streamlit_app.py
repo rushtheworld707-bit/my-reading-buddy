@@ -781,11 +781,46 @@ if has_file:
         # 键盘 ← / → 翻页（向父文档挂一次性监听器，含状态指示以便诊断）
         components.html(
             """
-            <div id="rb-kbd-status" style="font-size:11px;color:#888;text-align:center;padding:2px;font-family:monospace;">⌨ 键盘翻页加载中…</div>
+            <style>
+              .rb-kbd-hint {
+                text-align: center;
+                font-size: 11px;
+                color: rgba(255,255,255,0.35);
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                letter-spacing: 0.3px;
+                padding: 4px 0 2px;
+                user-select: none;
+              }
+              .rb-kbd-hint kbd {
+                display: inline-block;
+                padding: 1px 6px;
+                margin: 0 2px;
+                border: 1px solid rgba(255,255,255,0.2);
+                border-radius: 4px;
+                background: rgba(255,255,255,0.04);
+                color: rgba(255,255,255,0.55);
+                font-size: 11px;
+                font-family: inherit;
+                line-height: 1.4;
+                box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+              }
+              .rb-kbd-hint.rb-err { color: #e57373; }
+            </style>
+            <div id="rb-kbd-status" class="rb-kbd-hint">加载中…</div>
             <script>
             (function() {
                 const s = document.getElementById('rb-kbd-status');
-                function setMsg(txt, c) { if (s) { s.innerText = txt; s.style.color = c || '#888'; } }
+                function setReady() {
+                    if (s) s.innerHTML = '<kbd>←</kbd> <kbd>→</kbd> 翻页';
+                }
+                function setErr(msg) {
+                    if (s) { s.classList.add('rb-err'); s.innerText = '键盘翻页不可用: ' + msg; }
+                }
+                function setMsg(txt, c) {
+                    if (c === '#4caf50') { setReady(); return; }
+                    if (c === '#f44336') { setErr(txt); return; }
+                    if (s) s.innerText = txt;
+                }
                 try {
                     const p = window.parent;
                     if (p._rb_kbd_v2) { setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50'); return; }
@@ -832,7 +867,7 @@ if has_file:
             })();
             </script>
             """,
-            height=22,
+            height=28,
         )
 
         # 侧边栏：阅读设置
