@@ -477,7 +477,10 @@ body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > span {
     color: #1a4fa8 !important;
     font-family: 'Noto Sans SC', sans-serif !important;
 }
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button {
+/* 只给主"Browse files"按钮（section > button，不含文件项里的次级按钮）加蓝底 */
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > button,
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > button,
+body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button {
     background: #1a4fa8 !important;
     color: #fff !important;
     border: none !important;
@@ -486,18 +489,16 @@ body:has(.zine-welcome) [data-testid="stFileUploader"] section button {
     font-weight: 700 !important;
     letter-spacing: 2px !important;
 }
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button:hover {
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > button:hover,
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > button:hover,
+body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button:hover {
     background: #111 !important;
 }
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button p {
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > button p,
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > button p,
+body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button p {
     color: #fff !important;
     font-family: 'Noto Sans SC', sans-serif !important;
-}
-/* 隐藏按钮里的 Material 图标（字体被覆盖后显示为字面文字） */
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button > span:first-child:not(:has(p)),
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button [data-testid*="Icon"],
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button span[class*="icon"] {
-    display: none !important;
 }
 @media (max-width: 768px) {
     .zine-welcome { padding: 48px 24px 72px; min-height: 480px; }
@@ -1465,10 +1466,14 @@ else:
     # 上传器放在欢迎页下方中央，通过 CSS 负边距上提与 zine 内容叠合
     _ul_col1, _ul_col2, _ul_col3 = st.columns([1, 2, 1])
     with _ul_col2:
-        uploaded_file = st.file_uploader(
+        _welcome_upload = st.file_uploader(
             "上传电子书",
             type=SUPPORTED_FORMATS,
             help="支持 EPUB、TXT、PDF、MOBI、AZW3",
             key="upload_welcome",
             label_visibility="collapsed",
         )
+    if _welcome_upload:
+        st.session_state.file_bytes = _welcome_upload.getvalue()
+        st.session_state.file_name = _welcome_upload.name
+        st.rerun()
