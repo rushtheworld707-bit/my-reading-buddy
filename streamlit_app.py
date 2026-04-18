@@ -217,19 +217,11 @@ st.markdown("""
 }
 
 /* ===== 翻页按钮（粉色爪印可爱风） ===== */
-/* 让翻页行与书页边缘对齐：用 space-between 强制两端对齐，
-   用 display:contents 让列不影响布局，直接把两个按钮作为 flex 子项 */
-div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: 0 !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) > div[data-testid="stColumn"] {
-    display: contents !important;
+/* 两个按钮在各自 column 内居中，天然对称 */
+.st-key-prev_page, .st-key-next_page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .st-key-prev_page button,
