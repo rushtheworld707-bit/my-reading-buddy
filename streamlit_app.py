@@ -239,6 +239,7 @@ st.markdown("""
     color: #ffd6d6;
     font-weight: 600;
     font-size: 14px;
+    font-family: inherit;
     text-decoration: none !important;
     transition: all 0.25s ease;
     box-shadow: 0 2px 10px rgba(255, 107, 107, 0.18);
@@ -257,6 +258,14 @@ st.markdown("""
     pointer-events: none;
     transform: none;
     box-shadow: none;
+}
+
+/* 隐藏的 Streamlit 按钮（仅用于通过 JS 点击触发 rerun） */
+.st-key-prev_page, .st-key-next_page {
+    display: none !important;
+}
+div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-prev_page) {
+    display: none !important;
 }
 /* 粉色爪印 SVG：左按钮在前，右按钮在后 */
 .nav-prev::before,
@@ -745,17 +754,6 @@ if has_file:
 
         current_page = st.session_state[page_key]
 
-        # 处理从 HTML 导航按钮/键盘触发的翻页（通过 query params）
-        if "nav" in st.query_params:
-            _nav = st.query_params["nav"]
-            del st.query_params["nav"]
-            if _nav == "prev" and current_page > 0:
-                st.session_state[page_key] = max(0, current_page - 2)
-                st.rerun()
-            elif _nav == "next" and current_page < total_pages - 1:
-                st.session_state[page_key] = min(total_pages - 1, current_page + 2)
-                st.rerun()
-
         # 切换章节时重置页码
         if "last_chapter" not in st.session_state:
             st.session_state.last_chapter = chapter_idx
@@ -815,8 +813,6 @@ if has_file:
         next_disabled = current_page >= total_pages - 1
         prev_cls = "nav-btn nav-prev" + (" nav-disabled" if prev_disabled else "")
         next_cls = "nav-btn nav-next" + (" nav-disabled" if next_disabled else "")
-        prev_href = '#' if prev_disabled else '?nav=prev'
-        next_href = '#' if next_disabled else '?nav=next'
 
         page_range = f"第 {left_num}{f'-{right_num}' if right_num else ''} / {total_pages} 页 · 全书 {overall:.1f}%"
 
@@ -835,8 +831,8 @@ if has_file:
             </div>
             <div class="page-indicator">{page_range}</div>
             <div class="nav-row">
-                <a href="{prev_href}" class="{prev_cls}" target="_self">上一页</a>
-                <a href="{next_href}" class="{next_cls}" target="_self">下一页</a>
+                <button type="button" class="{prev_cls}">上一页</button>
+                <button type="button" class="{next_cls}">下一页</button>
             </div>
         </div>
         '''
@@ -844,6 +840,19 @@ if has_file:
 
         # 持久化阅读进度
         _save_progress(book_key, chapter_idx, current_page)
+
+        # 隐藏的 Streamlit 按钮：真正处理翻页逻辑（HTML 按钮通过 JS 点击它们）
+        hcol1, hcol2 = st.columns(2)
+        with hcol1:
+            if st.button("prev", key="prev_page"):
+                if current_page > 0:
+                    st.session_state[page_key] = max(0, current_page - 2)
+                    st.rerun()
+        with hcol2:
+            if st.button("next", key="next_page"):
+                if current_page < total_pages - 1:
+                    st.session_state[page_key] = min(total_pages - 1, current_page + 2)
+                    st.rerun()
 
         # 键盘 ← / → 翻页（点击 HTML 导航链接来触发翻页）
         components.html(
@@ -930,23 +939,37 @@ if has_file:
                         }
                         return false;
                     }
+                    function clickHiddenBtn(action) {
+                        const sel = action === 'prev'
+                            ? '.st-key-prev_page button'
+                            : '.st-key-next_page button';
+                        const btn = p.document.querySelector(sel);
+                        if (btn && !btn.disabled) btn.click();
+                    }
                     function handler(e) {
                         if (e.ctrlKey || e.metaKey || e.altKey) return;
                         if (isTextEditing(e.target)) return;
-                        let selector = null;
-                        if (e.key === 'ArrowLeft') selector = '.nav-prev';
-                        else if (e.key === 'ArrowRight') selector = '.nav-next';
-                        if (!selector) return;
-                        const el = p.document.querySelector(selector);
-                        if (el && !el.classList.contains('nav-disabled')) {
-                            e.preventDefault();
-                            try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
-                            el.click();
-                            return;
-                        }
+                        let action = null;
+                        if (e.key === 'ArrowLeft') action = 'prev';
+                        else if (e.key === 'ArrowRight') action = 'next';
+                        if (!action) return;
+                        const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
+                        if (!visEl || visEl.classList.contains('nav-disabled')) return;
+                        e.preventDefault();
+                        try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
+                        clickHiddenBtn(action);
                     }
                     p.document.addEventListener('keydown', handler, true);
                     p.addEventListener('keydown', handler, true);
+                    // 点击委托：HTML 导航按钮 → 隐藏 st.button
+                    p.document.addEventListener('click', function(e) {
+                        const btn = e.target.closest && e.target.closest('.nav-btn');
+                        if (!btn) return;
+                        e.preventDefault();
+                        if (btn.classList.contains('nav-disabled')) return;
+                        const action = btn.classList.contains('nav-prev') ? 'prev' : 'next';
+                        clickHiddenBtn(action);
+                    }, true);
                     setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
                 } catch (err) {
                     setMsg('⌨ 键盘翻页不可用: ' + (err && err.message || err), '#f44336');
