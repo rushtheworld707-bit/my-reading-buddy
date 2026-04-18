@@ -86,13 +86,10 @@ st.markdown("""
 /* 页码和进度信息 */
 .page-indicator {
     text-align: center;
-    color: #888;
-    font-size: 13px;
-    margin: 8px 0;
-}
-.page-indicator .time-left {
     color: #ff9eb3;
+    font-size: 13px;
     font-weight: 500;
+    margin: 8px 0;
 }
 
 /* 时间显示 */
@@ -829,7 +826,7 @@ if has_file:
         page_range = (
             f"第 {left_num}{f'-{right_num}' if right_num else ''} / {total_pages} 页"
             f" · 全书 {overall:.1f}%"
-            f" · <span class=\"time-left\">{_time_left}</span>"
+            f" · {_time_left}"
         )
 
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
