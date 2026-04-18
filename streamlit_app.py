@@ -19,7 +19,7 @@ from openai import OpenAI
 st.set_page_config(page_title="嘟哒", layout="wide")
 
 # 2. 全局自定义样式
-st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
+st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""
 <style>
 /* 主标题手绘体 */
@@ -269,7 +269,7 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
     display: none !important;
 }
 
-/* ===== 日式编辑 / zine 风欢迎页 全屏覆盖模式 ===== */
+/* ===== 现代像素风欢迎页 (全屏覆盖) ===== */
 /* 当 .zine-welcome 出现时隐藏 Streamlit 外壳，主内容区铺满 */
 body:has(.zine-welcome) header[data-testid="stHeader"] {
     display: none !important;
@@ -278,10 +278,7 @@ body:has(.zine-welcome) section[data-testid="stSidebar"] {
     display: none !important;
 }
 body:has(.zine-welcome) [data-testid="stMainBlockContainer"],
-body:has(.zine-welcome) [data-testid="stAppViewContainer"] > .main > div {
-    padding: 0 !important;
-    max-width: 100% !important;
-}
+body:has(.zine-welcome) [data-testid="stAppViewContainer"] > .main > div,
 body:has(.zine-welcome) .main .block-container,
 body:has(.zine-welcome) [class*="block-container"] {
     padding: 0 !important;
@@ -290,424 +287,276 @@ body:has(.zine-welcome) [class*="block-container"] {
 body:has(.zine-welcome) .handwrite-title {
     display: none !important;
 }
-/* 文字颜色 !important 对抗 Streamlit 暗色模式默认白字 */
-.zine-title { color: #111 !important; }
-.zine-title .zine-bracket { color: #111 !important; background: #ffe93b !important; }
-.zine-subtitle { color: #333 !important; }
-.zine-tag { color: #1a4fa8 !important; background: #fff !important; }
-.zine-cta, .zine-cta * { color: #fff !important; }
-.zine-eyebrow { color: #ff6b6b !important; }
 
+/* 调色盘：Stardew-ish 暖色 */
+.zine-welcome {
+    --zw-paper: #f3e9cf;
+    --zw-paper-2: #e8dcbc;
+    --zw-ink: #3b2e1e;
+    --zw-ink-soft: #6b5843;
+    --zw-terra: #c25a44;
+    --zw-terra-soft: #e07b5a;
+    --zw-moss: #4a6d4e;
+    --zw-mustard: #d4b54c;
+    --zw-dusty: #7a96b4;
+}
 
-@keyframes zine-title-in {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes zw-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes zine-fade-in {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes zw-pop {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
 }
-@keyframes zine-sticker-in {
-    0% { opacity: 0; transform: scale(0.3) rotate(0deg); }
-    60% { opacity: 1; transform: scale(1.08) var(--rot, rotate(0deg)); }
-    100% { opacity: 1; transform: scale(1) var(--rot, rotate(0deg)); }
+@keyframes zw-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
 }
+@keyframes zw-blink {
+    0%, 49%  { opacity: 1; }
+    50%, 100%{ opacity: 0; }
+}
+
 .zine-welcome {
     position: relative;
     min-height: 100vh;
     width: 100%;
-    background-color: #ede3cc;
+    background-color: var(--zw-paper);
     background-image:
-        /* 噪点纹理 */
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 0.15 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>"),
-        /* 左上暖光 */
-        radial-gradient(ellipse 900px 700px at 15% 10%, rgba(255, 233, 59, 0.25), transparent 70%),
-        /* 右下冷调 */
-        radial-gradient(ellipse 800px 600px at 85% 90%, rgba(26, 79, 168, 0.18), transparent 70%),
-        /* 边缘暗角 */
-        radial-gradient(ellipse at center, transparent 55%, rgba(60, 40, 20, 0.22) 100%);
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.15 0 0 0 0 0.08 0 0 0 0.1 0'/></filter><rect width='280' height='280' filter='url(%23n)'/></svg>");
+    padding: 36px 80px 100px;
     overflow: hidden;
-    padding: 60px 72px 120px;
-    margin: 0;
     box-sizing: border-box;
+    font-family: 'Noto Sans SC', 'PingFang SC', sans-serif;
 }
-/* 顶部刊头条：卷号 / 品牌 / 刊号 */
-.zine-topbar {
+
+/* 顶部刊头 */
+.zw-topbar {
     position: relative;
     z-index: 4;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 0 16px;
-    border-bottom: 2px solid #111;
-    margin-bottom: 60px;
-    font-family: 'Noto Sans SC', monospace;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: #111 !important;
-    animation: zine-fade-in 0.6s ease-out both;
-}
-.zine-topbar .tb-brand { color: #1a4fa8 !important; }
-.zine-topbar .tb-sep { color: #ff6b6b !important; font-size: 14px; }
-/* 四角装饰 + 裁剪标记 */
-.zine-corner {
-    position: absolute;
-    font-family: monospace;
-    font-size: 14px;
-    color: #111;
-    opacity: 0.5;
-    z-index: 4;
-}
-.zine-corner.tl { top: 22px; left: 22px; }
-.zine-corner.tr { top: 22px; right: 22px; }
-.zine-corner.bl { bottom: 22px; left: 22px; }
-.zine-corner.br { bottom: 22px; right: 22px; }
-/* Polaroid 照片卡 */
-.zine-polaroid {
-    position: absolute;
-    background: #fff;
-    padding: 10px 10px 36px;
-    box-shadow: 4px 6px 14px rgba(0,0,0,0.25);
-    z-index: 2;
-    animation: zine-sticker-in 0.8s cubic-bezier(.34,1.56,.64,1) both;
-}
-.zine-polaroid.p1 { top: 80px; right: 80px; width: 140px; transform: rotate(6deg); animation-delay: 0.6s; }
-.zine-polaroid.p2 { top: 280px; right: 160px; width: 110px; transform: rotate(-8deg); animation-delay: 0.9s; }
-.zine-polaroid.p3 { bottom: 180px; left: 60px; width: 130px; transform: rotate(-4deg); animation-delay: 0.8s; }
-.zine-polaroid .pic {
-    width: 100%;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 64px;
-    font-family: 'Noto Serif SC', serif;
-    font-weight: 900;
-}
-.zine-polaroid.p1 .pic { background: linear-gradient(135deg, #1a4fa8, #2470d0); color: #ffe93b; }
-.zine-polaroid.p2 .pic { background: linear-gradient(135deg, #ff6b6b, #ff9eb3); color: #fff; }
-.zine-polaroid.p3 .pic { background: linear-gradient(135deg, #ffe93b, #ffd000); color: #111; }
-.zine-polaroid .cap {
-    position: absolute;
-    bottom: 8px;
-    left: 10px;
-    font-family: 'Caveat', cursive;
-    font-size: 16px;
-    color: #111;
-}
-/* 胶带 */
-.zine-polaroid::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-3deg);
-    width: 60px;
-    height: 18px;
-    background: rgba(255, 233, 59, 0.7);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-}
-/* 竖排日式刻印 */
-.zine-vertical {
-    position: absolute;
-    top: 300px;
-    right: 40px;
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-    font-family: 'Noto Serif SC', serif;
-    font-size: 14px;
-    letter-spacing: 8px;
-    color: #1a4fa8 !important;
-    font-weight: 700;
-    z-index: 3;
-    animation: zine-fade-in 0.8s ease-out 1.1s both;
-}
-/* 橡皮章：圆形 */
-.zine-stamp {
-    position: absolute;
-    top: 140px;
-    left: 50%;
-    transform: translateX(180px) rotate(-12deg);
-    width: 88px;
-    height: 88px;
-    border: 2.5px solid #ff6b6b;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    font-family: monospace;
-    font-size: 10px;
-    font-weight: 900;
-    color: #ff6b6b !important;
+    padding: 0 0 10px;
+    border-bottom: 2px solid var(--zw-ink);
+    margin-bottom: 28px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
     letter-spacing: 2px;
-    line-height: 1.3;
-    opacity: 0.85;
-    z-index: 3;
-    animation: zine-sticker-in 0.7s cubic-bezier(.34,1.56,.64,1) 1.3s both;
+    color: var(--zw-ink) !important;
+    animation: zw-fade-in 0.6s ease-out both;
 }
-.zine-stamp::before {
-    content: '';
+.zw-topbar span, .zw-topbar b { color: var(--zw-ink) !important; }
+.zw-topbar .dot { color: var(--zw-terra) !important; margin: 0 4px; }
+
+/* 四角装饰 */
+.zw-corner {
     position: absolute;
-    inset: 4px;
-    border: 1.5px dashed #ff6b6b;
-    border-radius: 50%;
-}
-/* 日期方格 */
-.zine-date {
-    position: absolute;
-    bottom: 220px;
-    right: 100px;
-    background: #111;
-    color: #ffe93b !important;
-    padding: 10px 16px;
-    font-family: monospace;
-    font-weight: 900;
-    letter-spacing: 3px;
-    font-size: 13px;
-    transform: rotate(3deg);
-    z-index: 3;
-    animation: zine-fade-in 0.7s ease-out 1.2s both;
-}
-/* 手写便签（胶带条） */
-.zine-note {
-    position: absolute;
-    bottom: 100px;
-    left: 80px;
-    padding: 14px 22px;
-    background: rgba(255, 233, 59, 0.88);
-    font-family: 'Caveat', cursive;
-    font-size: 22px;
-    color: #111 !important;
-    transform: rotate(-4deg);
-    box-shadow: 3px 4px 8px rgba(0,0,0,0.15);
-    z-index: 3;
-    animation: zine-fade-in 0.7s ease-out 1.4s both;
-}
-.zine-note::before, .zine-note::after {
-    content: '';
-    position: absolute;
-    top: -8px;
-    width: 44px;
-    height: 16px;
-    background: rgba(26, 79, 168, 0.3);
-    border: 1px dashed rgba(26, 79, 168, 0.6);
-}
-.zine-note::before { left: 10px; transform: rotate(-2deg); }
-.zine-note::after  { right: 10px; transform: rotate(3deg); }
-/* 页码标记 */
-.zine-pageno {
-    position: absolute;
-    bottom: 40px;
-    right: 80px;
-    font-family: 'Noto Serif SC', serif;
-    font-size: 80px;
-    font-weight: 900;
-    color: rgba(26, 79, 168, 0.18);
-    line-height: 1;
-    z-index: 1;
-    animation: zine-fade-in 0.8s ease-out 1s both;
-}
-/* 半调点 */
-.zine-halftone {
-    position: absolute;
-    top: 40%;
-    left: 20px;
-    width: 120px;
-    height: 180px;
-    background-image: radial-gradient(circle, #111 1px, transparent 1.6px);
-    background-size: 10px 10px;
-    opacity: 0.25;
-    z-index: 1;
-    transform: rotate(-8deg);
-    animation: zine-fade-in 0.8s ease-out 1s both;
-}
-.zine-welcome * { box-sizing: border-box; }
-/* 装饰色块 */
-.zine-block {
-    position: absolute;
-    z-index: 1;
-    animation: zine-fade-in 0.8s ease-out both;
-}
-.zine-yellow { background: #ffe93b; }
-.zine-blue { background: #1a4fa8; }
-.zine-block.b1 { top: 44px; right: 120px; width: 72px; height: 96px; transform: rotate(2deg); animation-delay: 0.6s; }
-.zine-block.b2 { bottom: 60px; left: 48px; width: 160px; height: 20px; animation-delay: 0.9s; }
-.zine-block.b3 { bottom: 120px; right: 60px; width: 44px; height: 44px; transform: rotate(-4deg); animation-delay: 1.0s; }
-.zine-block.b4 { top: 160px; left: 40px; width: 16px; height: 120px; background: #1a4fa8; animation-delay: 0.8s; }
-/* 贴纸（emoji 代替照片） */
-.zine-sticker {
-    position: absolute;
+    color: var(--zw-ink);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    opacity: 0.4;
     z-index: 2;
-    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.18));
-    animation: zine-sticker-in 0.7s cubic-bezier(.34,1.56,.64,1) both;
-    user-select: none;
 }
-.zine-sticker.s-book  { top: 80px; left: 44px; font-size: 56px; --rot: rotate(-10deg); transform: rotate(-10deg); animation-delay: 0.5s; }
-.zine-sticker.s-paw   { bottom: 80px; right: 150px; font-size: 40px; --rot: rotate(14deg); transform: rotate(14deg); animation-delay: 0.7s; }
-.zine-sticker.s-spark { top: 200px; right: 90px; font-size: 28px; --rot: rotate(0deg); animation-delay: 1.1s; }
-.zine-sticker.s-note  { bottom: 200px; left: 120px; font-size: 32px; --rot: rotate(-6deg); transform: rotate(-6deg); animation-delay: 0.9s; }
-/* 内容区 */
-.zine-content {
+.zw-corner.tl { top: 10px; left: 12px; }
+.zw-corner.tr { top: 10px; right: 12px; }
+.zw-corner.bl { bottom: 10px; left: 12px; }
+.zw-corner.br { bottom: 10px; right: 12px; }
+
+/* Hero 双栏 */
+.zw-hero {
     position: relative;
     z-index: 3;
-    max-width: 620px;
-    margin: 0 auto;
-    text-align: left;
-}
-.zine-eyebrow {
-    font-family: 'Caveat', cursive;
-    font-size: 34px;
-    color: #ff6b6b;
-    margin-bottom: 2px;
-    letter-spacing: 1px;
-    animation: zine-fade-in 0.6s ease-out both;
-}
-.zine-kicker {
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 6px;
-    color: #1a4fa8 !important;
-    margin-bottom: 20px;
-    animation: zine-fade-in 0.6s ease-out 0.2s both;
-}
-.zine-kicker::before, .zine-kicker::after { content: '—'; margin: 0 8px; color: #ff6b6b !important; }
-.zine-title {
-    font-family: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
-    font-size: 84px;
-    font-weight: 900;
-    line-height: 1.1;
-    color: #111;
-    margin: 0 0 28px;
-    letter-spacing: 4px;
-    animation: zine-title-in 0.8s cubic-bezier(.2,.8,.2,1) 0.1s both;
-}
-.zine-title .zine-bracket {
-    display: inline-block;
-    background: #ffe93b;
-    padding: 0 10px;
-    margin: 0 2px;
-    box-shadow: 0 2px 0 #1a4fa8;
-}
-.zine-title .zine-dash {
-    display: inline-block;
-    width: 36px;
-    height: 6px;
-    background: #1a4fa8;
-    vertical-align: middle;
-    margin: 0 8px 8px;
-}
-.zine-subtitle {
-    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    font-size: 15px;
-    line-height: 2;
-    color: #333;
-    margin-bottom: 36px;
-    max-width: 480px;
-    animation: zine-fade-in 0.7s ease-out 0.4s both;
-}
-.zine-formats {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-    animation: zine-fade-in 0.7s ease-out 0.6s both;
-}
-.zine-tag {
-    padding: 6px 14px;
-    background: white;
-    border: 2px solid #1a4fa8;
-    color: #1a4fa8;
-    font-family: 'Noto Sans SC', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-}
-.zine-tag:nth-child(1) { transform: rotate(-1.5deg); }
-.zine-tag:nth-child(2) { transform: rotate(1deg); }
-.zine-tag:nth-child(3) { transform: rotate(-0.5deg); }
-.zine-tag:nth-child(4) { transform: rotate(1.5deg); }
-.zine-tag:nth-child(5) { transform: rotate(-1deg); }
-.zine-cta-hint {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 60px;
     align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
-    background: #111;
-    color: #fff !important;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: 'Noto Sans SC', sans-serif;
-    letter-spacing: 2px;
-    transform: rotate(-0.8deg);
-    box-shadow: 4px 4px 0 #ffe93b;
-    animation: zine-fade-in 0.7s ease-out 0.8s both;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 0 50px;
 }
-.zine-cta-hint .arr { font-size: 18px; }
 
-/* 内嵌上传器：zine 风样式 + 上提叠入欢迎页 */
+/* 左：文字 */
+.zw-eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 30px;
+    color: var(--zw-ink) !important;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    opacity: 0.55;
+    font-weight: 500;
+    animation: zw-fade-in 0.6s ease-out both;
+}
+
+.zw-kicker {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--zw-moss) !important;
+    letter-spacing: 3px;
+    padding: 6px 10px;
+    border: 2px solid var(--zw-moss);
+    margin-bottom: 28px;
+    animation: zw-fade-in 0.6s ease-out 0.15s both;
+}
+
+.zw-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 110px;
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--zw-ink) !important;
+    margin: 0 0 6px;
+    letter-spacing: 16px;
+    animation: zw-fade-in 0.7s ease-out 0.1s both;
+    text-shadow: 3px 3px 0 var(--zw-mustard);
+}
+
+.zw-title-bar {
+    width: 180px;
+    height: 10px;
+    background-image: linear-gradient(90deg, var(--zw-terra) 20%, var(--zw-mustard) 20% 45%, var(--zw-moss) 45% 70%, var(--zw-dusty) 70%);
+    image-rendering: pixelated;
+    margin: 10px 0 18px;
+    animation: zw-fade-in 0.6s ease-out 0.3s both;
+}
+
+.zw-subtitle-zh {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--zw-ink) !important;
+    margin: 0 0 24px;
+    letter-spacing: 6px;
+    animation: zw-fade-in 0.6s ease-out 0.35s both;
+}
+
+.zw-desc {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--zw-ink-soft) !important;
+    margin-bottom: 26px;
+    max-width: 440px;
+    animation: zw-fade-in 0.6s ease-out 0.45s both;
+}
+
+.zw-formats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    animation: zw-fade-in 0.6s ease-out 0.55s both;
+}
+.zw-tag {
+    padding: 6px 10px;
+    background: transparent;
+    border: 2px solid var(--zw-ink) !important;
+    color: var(--zw-ink) !important;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+
+/* 右：像素艺术 */
+.zw-art {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: zw-pop 0.7s ease-out 0.35s both;
+}
+.zw-art svg {
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    image-rendering: pixelated;
+    shape-rendering: crispEdges;
+    animation: zw-float 4.5s ease-in-out infinite;
+    filter: drop-shadow(4px 6px 0 rgba(59, 46, 30, 0.18));
+}
+.zw-art-caption {
+    position: absolute;
+    bottom: -10px;
+    right: 20px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--zw-ink) !important;
+    opacity: 0.45;
+    letter-spacing: 2px;
+}
+
+/* 上传区标签 */
+.zw-upload-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--zw-terra) !important;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.zw-upload-label .caret {
+    display: inline-block;
+    margin-left: 4px;
+    color: var(--zw-ink);
+    animation: zw-blink 1.1s step-end infinite;
+}
+
+/* 上传器皮肤 */
 body:has(.zine-welcome) [data-testid="stFileUploader"] {
     position: relative;
-    z-index: 5;
-    margin-top: -180px !important;
-    margin-bottom: 40px;
-    max-width: 560px;
-    margin-left: auto;
-    margin-right: auto;
-    animation: zine-fade-in 0.8s ease-out 1s both;
+    z-index: 3;
+    margin: 0 !important;
+    animation: zw-fade-in 0.7s ease-out 0.9s both;
 }
 body:has(.zine-welcome) [data-testid="stFileUploader"] section {
-    background: #fff !important;
-    border: 2.5px dashed #1a4fa8 !important;
+    background: rgba(255, 255, 255, 0.55) !important;
+    border: 2px dashed var(--zw-ink) !important;
     border-radius: 0 !important;
-    padding: 28px 24px !important;
-    box-shadow: 6px 6px 0 #ffe93b !important;
+    padding: 22px 18px !important;
+    box-shadow: 4px 4px 0 var(--zw-mustard) !important;
     transition: all 0.2s ease;
 }
 body:has(.zine-welcome) [data-testid="stFileUploader"] section:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0 #ffe93b !important;
-    background: #fffef0 !important;
+    box-shadow: 6px 6px 0 var(--zw-mustard) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
 }
-body:has(.zine-welcome) [data-testid="stFileUploader"] section small,
 body:has(.zine-welcome) [data-testid="stFileUploader"] section p,
+body:has(.zine-welcome) [data-testid="stFileUploader"] section small,
 body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > span {
-    color: #1a4fa8 !important;
+    color: var(--zw-ink) !important;
     font-family: 'Noto Sans SC', sans-serif !important;
 }
-/* 只给主"Browse files"按钮（section > button，不含文件项里的次级按钮）加蓝底 */
 body:has(.zine-welcome) [data-testid="stFileUploader"] section > button,
 body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > button,
 body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button {
-    background: #1a4fa8 !important;
-    color: #fff !important;
+    background: var(--zw-ink) !important;
+    color: var(--zw-paper) !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 8px 18px !important;
-    font-weight: 700 !important;
+    padding: 8px 14px !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 9px !important;
     letter-spacing: 2px !important;
 }
 body:has(.zine-welcome) [data-testid="stFileUploader"] section > button:hover,
-body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > button:hover,
 body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button:hover {
-    background: #111 !important;
+    background: var(--zw-terra) !important;
 }
 body:has(.zine-welcome) [data-testid="stFileUploader"] section > button p,
-body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > button p,
 body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button p {
-    color: #fff !important;
-    font-family: 'Noto Sans SC', sans-serif !important;
+    color: var(--zw-paper) !important;
+    font-family: 'Press Start 2P', monospace !important;
 }
-@media (max-width: 768px) {
-    .zine-welcome { padding: 48px 24px 72px; min-height: 480px; }
-    .zine-title { font-size: 38px; }
-    .zine-sticker.s-book { font-size: 40px; top: 40px; left: 20px; }
-    .zine-sticker.s-paw { font-size: 30px; right: 40px; bottom: 40px; }
-    .zine-block.b1 { width: 48px; height: 64px; top: 20px; right: 40px; }
-    .zine-block.b3 { width: 30px; height: 30px; bottom: 80px; right: 20px; }
+
+@media (max-width: 900px) {
+    .zw-hero { grid-template-columns: 1fr; gap: 30px; }
+    .zw-title { font-size: 74px; letter-spacing: 10px; }
+    .zine-welcome { padding: 32px 28px 80px; }
+    .zw-art svg { max-width: 240px; }
 }
+
 /* 粉色爪印 SVG：左按钮在前，右按钮在后 */
 .nav-prev::before,
 .nav-next::after {
@@ -1633,77 +1482,95 @@ else:
     # 日式编辑 zine 风欢迎页（全屏覆盖 + 内嵌上传器）
     st.markdown("""
     <div class="zine-welcome">
-        <!-- 四角裁剪标记 -->
-        <div class="zine-corner tl">+</div>
-        <div class="zine-corner tr">+</div>
-        <div class="zine-corner bl">+</div>
-        <div class="zine-corner br">+</div>
-        <!-- 顶部刊头条 -->
-        <div class="zine-topbar">
-            <span>VOL.01 · EST.2026</span>
-            <span class="tb-brand">SWEET SWEET HOMELAND / 嘟哒 <span class="tb-sep">◆</span> 读书俱乐部</span>
-            <span>ISSUE—№001</span>
+        <div class="zw-corner tl">[+]</div>
+        <div class="zw-corner tr">[+]</div>
+        <div class="zw-corner bl">[+]</div>
+        <div class="zw-corner br">[+]</div>
+        <div class="zw-topbar">
+            <span>VOL.01 <span class="dot">■</span> EST.2026</span>
+            <b>SWEET SWEET HOMELAND</b>
+            <span>№001 <span class="dot">■</span> PIXEL EDITION</span>
         </div>
-        <!-- 色块 -->
-        <div class="zine-block zine-yellow b1"></div>
-        <div class="zine-block zine-blue b2"></div>
-        <div class="zine-block zine-yellow b3"></div>
-        <div class="zine-block zine-blue b4"></div>
-        <!-- Emoji 贴纸 -->
-        <div class="zine-sticker s-book">📚</div>
-        <div class="zine-sticker s-paw">🐾</div>
-        <div class="zine-sticker s-spark">✦</div>
-        <div class="zine-sticker s-note">✎</div>
-        <!-- Polaroid 照片卡 -->
-        <div class="zine-polaroid p1">
-            <div class="pic">書</div>
-            <div class="cap">~ 今日も読書 ~</div>
-        </div>
-        <div class="zine-polaroid p2">
-            <div class="pic">読</div>
-            <div class="cap">deep reads</div>
-        </div>
-        <div class="zine-polaroid p3">
-            <div class="pic">夢</div>
-            <div class="cap">little adventures</div>
-        </div>
-        <!-- 竖排日文 -->
-        <div class="zine-vertical">毎日読書 · 小さな冒険</div>
-        <!-- 橡皮章 -->
-        <div class="zine-stamp">CAT<br>APPROVED<br>2026</div>
-        <!-- 日期方块 -->
-        <div class="zine-date">04 · 18</div>
-        <!-- 页码大字 -->
-        <div class="zine-pageno">001</div>
-        <!-- 半调点 -->
-        <div class="zine-halftone"></div>
-        <!-- 手写便签 -->
-        <div class="zine-note">↓ 从这里开始 ~</div>
-        <!-- 主内容 -->
-        <div class="zine-content">
-            <div class="zine-eyebrow">Sweet Sweet Homeland</div>
-            <div class="zine-kicker">DOUDA · 読書 · CLUB</div>
-            <h1 class="zine-title">
-                <span class="zine-bracket">嘟哒</span><br>
-                你的共读伴侣
-            </h1>
-            <p class="zine-subtitle">
-                在这里，每一本书都值得被深度对话。<br>
-                上传你的电子书，和 AI 一起开启属于你的阅读旅程。
-            </p>
-            <div class="zine-formats">
-                <span class="zine-tag">EPUB</span>
-                <span class="zine-tag">TXT</span>
-                <span class="zine-tag">PDF</span>
-                <span class="zine-tag">MOBI</span>
-                <span class="zine-tag">AZW3</span>
+        <div class="zw-hero">
+            <div class="zw-hero-text">
+                <div class="zw-eyebrow">Sweet Sweet Homeland</div>
+                <div class="zw-kicker">A READING CLUB</div>
+                <h1 class="zw-title">嘟 哒</h1>
+                <div class="zw-title-bar"></div>
+                <div class="zw-subtitle-zh">你 的 共 读 伴 侣</div>
+                <p class="zw-desc">
+                    在这里，每一本书都值得被深度对话。<br>
+                    上传你的电子书，和 AI 一起开启阅读旅程。
+                </p>
+                <div class="zw-formats">
+                    <span class="zw-tag">EPUB</span>
+                    <span class="zw-tag">TXT</span>
+                    <span class="zw-tag">PDF</span>
+                    <span class="zw-tag">MOBI</span>
+                    <span class="zw-tag">AZW3</span>
+                </div>
+            </div>
+            <div class="zw-art">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 书 1 底部 陶土红 -->
+                    <rect x="6" y="50" width="52" height="8" fill="#c25a44"/>
+                    <rect x="6" y="50" width="52" height="1" fill="#7d2e21"/>
+                    <rect x="6" y="57" width="52" height="1" fill="#7d2e21"/>
+                    <rect x="10" y="53" width="16" height="1" fill="#f3e9cf"/>
+                    <rect x="10" y="55" width="12" height="1" fill="#f3e9cf"/>
+                    <!-- 书 2 中间 苔绿 -->
+                    <rect x="10" y="42" width="44" height="8" fill="#4a6d4e"/>
+                    <rect x="10" y="42" width="44" height="1" fill="#2d4130"/>
+                    <rect x="10" y="49" width="44" height="1" fill="#2d4130"/>
+                    <rect x="14" y="45" width="14" height="1" fill="#f3e9cf"/>
+                    <!-- 书 3 顶部 芥黄 -->
+                    <rect x="14" y="34" width="36" height="8" fill="#d4b54c"/>
+                    <rect x="14" y="34" width="36" height="1" fill="#8a7420"/>
+                    <rect x="14" y="41" width="36" height="1" fill="#8a7420"/>
+                    <rect x="18" y="37" width="10" height="1" fill="#3b2e1e"/>
+                    <!-- 猫咪 curled 在书顶 -->
+                    <!-- 耳朵 -->
+                    <rect x="16" y="20" width="4" height="4" fill="#3b2e1e"/>
+                    <rect x="22" y="20" width="4" height="4" fill="#3b2e1e"/>
+                    <rect x="17" y="22" width="2" height="2" fill="#e07b5a"/>
+                    <rect x="23" y="22" width="2" height="2" fill="#e07b5a"/>
+                    <!-- 身体猫面包型 -->
+                    <rect x="14" y="24" width="28" height="10" fill="#3b2e1e"/>
+                    <rect x="12" y="26" width="32" height="6" fill="#3b2e1e"/>
+                    <!-- 闭眼（横线） -->
+                    <rect x="17" y="28" width="3" height="1" fill="#f3e9cf"/>
+                    <rect x="22" y="28" width="3" height="1" fill="#f3e9cf"/>
+                    <!-- 鼻嘴 -->
+                    <rect x="20" y="30" width="2" height="1" fill="#e07b5a"/>
+                    <rect x="19" y="31" width="1" height="1" fill="#3b2e1e"/>
+                    <rect x="22" y="31" width="1" height="1" fill="#3b2e1e"/>
+                    <!-- 尾巴 竖起向后 -->
+                    <rect x="40" y="22" width="2" height="6" fill="#3b2e1e"/>
+                    <rect x="42" y="20" width="2" height="4" fill="#3b2e1e"/>
+                    <!-- 白肚 -->
+                    <rect x="20" y="30" width="12" height="4" fill="#6b5843"/>
+                    <!-- Z 泡泡 -->
+                    <rect x="30" y="12" width="3" height="1" fill="#7a96b4"/>
+                    <rect x="32" y="13" width="1" height="1" fill="#7a96b4"/>
+                    <rect x="30" y="14" width="3" height="1" fill="#7a96b4"/>
+                    <rect x="36" y="6" width="5" height="1" fill="#7a96b4"/>
+                    <rect x="39" y="7" width="1" height="1" fill="#7a96b4"/>
+                    <rect x="38" y="8" width="1" height="1" fill="#7a96b4"/>
+                    <rect x="37" y="9" width="1" height="1" fill="#7a96b4"/>
+                    <rect x="36" y="10" width="5" height="1" fill="#7a96b4"/>
+                </svg>
+                <div class="zw-art-caption">READING CLUB · 001</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    # 上传器放在欢迎页下方中央，通过 CSS 负边距上提与 zine 内容叠合
+    # 上传区：标签 + 上传器（中央居中）
     _ul_col1, _ul_col2, _ul_col3 = st.columns([1, 2, 1])
     with _ul_col2:
+        st.markdown(
+            '<div class="zw-upload-label">&gt; PRESS UPLOAD TO BEGIN<span class="caret">_</span></div>',
+            unsafe_allow_html=True,
+        )
         _welcome_upload = st.file_uploader(
             "上传电子书",
             type=SUPPORTED_FORMATS,
