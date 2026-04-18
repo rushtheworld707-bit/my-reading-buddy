@@ -686,6 +686,7 @@ def _to_html(page_text):
 
 
 _PROGRESS_FILE = os.path.join(os.path.expanduser("~"), ".reading_buddy_progress.json")
+_BOOKMARKS_FILE = os.path.join(os.path.expanduser("~"), ".reading_buddy_bookmarks.json")
 
 
 def _load_progress():
@@ -708,6 +709,47 @@ def _save_progress(book_key, chapter_idx, page):
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception:
         pass
+
+
+def _load_bookmarks():
+    try:
+        with open(_BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_bookmarks(data):
+    try:
+        with open(_BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def _add_bookmark(book_key, chapter_idx, page):
+    from datetime import timezone, timedelta
+    data = _load_bookmarks()
+    lst = data.setdefault(book_key, [])
+    # 去重：相同章节 + 页不重复添加
+    for b in lst:
+        if int(b.get("chapter_idx", -1)) == int(chapter_idx) and int(b.get("page", -1)) == int(page):
+            return False
+    lst.append({
+        "chapter_idx": int(chapter_idx),
+        "page": int(page),
+        "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
+    })
+    _save_bookmarks(data)
+    return True
+
+
+def _remove_bookmark(book_key, index):
+    data = _load_bookmarks()
+    lst = data.get(book_key, [])
+    if 0 <= index < len(lst):
+        lst.pop(index)
+        _save_bookmarks(data)
 
 # 5. 主逻辑控制
 # 将上传文件缓存到 session_state，防止翻页时丢失
@@ -762,6 +804,39 @@ if has_file:
             st.session_state[page_key] = 0
             current_page = 0
             st.session_state.last_chapter = chapter_idx
+
+        # --- 侧边栏：书签 ---
+        st.sidebar.divider()
+        st.sidebar.markdown("**📌 书签**")
+        if st.sidebar.button("加入当前位置", key="bm_add", use_container_width=True):
+            added = _add_bookmark(book_key, chapter_idx, current_page)
+            st.toast("📌 已添加书签" if added else "此位置已有书签")
+            st.rerun()
+
+        _bms = _load_bookmarks().get(book_key, [])
+        if not _bms:
+            st.sidebar.caption("还没有书签")
+        else:
+            for _i, _b in enumerate(_bms):
+                _ch = int(_b.get("chapter_idx", 0))
+                _pg = int(_b.get("page", 0))
+                _ts = _b.get("ts", "")
+                _ch_title = chapter_titles[_ch] if 0 <= _ch < len(chapter_titles) else f"章节 {_ch+1}"
+                _short = _ch_title if len(_ch_title) <= 10 else _ch_title[:10] + "…"
+                _label = f"{_short} · 第{_pg+1}页"
+                if _ts:
+                    _label += f"　{_ts}"
+                _bc1, _bc2 = st.sidebar.columns([6, 1])
+                with _bc1:
+                    if st.button(_label, key=f"bm_go_{_i}", use_container_width=True):
+                        st.session_state[sel_key] = _ch
+                        st.session_state[f"page_{_ch}"] = _pg
+                        st.session_state.last_chapter = _ch
+                        st.rerun()
+                with _bc2:
+                    if st.button("✕", key=f"bm_del_{_i}", help="删除此书签"):
+                        _remove_bookmark(book_key, _i)
+                        st.rerun()
 
         # --- 阅读界面 ---
 
