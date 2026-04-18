@@ -471,7 +471,9 @@ body:has(.zine-welcome) [data-testid="stFileUploader"] section:hover {
     box-shadow: 8px 8px 0 #ffe93b !important;
     background: #fffef0 !important;
 }
-body:has(.zine-welcome) [data-testid="stFileUploader"] section * {
+body:has(.zine-welcome) [data-testid="stFileUploader"] section small,
+body:has(.zine-welcome) [data-testid="stFileUploader"] section p,
+body:has(.zine-welcome) [data-testid="stFileUploader"] section > div > span {
     color: #1a4fa8 !important;
     font-family: 'Noto Sans SC', sans-serif !important;
 }
@@ -487,8 +489,15 @@ body:has(.zine-welcome) [data-testid="stFileUploader"] section button {
 body:has(.zine-welcome) [data-testid="stFileUploader"] section button:hover {
     background: #111 !important;
 }
-body:has(.zine-welcome) [data-testid="stFileUploader"] section button * {
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button p {
     color: #fff !important;
+    font-family: 'Noto Sans SC', sans-serif !important;
+}
+/* 隐藏按钮里的 Material 图标（字体被覆盖后显示为字面文字） */
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button > span:first-child:not(:has(p)),
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button [data-testid*="Icon"],
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button span[class*="icon"] {
+    display: none !important;
 }
 @media (max-width: 768px) {
     .zine-welcome { padding: 48px 24px 72px; min-height: 480px; }
