@@ -875,11 +875,12 @@ if has_file:
         fs = st.session_state.get("font_size", 18)
         theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
         # 字体族（基于 session_state，默认系统字体）
+        # 用单引号包裹字体名，以便安全嵌入 style="..." 属性
         _font_stacks = {
-            "默认": 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
-            "宋体": '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", "PingFang SC", serif',
-            "楷体": '"Kaiti SC", "STKaiti", "KaiTi", "BiauKai", serif',
-            "圆体": '"Yuanti SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+            "默认": "system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
+            "宋体": "'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'SimSun', 'PingFang SC', serif",
+            "楷体": "'Kaiti SC', 'STKaiti', 'KaiTi', 'BiauKai', serif",
+            "圆体": "'Yuanti SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
         }
         ff_css = _font_stacks.get(st.session_state.get("font_family_name", "默认"), _font_stacks["默认"])
 
