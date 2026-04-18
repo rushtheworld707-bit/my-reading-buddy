@@ -217,11 +217,24 @@ st.markdown("""
 }
 
 /* ===== 翻页按钮（粉色爪印可爱风） ===== */
-/* 两个按钮在各自 column 内居中，天然对称 */
+/* 2 columns + display:contents + space-between
+   保证按钮对称分布在阅读区域两端，不受 column 宽度不均影响 */
+div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) > div[data-testid="stColumn"] {
+    display: contents !important;
+}
 .st-key-prev_page, .st-key-next_page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .st-key-prev_page button,
@@ -818,7 +831,7 @@ if has_file:
         _save_progress(book_key, chapter_idx, current_page)
 
         # 翻页按钮（位于阅读区域下方）
-        nav_l, nav_m, nav_r = st.columns([1, 4, 1])
+        nav_l, nav_r = st.columns(2)
         with nav_l:
             if st.button("上一页", key="prev_page", disabled=(current_page <= 0)):
                 st.session_state[page_key] = max(0, current_page - 2)
