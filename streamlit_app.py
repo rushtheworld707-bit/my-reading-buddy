@@ -790,10 +790,24 @@ if has_file:
                     const p = window.parent;
                     if (p._rb_kbd_v2) { setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50'); return; }
                     p._rb_kbd_v2 = true;
+                    function isTextEditing(el) {
+                        if (!el) return false;
+                        if (el.isContentEditable) return true;
+                        const tag = el.tagName;
+                        if (tag === 'TEXTAREA') return true;
+                        if (tag === 'INPUT') {
+                            if (el.readOnly || el.disabled) return false;
+                            // 忽略 selectbox/combobox 内的搜索输入框
+                            if (el.closest && (el.closest('[role="combobox"]') || el.closest('[data-baseweb="select"]'))) return false;
+                            const blocked = ['button','submit','reset','checkbox','radio','file','range','color'];
+                            if (blocked.indexOf(el.type) !== -1) return false;
+                            return true;
+                        }
+                        return false;
+                    }
                     function handler(e) {
                         if (e.ctrlKey || e.metaKey || e.altKey) return;
-                        const t = e.target;
-                        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+                        if (isTextEditing(e.target)) return;
                         let label = null;
                         if (e.key === 'ArrowLeft') label = '上一页';
                         else if (e.key === 'ArrowRight') label = '下一页';
@@ -802,6 +816,8 @@ if has_file:
                         for (const b of btns) {
                             if (b.innerText && b.innerText.indexOf(label) !== -1 && !b.disabled) {
                                 e.preventDefault();
+                                // 触发前把焦点从 selectbox 移走，避免 Streamlit 吞键
+                                try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
                                 b.click();
                                 return;
                             }
