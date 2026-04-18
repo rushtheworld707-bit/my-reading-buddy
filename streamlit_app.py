@@ -291,8 +291,7 @@ body:has(.zine-welcome) .handwrite-title {
 /* 中文像素字体 Zpix（最像素）from jsDelivr */
 @font-face {
     font-family: 'Zpix';
-    src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font@main/fonts/.woff2/Zpix.woff2') format('woff2'),
-         url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font@main/fonts/.ttf/Zpix.ttf') format('truetype');
+    src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font/dist/zpix.ttf') format('truetype');
     font-display: swap;
 }
 
@@ -324,6 +323,28 @@ body:has(.zine-welcome) .handwrite-title {
 @keyframes zw-blink {
     0%, 49%  { opacity: 1; }
     50%, 100%{ opacity: 0; }
+}
+/* 标题像素弹跳（每一步缩放，带点8-bit感） */
+@keyframes zw-bounce {
+    0%   { opacity: 0; transform: scale(0); }
+    40%  { opacity: 1; transform: scale(1.15); }
+    70%  { transform: scale(0.94); }
+    100% { transform: scale(1); }
+}
+/* 色条从左往右展开 */
+@keyframes zw-bar-grow {
+    from { width: 0; }
+    to   { width: 180px; }
+}
+/* 副标题从左滑入 */
+@keyframes zw-slide-in {
+    from { opacity: 0; transform: translateX(-24px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+/* 描述逐字显示（用 clip-path） */
+@keyframes zw-typewriter {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
 }
 
 .zine-welcome {
@@ -416,9 +437,9 @@ body:has(.zine-welcome) .handwrite-title {
     color: var(--zw-ink) !important;
     margin: 0 0 8px;
     letter-spacing: 8px;
-    animation: zw-fade-in 0.7s ease-out 0.1s both;
+    animation: zw-bounce 0.9s cubic-bezier(.34,1.56,.64,1) 0.2s both;
     text-shadow: 4px 4px 0 var(--zw-mustard);
-    /* 像素锐化渲染 */
+    transform-origin: left center;
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -429,7 +450,7 @@ body:has(.zine-welcome) .handwrite-title {
     background-image: linear-gradient(90deg, var(--zw-terra) 20%, var(--zw-mustard) 20% 45%, var(--zw-moss) 45% 70%, var(--zw-dusty) 70%);
     image-rendering: pixelated;
     margin: 14px 0 18px;
-    animation: zw-fade-in 0.6s ease-out 0.3s both;
+    animation: zw-bar-grow 0.6s steps(9) 0.9s both;
 }
 
 .zw-subtitle-zh {
@@ -438,10 +459,11 @@ body:has(.zine-welcome) .handwrite-title {
     color: var(--zw-ink) !important;
     margin: 0 0 24px;
     letter-spacing: 4px;
-    animation: zw-fade-in 0.6s ease-out 0.35s both;
+    animation: zw-slide-in 0.5s cubic-bezier(.2,.8,.2,1) 1.3s both;
     -webkit-font-smoothing: none;
 }
 
+/* 描述逐字显示（typewriter） */
 .zw-desc {
     font-family: 'Zpix', 'Noto Sans SC', sans-serif;
     font-size: 14px;
@@ -449,9 +471,29 @@ body:has(.zine-welcome) .handwrite-title {
     color: var(--zw-ink-soft) !important;
     margin-bottom: 26px;
     max-width: 440px;
-    animation: zw-fade-in 0.6s ease-out 0.45s both;
     -webkit-font-smoothing: none;
+    position: relative;
 }
+.zw-desc .line {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: zw-typewriter 1.4s steps(30) both;
+}
+.zw-desc .line-1 { animation-delay: 1.7s; }
+.zw-desc .line-2 { animation-delay: 3.1s; }
+.zw-desc .caret {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--zw-terra);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: zw-blink 1s step-end infinite;
+    animation-delay: 4.5s;
+    opacity: 0;
+}
+.zw-desc .caret.on { animation-delay: 4.5s; opacity: 1; }
 
 .zw-formats {
     display: flex;
@@ -1639,10 +1681,10 @@ else:
                 <h1 class="zw-title">嘟 哒</h1>
                 <div class="zw-title-bar"></div>
                 <div class="zw-subtitle-zh">你 的 共 读 伴 侣</div>
-                <p class="zw-desc">
-                    在这里，每一本书都值得被深度对话。<br>
-                    上传你的电子书，和 AI 一起开启阅读旅程。
-                </p>
+                <div class="zw-desc">
+                    <span class="line line-1">在这里，每一本书都值得被深度对话。</span>
+                    <span class="line line-2">上传你的电子书，和 AI 一起开启阅读旅程。<span class="caret on"></span></span>
+                </div>
                 <div class="zw-formats">
                     <span class="zw-tag">EPUB</span>
                     <span class="zw-tag">TXT</span>
