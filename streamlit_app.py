@@ -217,8 +217,17 @@ st.markdown("""
 }
 
 /* ===== 翻页按钮（粉色爪印可爱风） ===== */
+/* 让翻页行与书页边缘对齐：清掉列间距和列的左右 padding */
+div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) {
+    gap: 0 !important;
+}
+div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) > div[data-testid="stColumn"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
 .st-key-prev_page, .st-key-next_page {
     display: flex;
+    width: 100%;
     align-items: center;
 }
 .st-key-prev_page { justify-content: flex-start; }
