@@ -288,6 +288,14 @@ body:has(.zine-welcome) .handwrite-title {
     display: none !important;
 }
 
+/* 中文像素字体 Zpix（最像素）from jsDelivr */
+@font-face {
+    font-family: 'Zpix';
+    src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font@main/fonts/.woff2/Zpix.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font@main/fonts/.ttf/Zpix.ttf') format('truetype');
+    font-display: swap;
+}
+
 /* 调色盘：Stardew-ish 暖色 */
 .zine-welcome {
     --zw-paper: #f3e9cf;
@@ -377,15 +385,14 @@ body:has(.zine-welcome) .handwrite-title {
     padding: 10px 0 50px;
 }
 
-/* 左：文字 */
+/* 左：文字（全部像素字体） */
 .zw-eyebrow {
-    font-family: 'Caveat', cursive;
-    font-size: 30px;
+    font-family: 'Zpix', 'Press Start 2P', monospace;
+    font-size: 14px;
     color: var(--zw-ink) !important;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-    opacity: 0.55;
-    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    opacity: 0.6;
     animation: zw-fade-in 0.6s ease-out both;
 }
 
@@ -402,15 +409,18 @@ body:has(.zine-welcome) .handwrite-title {
 }
 
 .zw-title {
-    font-family: 'Noto Serif SC', serif;
-    font-size: 110px;
-    font-weight: 900;
-    line-height: 0.95;
+    font-family: 'Zpix', 'Noto Serif SC', serif;
+    font-size: 96px;
+    font-weight: 400;
+    line-height: 1.0;
     color: var(--zw-ink) !important;
-    margin: 0 0 6px;
-    letter-spacing: 16px;
+    margin: 0 0 8px;
+    letter-spacing: 8px;
     animation: zw-fade-in 0.7s ease-out 0.1s both;
-    text-shadow: 3px 3px 0 var(--zw-mustard);
+    text-shadow: 4px 4px 0 var(--zw-mustard);
+    /* 像素锐化渲染 */
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .zw-title-bar {
@@ -418,28 +428,29 @@ body:has(.zine-welcome) .handwrite-title {
     height: 10px;
     background-image: linear-gradient(90deg, var(--zw-terra) 20%, var(--zw-mustard) 20% 45%, var(--zw-moss) 45% 70%, var(--zw-dusty) 70%);
     image-rendering: pixelated;
-    margin: 10px 0 18px;
+    margin: 14px 0 18px;
     animation: zw-fade-in 0.6s ease-out 0.3s both;
 }
 
 .zw-subtitle-zh {
-    font-family: 'Noto Sans SC', sans-serif;
-    font-size: 20px;
-    font-weight: 500;
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
+    font-size: 22px;
     color: var(--zw-ink) !important;
     margin: 0 0 24px;
-    letter-spacing: 6px;
+    letter-spacing: 4px;
     animation: zw-fade-in 0.6s ease-out 0.35s both;
+    -webkit-font-smoothing: none;
 }
 
 .zw-desc {
-    font-family: 'Noto Sans SC', sans-serif;
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
     font-size: 14px;
     line-height: 1.9;
     color: var(--zw-ink-soft) !important;
     margin-bottom: 26px;
     max-width: 440px;
     animation: zw-fade-in 0.6s ease-out 0.45s both;
+    -webkit-font-smoothing: none;
 }
 
 .zw-formats {
@@ -485,6 +496,136 @@ body:has(.zine-welcome) .handwrite-title {
     opacity: 0.45;
     letter-spacing: 2px;
 }
+
+/* HOW IT WORKS 面板 */
+.zw-howto {
+    position: relative;
+    z-index: 3;
+    max-width: 900px;
+    margin: 20px auto 40px;
+    padding: 18px 24px 20px;
+    background: rgba(255, 255, 255, 0.35);
+    border: 2px solid var(--zw-ink);
+    box-shadow: 5px 5px 0 var(--zw-terra);
+    animation: zw-fade-in 0.7s ease-out 0.7s both;
+}
+.zw-howto-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--zw-terra) !important;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--zw-ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.zw-howto-title .zw-meter {
+    font-family: 'Press Start 2P', monospace;
+    color: var(--zw-moss) !important;
+    font-size: 9px;
+}
+.zw-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 10px;
+}
+.zw-step {
+    flex: 1;
+    text-align: center;
+    padding: 14px 10px;
+    background: var(--zw-paper);
+    border: 2px solid var(--zw-ink);
+    transition: all 0.2s ease;
+}
+.zw-step:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--zw-mustard);
+}
+.zw-step-num {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--zw-mustard) !important;
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+}
+.zw-step-icon {
+    font-size: 30px;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+.zw-step-label {
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    color: var(--zw-ink) !important;
+    margin-bottom: 2px;
+    -webkit-font-smoothing: none;
+}
+.zw-step-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--zw-ink-soft) !important;
+    letter-spacing: 2px;
+}
+.zw-step-arrow {
+    align-self: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--zw-terra) !important;
+    padding: 0 2px;
+    animation: zw-float 2s ease-in-out infinite;
+}
+
+/* 特性徽章栏 */
+.zw-features {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto 32px;
+    padding: 0 20px;
+    animation: zw-fade-in 0.7s ease-out 0.85s both;
+}
+.zw-feature {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1.5px dashed var(--zw-ink-soft);
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
+    font-size: 12px;
+    color: var(--zw-ink) !important;
+    -webkit-font-smoothing: none;
+}
+.zw-feature .ic {
+    font-size: 14px;
+}
+
+/* 底部像素装饰条 */
+.zw-footer-strip {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 20px auto 0;
+    padding-top: 16px;
+    border-top: 2px dashed var(--zw-ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--zw-ink-soft) !important;
+    letter-spacing: 2px;
+    animation: zw-fade-in 0.7s ease-out 1s both;
+}
+.zw-footer-strip .hearts { color: var(--zw-terra) !important; letter-spacing: 3px; }
 
 /* 上传区标签 */
 .zw-upload-label {
@@ -1528,27 +1669,52 @@ else:
                     <rect x="14" y="34" width="36" height="1" fill="#8a7420"/>
                     <rect x="14" y="41" width="36" height="1" fill="#8a7420"/>
                     <rect x="18" y="37" width="10" height="1" fill="#3b2e1e"/>
-                    <!-- 猫咪 curled 在书顶 -->
-                    <!-- 耳朵 -->
-                    <rect x="16" y="20" width="4" height="4" fill="#3b2e1e"/>
-                    <rect x="22" y="20" width="4" height="4" fill="#3b2e1e"/>
+                    <!-- 白猫 curled 在书顶 -->
+                    <!-- 耳朵（描边 + 白填充 + 粉内耳） -->
+                    <rect x="15" y="19" width="6" height="1" fill="#3b2e1e"/>
+                    <rect x="21" y="19" width="6" height="1" fill="#3b2e1e"/>
+                    <rect x="15" y="20" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="20" y="20" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="21" y="20" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="26" y="20" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="16" y="20" width="4" height="4" fill="#fffef8"/>
+                    <rect x="22" y="20" width="4" height="4" fill="#fffef8"/>
                     <rect x="17" y="22" width="2" height="2" fill="#e07b5a"/>
                     <rect x="23" y="22" width="2" height="2" fill="#e07b5a"/>
-                    <!-- 身体猫面包型 -->
-                    <rect x="14" y="24" width="28" height="10" fill="#3b2e1e"/>
-                    <rect x="12" y="26" width="32" height="6" fill="#3b2e1e"/>
-                    <!-- 闭眼（横线） -->
-                    <rect x="17" y="28" width="3" height="1" fill="#f3e9cf"/>
-                    <rect x="22" y="28" width="3" height="1" fill="#f3e9cf"/>
-                    <!-- 鼻嘴 -->
-                    <rect x="20" y="30" width="2" height="1" fill="#e07b5a"/>
+                    <!-- 头身描边 -->
+                    <rect x="13" y="24" width="30" height="1" fill="#3b2e1e"/>
+                    <rect x="11" y="26" width="34" height="1" fill="#3b2e1e"/>
+                    <rect x="11" y="31" width="34" height="1" fill="#3b2e1e"/>
+                    <rect x="13" y="33" width="30" height="1" fill="#3b2e1e"/>
+                    <rect x="11" y="27" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="44" y="27" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="13" y="25" width="1" height="8" fill="#3b2e1e"/>
+                    <rect x="42" y="25" width="1" height="8" fill="#3b2e1e"/>
+                    <!-- 身体（白填充） -->
+                    <rect x="14" y="24" width="28" height="10" fill="#fffef8"/>
+                    <rect x="12" y="26" width="32" height="6" fill="#fffef8"/>
+                    <!-- 底部浅灰阴影增加立体感 -->
+                    <rect x="14" y="32" width="28" height="1" fill="#e5dcc0"/>
+                    <!-- 闭眼（黑色短横线） -->
+                    <rect x="17" y="28" width="3" height="1" fill="#3b2e1e"/>
+                    <rect x="22" y="28" width="3" height="1" fill="#3b2e1e"/>
+                    <!-- 鼻 -->
+                    <rect x="20" y="30" width="2" height="1" fill="#c25a44"/>
+                    <!-- 嘴 -->
                     <rect x="19" y="31" width="1" height="1" fill="#3b2e1e"/>
                     <rect x="22" y="31" width="1" height="1" fill="#3b2e1e"/>
-                    <!-- 尾巴 竖起向后 -->
-                    <rect x="40" y="22" width="2" height="6" fill="#3b2e1e"/>
-                    <rect x="42" y="20" width="2" height="4" fill="#3b2e1e"/>
-                    <!-- 白肚 -->
-                    <rect x="20" y="30" width="12" height="4" fill="#6b5843"/>
+                    <!-- 腮红 -->
+                    <rect x="15" y="29" width="1" height="1" fill="#e07b5a" opacity="0.5"/>
+                    <rect x="26" y="29" width="1" height="1" fill="#e07b5a" opacity="0.5"/>
+                    <!-- 尾巴（描边 + 白填充） -->
+                    <rect x="40" y="21" width="2" height="1" fill="#3b2e1e"/>
+                    <rect x="39" y="22" width="1" height="6" fill="#3b2e1e"/>
+                    <rect x="42" y="22" width="1" height="6" fill="#3b2e1e"/>
+                    <rect x="40" y="22" width="2" height="6" fill="#fffef8"/>
+                    <rect x="42" y="19" width="3" height="1" fill="#3b2e1e"/>
+                    <rect x="42" y="20" width="1" height="2" fill="#3b2e1e"/>
+                    <rect x="44" y="20" width="1" height="2" fill="#3b2e1e"/>
+                    <rect x="43" y="20" width="1" height="2" fill="#fffef8"/>
                     <!-- Z 泡泡 -->
                     <rect x="30" y="12" width="3" height="1" fill="#7a96b4"/>
                     <rect x="32" y="13" width="1" height="1" fill="#7a96b4"/>
@@ -1561,6 +1727,50 @@ else:
                 </svg>
                 <div class="zw-art-caption">READING CLUB · 001</div>
             </div>
+        </div>
+        <!-- HOW IT WORKS 3 步 -->
+        <div class="zw-howto">
+            <div class="zw-howto-title">
+                <span>▶ HOW IT WORKS / 开始指南</span>
+                <span class="zw-meter">■ ■ ■ □ □</span>
+            </div>
+            <div class="zw-steps">
+                <div class="zw-step">
+                    <div class="zw-step-num">01</div>
+                    <div class="zw-step-icon">📤</div>
+                    <div class="zw-step-label">上传电子书</div>
+                    <div class="zw-step-sub">UPLOAD</div>
+                </div>
+                <div class="zw-step-arrow">&gt;</div>
+                <div class="zw-step">
+                    <div class="zw-step-num">02</div>
+                    <div class="zw-step-icon">📖</div>
+                    <div class="zw-step-label">选章节阅读</div>
+                    <div class="zw-step-sub">READ</div>
+                </div>
+                <div class="zw-step-arrow">&gt;</div>
+                <div class="zw-step">
+                    <div class="zw-step-num">03</div>
+                    <div class="zw-step-icon">💬</div>
+                    <div class="zw-step-label">AI 深度对话</div>
+                    <div class="zw-step-sub">CHAT</div>
+                </div>
+            </div>
+        </div>
+        <!-- 特性徽章 -->
+        <div class="zw-features">
+            <span class="zw-feature"><span class="ic">⌨</span> 键盘翻页</span>
+            <span class="zw-feature"><span class="ic">📌</span> 书签收藏</span>
+            <span class="zw-feature"><span class="ic">🎨</span> 主题字体自定义</span>
+            <span class="zw-feature"><span class="ic">⏱</span> 剩余时间估算</span>
+            <span class="zw-feature"><span class="ic">💾</span> 进度自动保存</span>
+            <span class="zw-feature"><span class="ic">🤖</span> AI 共读</span>
+        </div>
+        <!-- 底部装饰条 -->
+        <div class="zw-footer-strip">
+            <span>PRESS UPLOAD TO BEGIN</span>
+            <span class="hearts">♥ ♥ ♥</span>
+            <span>SSH · №001 · 2026</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
