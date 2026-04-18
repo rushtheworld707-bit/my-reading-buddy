@@ -10,6 +10,7 @@ import chardet
 from datetime import datetime
 
 import streamlit as st
+import streamlit.components.v1 as components
 from ebooklib import epub
 from bs4 import BeautifulSoup
 from openai import OpenAI
@@ -776,6 +777,40 @@ if has_file:
             if st.button("下一页 →", key="next_page", use_container_width=True, disabled=(current_page >= total_pages - 1)):
                 st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                 st.rerun()
+
+        # 键盘 ← / → 翻页（向父文档挂一次性监听器）
+        components.html(
+            """
+            <script>
+            (function() {
+                const parent = window.parent;
+                if (parent._readingKeyNavAttached) return;
+                parent._readingKeyNavAttached = true;
+                const doc = parent.document;
+                doc.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey || e.metaKey || e.altKey) return;
+                    const t = e.target;
+                    if (!t) return;
+                    const tag = t.tagName;
+                    if (tag === 'INPUT' || tag === 'TEXTAREA' || t.isContentEditable) return;
+                    let label = null;
+                    if (e.key === 'ArrowLeft') label = '上一页';
+                    else if (e.key === 'ArrowRight') label = '下一页';
+                    if (!label) return;
+                    const btns = doc.querySelectorAll('button');
+                    for (const b of btns) {
+                        if (b.innerText && b.innerText.indexOf(label) !== -1 && !b.disabled) {
+                            b.click();
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                });
+            })();
+            </script>
+            """,
+            height=0,
+        )
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
