@@ -216,57 +216,51 @@ st.markdown("""
     .page-indicator { font-size: 12px; }
 }
 
-/* ===== 翻页按钮（粉色爪印可爱风） ===== */
-/* 2 columns + display:contents + space-between
-   保证按钮对称分布在阅读区域两端，不受 column 宽度不均影响 */
-div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: 0 !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
+/* ===== 阅读区域 + 导航按钮 =====
+   book-spread、页码指示、翻页按钮在同一个 .reading-area 里，宽度严格一致 */
+.reading-area {
+    width: 100%;
 }
-div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) > div[data-testid="stColumn"] {
-    display: contents !important;
+.nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 4px;
 }
-.st-key-prev_page, .st-key-next_page {
-    margin: 0 !important;
-    padding: 0 !important;
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.20), rgba(255, 154, 154, 0.12));
+    border: 1.5px solid rgba(255, 154, 154, 0.50);
+    border-radius: 18px;
+    color: #ffd6d6;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none !important;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.18);
+    cursor: pointer;
+    user-select: none;
 }
-
-.st-key-prev_page button,
-.st-key-next_page button {
-    width: auto !important;
-    min-width: 0 !important;
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.20), rgba(255, 154, 154, 0.12)) !important;
-    border: 1.5px solid rgba(255, 154, 154, 0.50) !important;
-    border-radius: 18px !important;
-    color: #ffd6d6 !important;
-    font-weight: 600 !important;
-    padding: 8px 20px !important;
-    transition: all 0.25s ease !important;
-    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.18) !important;
-}
-.st-key-prev_page button:hover,
-.st-key-next_page button:hover {
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.32), rgba(255, 154, 154, 0.20)) !important;
-    border-color: rgba(255, 154, 154, 0.75) !important;
+.nav-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.32), rgba(255, 154, 154, 0.20));
+    border-color: rgba(255, 154, 154, 0.75);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.30) !important;
+    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.30);
     color: #fff !important;
 }
-.st-key-prev_page button:disabled,
-.st-key-next_page button:disabled {
-    opacity: 0.35 !important;
-    transform: none !important;
-    box-shadow: none !important;
+.nav-btn.nav-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
 }
-/* 粉色爪印 SVG (::before 在左按钮前, ::after 在右按钮后) */
-.st-key-prev_page button::before,
-.st-key-next_page button::after {
+/* 粉色爪印 SVG：左按钮在前，右按钮在后 */
+.nav-prev::before,
+.nav-next::after {
     content: '';
     display: inline-block;
     width: 14px;
@@ -276,8 +270,6 @@ div[data-testid="stHorizontalBlock"]:has(.st-key-prev_page) > div[data-testid="s
     background-size: contain;
     vertical-align: middle;
 }
-.st-key-prev_page button::before { margin-right: 6px; }
-.st-key-next_page button::after { margin-left: 6px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -753,6 +745,17 @@ if has_file:
 
         current_page = st.session_state[page_key]
 
+        # 处理从 HTML 导航按钮/键盘触发的翻页（通过 query params）
+        if "nav" in st.query_params:
+            _nav = st.query_params["nav"]
+            del st.query_params["nav"]
+            if _nav == "prev" and current_page > 0:
+                st.session_state[page_key] = max(0, current_page - 2)
+                st.rerun()
+            elif _nav == "next" and current_page < total_pages - 1:
+                st.session_state[page_key] = min(total_pages - 1, current_page + 2)
+                st.rerun()
+
         # 切换章节时重置页码
         if "last_chapter" not in st.session_state:
             st.session_state.last_chapter = chapter_idx
@@ -802,46 +805,47 @@ if has_file:
         right_html = (_to_html(pages[right_idx]) if right_idx is not None
                       else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>')
 
-        book_html = f'''
-        <div class="book-spread" style="{theme_css} font-size: {fs}px;">
-            <div class="book-page book-page-left">
-                {left_html}
-                <div class="page-num">{left_num}</div>
-            </div>
-            <div class="book-page book-page-right">
-                {right_html}
-                <div class="page-num">{right_num}</div>
-            </div>
-        </div>
-        '''
-        st.markdown(book_html, unsafe_allow_html=True)
-
-        # 页码指示
+        # 页码指示 & 总进度
         chapter_page_counts = [len(split_into_pages(ch["text"])) for ch in chapters]
         total_all_pages = sum(chapter_page_counts)
         read_pages = sum(chapter_page_counts[:chapter_idx]) + current_page + 1
         overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
-        st.markdown(
-            f'<div class="page-indicator">第 {left_num}{f"-{right_num}" if right_num else ""}'
-            f' / {total_pages} 页 · 全书 {overall:.1f}%</div>',
-            unsafe_allow_html=True,
-        )
+
+        prev_disabled = current_page <= 0
+        next_disabled = current_page >= total_pages - 1
+        prev_cls = "nav-btn nav-prev" + (" nav-disabled" if prev_disabled else "")
+        next_cls = "nav-btn nav-next" + (" nav-disabled" if next_disabled else "")
+        prev_href = '#' if prev_disabled else '?nav=prev'
+        next_href = '#' if next_disabled else '?nav=next'
+
+        page_range = f"第 {left_num}{f'-{right_num}' if right_num else ''} / {total_pages} 页 · 全书 {overall:.1f}%"
+
+        # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
+        reading_html = f'''
+        <div class="reading-area">
+            <div class="book-spread" style="{theme_css} font-size: {fs}px;">
+                <div class="book-page book-page-left">
+                    {left_html}
+                    <div class="page-num">{left_num}</div>
+                </div>
+                <div class="book-page book-page-right">
+                    {right_html}
+                    <div class="page-num">{right_num}</div>
+                </div>
+            </div>
+            <div class="page-indicator">{page_range}</div>
+            <div class="nav-row">
+                <a href="{prev_href}" class="{prev_cls}" target="_self">上一页</a>
+                <a href="{next_href}" class="{next_cls}" target="_self">下一页</a>
+            </div>
+        </div>
+        '''
+        st.markdown(reading_html, unsafe_allow_html=True)
 
         # 持久化阅读进度
         _save_progress(book_key, chapter_idx, current_page)
 
-        # 翻页按钮（位于阅读区域下方）
-        nav_l, nav_r = st.columns(2)
-        with nav_l:
-            if st.button("上一页", key="prev_page", disabled=(current_page <= 0)):
-                st.session_state[page_key] = max(0, current_page - 2)
-                st.rerun()
-        with nav_r:
-            if st.button("下一页", key="next_page", disabled=(current_page >= total_pages - 1)):
-                st.session_state[page_key] = min(total_pages - 1, current_page + 2)
-                st.rerun()
-
-        # 键盘 ← / → 翻页（向父文档挂一次性监听器，含状态指示以便诊断）
+        # 键盘 ← / → 翻页（点击 HTML 导航链接来触发翻页）
         components.html(
             """
             <style>
@@ -929,19 +933,16 @@ if has_file:
                     function handler(e) {
                         if (e.ctrlKey || e.metaKey || e.altKey) return;
                         if (isTextEditing(e.target)) return;
-                        let label = null;
-                        if (e.key === 'ArrowLeft') label = '上一页';
-                        else if (e.key === 'ArrowRight') label = '下一页';
-                        if (!label) return;
-                        const btns = p.document.querySelectorAll('button');
-                        for (const b of btns) {
-                            if (b.innerText && b.innerText.indexOf(label) !== -1 && !b.disabled) {
-                                e.preventDefault();
-                                // 触发前把焦点从 selectbox 移走，避免 Streamlit 吞键
-                                try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
-                                b.click();
-                                return;
-                            }
+                        let selector = null;
+                        if (e.key === 'ArrowLeft') selector = '.nav-prev';
+                        else if (e.key === 'ArrowRight') selector = '.nav-next';
+                        if (!selector) return;
+                        const el = p.document.querySelector(selector);
+                        if (el && !el.classList.contains('nav-disabled')) {
+                            e.preventDefault();
+                            try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
+                            el.click();
+                            return;
                         }
                     }
                     p.document.addEventListener('keydown', handler, true);
