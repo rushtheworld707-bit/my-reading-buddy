@@ -770,11 +770,11 @@ if has_file:
         # 翻页按钮（位于阅读区域下方）
         nav_l, nav_m, nav_r = st.columns([1, 4, 1])
         with nav_l:
-            if st.button("← 上一页", key="prev_page", use_container_width=True, disabled=(current_page <= 0)):
+            if st.button("🐾 上一页", key="prev_page", use_container_width=True, disabled=(current_page <= 0)):
                 st.session_state[page_key] = max(0, current_page - 2)
                 st.rerun()
         with nav_r:
-            if st.button("下一页 →", key="next_page", use_container_width=True, disabled=(current_page >= total_pages - 1)):
+            if st.button("下一页 🐾", key="next_page", use_container_width=True, disabled=(current_page >= total_pages - 1)):
                 st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                 st.rerun()
 
@@ -825,7 +825,7 @@ if has_file:
               }
             </style>
             <div class="rb-kbd-wrap">
-              <div id="rb-kbd-status" class="rb-kbd-hint">🐾 加载中…</div>
+              <div id="rb-kbd-status" class="rb-kbd-hint">加载中…</div>
             </div>
             <script>
             (function() {
@@ -833,7 +833,7 @@ if has_file:
                 function setReady() {
                     if (s) {
                         s.classList.remove('rb-err');
-                        s.innerHTML = '🐾 键盘翻页已启用 <kbd>←</kbd><kbd>→</kbd>';
+                        s.innerHTML = '键盘翻页已启用 <kbd>←</kbd><kbd>→</kbd>';
                     }
                 }
                 function setErr(msg) {
