@@ -3,6 +3,7 @@ import io
 import os
 import glob
 import html
+import json
 import tempfile
 import zipfile
 import chardet
@@ -617,6 +618,31 @@ def _to_html(page_text):
             result += f"<p>{html.escape(para)}</p>"
     return result
 
+
+_PROGRESS_FILE = os.path.join(os.path.expanduser("~"), ".reading_buddy_progress.json")
+
+
+def _load_progress():
+    try:
+        with open(_PROGRESS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_progress(book_key, chapter_idx, page):
+    data = _load_progress()
+    data[book_key] = {
+        "chapter_idx": int(chapter_idx),
+        "page": int(page),
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    try:
+        with open(_PROGRESS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
 # 5. 主逻辑控制
 # 将上传文件缓存到 session_state，防止翻页时丢失
 if uploaded_file:
@@ -630,10 +656,25 @@ if has_file:
     if chapters:
         # 侧边栏：章节选择（显示真实标题）
         chapter_titles = [ch["title"] for ch in chapters]
+        book_key = st.session_state.file_name
+        sel_key = "chapter_select"
+
+        # 首次载入此书时，恢复上次的章节 + 页码
+        if st.session_state.get("loaded_book") != book_key:
+            saved = _load_progress().get(book_key, {})
+            saved_ch = 0
+            if saved:
+                saved_ch = min(max(int(saved.get("chapter_idx", 0)), 0), len(chapters) - 1)
+                st.session_state[f"page_{saved_ch}"] = int(saved.get("page", 0))
+            st.session_state[sel_key] = saved_ch
+            st.session_state.last_chapter = saved_ch
+            st.session_state.loaded_book = book_key
+
         chapter_idx = st.sidebar.selectbox(
             "选择章节",
             range(len(chapters)),
-            format_func=lambda x: chapter_titles[x]
+            format_func=lambda x: chapter_titles[x],
+            key=sel_key,
         )
         current_text = chapters[chapter_idx]["text"]
 
@@ -721,6 +762,9 @@ if has_file:
             f' / {total_pages} 页 · 全书 {overall:.1f}%</div>',
             unsafe_allow_html=True,
         )
+
+        # 持久化阅读进度
+        _save_progress(book_key, chapter_idx, current_page)
 
         # 翻页按钮（位于阅读区域下方）
         nav_l, nav_m, nav_r = st.columns([1, 4, 1])
