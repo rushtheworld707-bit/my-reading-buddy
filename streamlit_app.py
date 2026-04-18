@@ -721,6 +721,17 @@ if has_file:
             unsafe_allow_html=True,
         )
 
+        # 翻页按钮（位于阅读区域下方）
+        nav_l, nav_m, nav_r = st.columns([1, 4, 1])
+        with nav_l:
+            if st.button("← 上一页", key="prev_page", use_container_width=True, disabled=(current_page <= 0)):
+                st.session_state[page_key] = max(0, current_page - 2)
+                st.rerun()
+        with nav_r:
+            if st.button("下一页 →", key="next_page", use_container_width=True, disabled=(current_page >= total_pages - 1)):
+                st.session_state[page_key] = min(total_pages - 1, current_page + 2)
+                st.rerun()
+
         # 侧边栏：阅读设置
         st.sidebar.divider()
         st.sidebar.markdown("**阅读设置**")
