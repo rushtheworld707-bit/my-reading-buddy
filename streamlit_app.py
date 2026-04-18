@@ -215,6 +215,56 @@ st.markdown("""
     }
     .page-indicator { font-size: 12px; }
 }
+
+/* ===== 翻页按钮（粉色爪印可爱风） ===== */
+.st-key-prev_page, .st-key-next_page {
+    display: flex;
+    align-items: center;
+}
+.st-key-prev_page { justify-content: flex-start; }
+.st-key-next_page { justify-content: flex-end; }
+
+.st-key-prev_page button,
+.st-key-next_page button {
+    width: auto !important;
+    min-width: 0 !important;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.20), rgba(255, 154, 154, 0.12)) !important;
+    border: 1.5px solid rgba(255, 154, 154, 0.50) !important;
+    border-radius: 18px !important;
+    color: #ffd6d6 !important;
+    font-weight: 600 !important;
+    padding: 8px 20px !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.18) !important;
+}
+.st-key-prev_page button:hover,
+.st-key-next_page button:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.32), rgba(255, 154, 154, 0.20)) !important;
+    border-color: rgba(255, 154, 154, 0.75) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.30) !important;
+    color: #fff !important;
+}
+.st-key-prev_page button:disabled,
+.st-key-next_page button:disabled {
+    opacity: 0.35 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+/* 粉色爪印 SVG (::before 在左按钮前, ::after 在右按钮后) */
+.st-key-prev_page button::before,
+.st-key-next_page button::after {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2" fill="%23ff9eb3"/><ellipse cx="5.5" cy="10.5" rx="2" ry="2.4" fill="%23ff9eb3"/><ellipse cx="18.5" cy="10.5" rx="2" ry="2.4" fill="%23ff9eb3"/><ellipse cx="9" cy="5.5" rx="1.6" ry="2" fill="%23ff9eb3"/><ellipse cx="15" cy="5.5" rx="1.6" ry="2" fill="%23ff9eb3"/></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+    vertical-align: middle;
+}
+.st-key-prev_page button::before { margin-right: 6px; }
+.st-key-next_page button::after { margin-left: 6px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -770,11 +820,11 @@ if has_file:
         # 翻页按钮（位于阅读区域下方）
         nav_l, nav_m, nav_r = st.columns([1, 4, 1])
         with nav_l:
-            if st.button("🐾 上一页", key="prev_page", use_container_width=True, disabled=(current_page <= 0)):
+            if st.button("上一页", key="prev_page", disabled=(current_page <= 0)):
                 st.session_state[page_key] = max(0, current_page - 2)
                 st.rerun()
         with nav_r:
-            if st.button("下一页 🐾", key="next_page", use_container_width=True, disabled=(current_page >= total_pages - 1)):
+            if st.button("下一页", key="next_page", disabled=(current_page >= total_pages - 1)):
                 st.session_state[page_key] = min(total_pages - 1, current_page + 2)
                 st.rerun()
 
@@ -833,7 +883,7 @@ if has_file:
                 function setReady() {
                     if (s) {
                         s.classList.remove('rb-err');
-                        s.innerHTML = '键盘翻页已启用 <kbd>←</kbd><kbd>→</kbd>';
+                        s.innerHTML = '<kbd>←</kbd> 键盘翻页已启动 <kbd>→</kbd>';
                     }
                 }
                 function setErr(msg) {
