@@ -778,6 +778,15 @@ if has_file:
             st.session_state.last_chapter = saved_ch
             st.session_state.loaded_book = book_key
 
+        # 书签跳转：在 selectbox 渲染之前应用 pending 状态
+        if "_pending_jump" in st.session_state:
+            _jmp = st.session_state.pop("_pending_jump")
+            _jch = int(_jmp.get("chapter", 0))
+            _jch = min(max(_jch, 0), len(chapters) - 1)
+            st.session_state[sel_key] = _jch
+            st.session_state[f"page_{_jch}"] = int(_jmp.get("page", 0))
+            st.session_state.last_chapter = _jch
+
         chapter_idx = st.sidebar.selectbox(
             "选择章节",
             range(len(chapters)),
@@ -829,9 +838,7 @@ if has_file:
                 _bc1, _bc2 = st.sidebar.columns([6, 1])
                 with _bc1:
                     if st.button(_label, key=f"bm_go_{_i}", use_container_width=True):
-                        st.session_state[sel_key] = _ch
-                        st.session_state[f"page_{_ch}"] = _pg
-                        st.session_state.last_chapter = _ch
+                        st.session_state._pending_jump = {"chapter": _ch, "page": _pg}
                         st.rerun()
                 with _bc2:
                     if st.button("✕", key=f"bm_del_{_i}", help="删除此书签"):
