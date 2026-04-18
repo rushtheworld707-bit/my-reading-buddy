@@ -19,7 +19,7 @@ from openai import OpenAI
 st.set_page_config(page_title="嘟哒", layout="wide")
 
 # 2. 全局自定义样式
-st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
+st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""
 <style>
 /* 主标题手绘体 */
@@ -267,6 +267,163 @@ st.markdown("""
 }
 div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-prev_page) {
     display: none !important;
+}
+
+/* ===== 日式编辑 / zine 风欢迎页 ===== */
+@keyframes zine-title-in {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes zine-fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes zine-sticker-in {
+    0% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+    60% { opacity: 1; transform: scale(1.08) var(--rot, rotate(0deg)); }
+    100% { opacity: 1; transform: scale(1) var(--rot, rotate(0deg)); }
+}
+.zine-welcome {
+    position: relative;
+    min-height: 560px;
+    background-color: #fbfaf4;
+    background-image:
+        repeating-linear-gradient(
+            to right,
+            transparent 0, transparent 39px,
+            rgba(120, 175, 205, 0.28) 39px, rgba(120, 175, 205, 0.28) 40px
+        ),
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0, transparent 39px,
+            rgba(120, 175, 205, 0.28) 39px, rgba(120, 175, 205, 0.28) 40px
+        );
+    overflow: hidden;
+    padding: 80px 72px 96px;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    margin: 20px 0;
+}
+.zine-welcome * { box-sizing: border-box; }
+/* 装饰色块 */
+.zine-block {
+    position: absolute;
+    z-index: 1;
+    animation: zine-fade-in 0.8s ease-out both;
+}
+.zine-yellow { background: #ffe93b; }
+.zine-blue { background: #1a4fa8; }
+.zine-block.b1 { top: 44px; right: 120px; width: 72px; height: 96px; transform: rotate(2deg); animation-delay: 0.6s; }
+.zine-block.b2 { bottom: 60px; left: 48px; width: 160px; height: 20px; animation-delay: 0.9s; }
+.zine-block.b3 { bottom: 120px; right: 60px; width: 44px; height: 44px; transform: rotate(-4deg); animation-delay: 1.0s; }
+.zine-block.b4 { top: 160px; left: 40px; width: 16px; height: 120px; background: #1a4fa8; animation-delay: 0.8s; }
+/* 贴纸（emoji 代替照片） */
+.zine-sticker {
+    position: absolute;
+    z-index: 2;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.18));
+    animation: zine-sticker-in 0.7s cubic-bezier(.34,1.56,.64,1) both;
+    user-select: none;
+}
+.zine-sticker.s-book  { top: 80px; left: 44px; font-size: 56px; --rot: rotate(-10deg); transform: rotate(-10deg); animation-delay: 0.5s; }
+.zine-sticker.s-paw   { bottom: 80px; right: 150px; font-size: 40px; --rot: rotate(14deg); transform: rotate(14deg); animation-delay: 0.7s; }
+.zine-sticker.s-spark { top: 200px; right: 90px; font-size: 28px; --rot: rotate(0deg); animation-delay: 1.1s; }
+.zine-sticker.s-note  { bottom: 200px; left: 120px; font-size: 32px; --rot: rotate(-6deg); transform: rotate(-6deg); animation-delay: 0.9s; }
+/* 内容区 */
+.zine-content {
+    position: relative;
+    z-index: 3;
+    max-width: 620px;
+    margin: 0 auto;
+    text-align: left;
+}
+.zine-eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 30px;
+    color: #ff6b6b;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+    animation: zine-fade-in 0.6s ease-out both;
+}
+.zine-title {
+    font-family: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1.35;
+    color: #111;
+    margin: 0 0 24px;
+    letter-spacing: 2px;
+    animation: zine-title-in 0.8s cubic-bezier(.2,.8,.2,1) 0.1s both;
+}
+.zine-title .zine-bracket {
+    display: inline-block;
+    background: #ffe93b;
+    padding: 0 10px;
+    margin: 0 2px;
+    box-shadow: 0 2px 0 #1a4fa8;
+}
+.zine-title .zine-dash {
+    display: inline-block;
+    width: 36px;
+    height: 6px;
+    background: #1a4fa8;
+    vertical-align: middle;
+    margin: 0 8px 8px;
+}
+.zine-subtitle {
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 15px;
+    line-height: 2;
+    color: #333;
+    margin-bottom: 36px;
+    max-width: 480px;
+    animation: zine-fade-in 0.7s ease-out 0.4s both;
+}
+.zine-formats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    animation: zine-fade-in 0.7s ease-out 0.6s both;
+}
+.zine-tag {
+    padding: 6px 14px;
+    background: white;
+    border: 2px solid #1a4fa8;
+    color: #1a4fa8;
+    font-family: 'Noto Sans SC', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+.zine-tag:nth-child(1) { transform: rotate(-1.5deg); }
+.zine-tag:nth-child(2) { transform: rotate(1deg); }
+.zine-tag:nth-child(3) { transform: rotate(-0.5deg); }
+.zine-tag:nth-child(4) { transform: rotate(1.5deg); }
+.zine-tag:nth-child(5) { transform: rotate(-1deg); }
+.zine-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    background: #111;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Noto Sans SC', sans-serif;
+    letter-spacing: 2px;
+    transform: rotate(-0.8deg);
+    box-shadow: 4px 4px 0 #ffe93b;
+    animation: zine-fade-in 0.7s ease-out 0.8s both;
+}
+.zine-cta .arr { font-size: 18px; }
+@media (max-width: 768px) {
+    .zine-welcome { padding: 48px 24px 72px; min-height: 480px; }
+    .zine-title { font-size: 38px; }
+    .zine-sticker.s-book { font-size: 40px; top: 40px; left: 20px; }
+    .zine-sticker.s-paw { font-size: 30px; right: 40px; bottom: 40px; }
+    .zine-block.b1 { width: 48px; height: 64px; top: 20px; right: 40px; }
+    .zine-block.b3 { width: 30px; height: 30px; bottom: 80px; right: 20px; }
 }
 /* 粉色爪印 SVG：左按钮在前，右按钮在后 */
 .nav-prev::before,
@@ -1185,24 +1342,36 @@ if has_file:
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
 else:
-    # 欢迎页面
+    # 日式编辑 zine 风欢迎页
     st.markdown("""
-    <div class="welcome-box">
-        <div class="welcome-cat">🐱</div>
-        <div class="welcome-title">欢迎来到深度共读伴侣</div>
-        <div class="welcome-desc">
-            在这里，每一本书都值得被深度对话<br>
-            上传你的电子书，开启属于你的共读之旅
-        </div>
-        <div class="welcome-formats">
-            <span class="format-tag">EPUB</span>
-            <span class="format-tag">TXT</span>
-            <span class="format-tag">PDF</span>
-            <span class="format-tag">MOBI</span>
-            <span class="format-tag">AZW3</span>
-        </div>
-        <div class="welcome-hint">
-            <span>← 点击左侧上传电子书开始</span>
+    <div class="zine-welcome">
+        <div class="zine-block zine-yellow b1"></div>
+        <div class="zine-block zine-blue b2"></div>
+        <div class="zine-block zine-yellow b3"></div>
+        <div class="zine-block zine-blue b4"></div>
+        <div class="zine-sticker s-book">📖</div>
+        <div class="zine-sticker s-paw">🐾</div>
+        <div class="zine-sticker s-spark">✦</div>
+        <div class="zine-sticker s-note">✎</div>
+        <div class="zine-content">
+            <div class="zine-eyebrow">Sweet Sweet Homeland</div>
+            <h1 class="zine-title">
+                欢迎来到<br>
+                <span class="zine-bracket">嘟哒</span>
+                <span class="zine-dash"></span>你的共读伴侣
+            </h1>
+            <p class="zine-subtitle">
+                在这里，每一本书都值得被深度对话。<br>
+                上传你的电子书，和 AI 一起开启属于你的阅读旅程。
+            </p>
+            <div class="zine-formats">
+                <span class="zine-tag">EPUB</span>
+                <span class="zine-tag">TXT</span>
+                <span class="zine-tag">PDF</span>
+                <span class="zine-tag">MOBI</span>
+                <span class="zine-tag">AZW3</span>
+            </div>
+            <div class="zine-cta"><span class="arr">←</span> 点击左侧上传电子书开始</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
