@@ -90,6 +90,10 @@ st.markdown("""
     font-size: 13px;
     margin: 8px 0;
 }
+.page-indicator .time-left {
+    color: #ff9eb3;
+    font-weight: 500;
+}
 
 /* 时间显示 */
 .time-display {
@@ -814,7 +818,19 @@ if has_file:
         prev_cls = "nav-btn nav-prev" + (" nav-disabled" if prev_disabled else "")
         next_cls = "nav-btn nav-next" + (" nav-disabled" if next_disabled else "")
 
-        page_range = f"第 {left_num}{f'-{right_num}' if right_num else ''} / {total_pages} 页 · 全书 {overall:.1f}%"
+        # 本章剩余阅读时间估算（未读页字数 / 300 字每分钟）
+        _remaining_chars = sum(len(p) for p in pages[current_page + 2:])
+        if _remaining_chars <= 0:
+            _time_left = "本章即将读完"
+        else:
+            _mins = max(1, round(_remaining_chars / 300))
+            _time_left = f"本章约剩 {_mins} 分钟"
+
+        page_range = (
+            f"第 {left_num}{f'-{right_num}' if right_num else ''} / {total_pages} 页"
+            f" · 全书 {overall:.1f}%"
+            f" · <span class=\"time-left\">{_time_left}</span>"
+        )
 
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
