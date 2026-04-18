@@ -269,7 +269,36 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
     display: none !important;
 }
 
-/* ===== 日式编辑 / zine 风欢迎页 ===== */
+/* ===== 日式编辑 / zine 风欢迎页 全屏覆盖模式 ===== */
+/* 当 .zine-welcome 出现时隐藏 Streamlit 外壳，主内容区铺满 */
+body:has(.zine-welcome) header[data-testid="stHeader"] {
+    display: none !important;
+}
+body:has(.zine-welcome) section[data-testid="stSidebar"] {
+    display: none !important;
+}
+body:has(.zine-welcome) [data-testid="stMainBlockContainer"],
+body:has(.zine-welcome) [data-testid="stAppViewContainer"] > .main > div {
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+body:has(.zine-welcome) .main .block-container,
+body:has(.zine-welcome) [class*="block-container"] {
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+body:has(.zine-welcome) .handwrite-title {
+    display: none !important;
+}
+/* 文字颜色 !important 对抗 Streamlit 暗色模式默认白字 */
+.zine-title { color: #111 !important; }
+.zine-title .zine-bracket { color: #111 !important; background: #ffe93b !important; }
+.zine-subtitle { color: #333 !important; }
+.zine-tag { color: #1a4fa8 !important; background: #fff !important; }
+.zine-cta, .zine-cta * { color: #fff !important; }
+.zine-eyebrow { color: #ff6b6b !important; }
+
+
 @keyframes zine-title-in {
     from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: translateY(0); }
@@ -285,7 +314,8 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
 }
 .zine-welcome {
     position: relative;
-    min-height: 560px;
+    min-height: 100vh;
+    width: 100%;
     background-color: #fbfaf4;
     background-image:
         repeating-linear-gradient(
@@ -299,10 +329,9 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
             rgba(120, 175, 205, 0.28) 39px, rgba(120, 175, 205, 0.28) 40px
         );
     overflow: hidden;
-    padding: 80px 72px 96px;
-    border-radius: 4px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    margin: 20px 0;
+    padding: 90px 80px 120px;
+    margin: 0;
+    box-sizing: border-box;
 }
 .zine-welcome * { box-sizing: border-box; }
 /* 装饰色块 */
@@ -401,13 +430,13 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
 .zine-tag:nth-child(3) { transform: rotate(-0.5deg); }
 .zine-tag:nth-child(4) { transform: rotate(1.5deg); }
 .zine-tag:nth-child(5) { transform: rotate(-1deg); }
-.zine-cta {
+.zine-cta-hint {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 22px;
+    padding: 10px 18px;
     background: #111;
-    color: #fff;
+    color: #fff !important;
     font-size: 14px;
     font-weight: 600;
     font-family: 'Noto Sans SC', sans-serif;
@@ -416,7 +445,51 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
     box-shadow: 4px 4px 0 #ffe93b;
     animation: zine-fade-in 0.7s ease-out 0.8s both;
 }
-.zine-cta .arr { font-size: 18px; }
+.zine-cta-hint .arr { font-size: 18px; }
+
+/* 内嵌上传器：zine 风样式 + 上提叠入欢迎页 */
+body:has(.zine-welcome) [data-testid="stFileUploader"] {
+    position: relative;
+    z-index: 5;
+    margin-top: -180px !important;
+    margin-bottom: 40px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: zine-fade-in 0.8s ease-out 1s both;
+}
+body:has(.zine-welcome) [data-testid="stFileUploader"] section {
+    background: #fff !important;
+    border: 2.5px dashed #1a4fa8 !important;
+    border-radius: 0 !important;
+    padding: 28px 24px !important;
+    box-shadow: 6px 6px 0 #ffe93b !important;
+    transition: all 0.2s ease;
+}
+body:has(.zine-welcome) [data-testid="stFileUploader"] section:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 #ffe93b !important;
+    background: #fffef0 !important;
+}
+body:has(.zine-welcome) [data-testid="stFileUploader"] section * {
+    color: #1a4fa8 !important;
+    font-family: 'Noto Sans SC', sans-serif !important;
+}
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button {
+    background: #1a4fa8 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 8px 18px !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+}
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button:hover {
+    background: #111 !important;
+}
+body:has(.zine-welcome) [data-testid="stFileUploader"] section button * {
+    color: #fff !important;
+}
 @media (max-width: 768px) {
     .zine-welcome { padding: 48px 24px 72px; min-height: 480px; }
     .zine-title { font-size: 38px; }
@@ -442,13 +515,18 @@ div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-p
 
 st.markdown('<div class="handwrite-title">Sweet Sweet Homeland</div>', unsafe_allow_html=True)
 
-# 3. 侧边栏：上传文件（支持多种格式）
+# 3. 上传文件：有书在读时放侧边栏，空态时放在欢迎页中央
 SUPPORTED_FORMATS = ['epub', 'txt', 'pdf', 'mobi', 'azw3']
-uploaded_file = st.sidebar.file_uploader(
-    "请上传一本电子书吧(๑•̀ㅂ•́)و✧",
-    type=SUPPORTED_FORMATS,
-    help="支持格式：EPUB、TXT、PDF、MOBI、AZW3"
-)
+_has_prev_file = "file_bytes" in st.session_state and st.session_state.file_bytes
+if _has_prev_file:
+    uploaded_file = st.sidebar.file_uploader(
+        "请上传一本电子书吧(๑•̀ㅂ•́)و✧",
+        type=SUPPORTED_FORMATS,
+        help="支持格式：EPUB、TXT、PDF、MOBI、AZW3",
+        key="upload_sidebar",
+    )
+else:
+    uploaded_file = None  # 稍后在欢迎页中渲染
 
 # 4. 各格式解析函数
 
@@ -1342,7 +1420,7 @@ if has_file:
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
 else:
-    # 日式编辑 zine 风欢迎页
+    # 日式编辑 zine 风欢迎页（全屏覆盖 + 内嵌上传器）
     st.markdown("""
     <div class="zine-welcome">
         <div class="zine-block zine-yellow b1"></div>
@@ -1371,7 +1449,17 @@ else:
                 <span class="zine-tag">MOBI</span>
                 <span class="zine-tag">AZW3</span>
             </div>
-            <div class="zine-cta"><span class="arr">←</span> 点击左侧上传电子书开始</div>
+            <div class="zine-cta-hint"><span class="arr">↓</span> 选一本书开始</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
+    # 上传器放在欢迎页下方中央，通过 CSS 负边距上提与 zine 内容叠合
+    _ul_col1, _ul_col2, _ul_col3 = st.columns([1, 2, 1])
+    with _ul_col2:
+        uploaded_file = st.file_uploader(
+            "上传电子书",
+            type=SUPPORTED_FORMATS,
+            help="支持 EPUB、TXT、PDF、MOBI、AZW3",
+            key="upload_welcome",
+            label_visibility="collapsed",
+        )
