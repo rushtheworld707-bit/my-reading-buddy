@@ -283,6 +283,8 @@ body:has(.zine-welcome) .main .block-container,
 body:has(.zine-welcome) [class*="block-container"] {
     padding: 0 !important;
     max-width: 100% !important;
+    background-color: #f3e9cf !important;
+    min-height: 100vh;
 }
 body:has(.zine-welcome) .handwrite-title {
     display: none !important;
@@ -349,7 +351,6 @@ body:has(.zine-welcome) .handwrite-title {
 
 .zine-welcome {
     position: relative;
-    min-height: 100vh;
     width: 100%;
     background-color: var(--zw-paper);
     background-image:
@@ -358,6 +359,18 @@ body:has(.zine-welcome) .handwrite-title {
     overflow: hidden;
     box-sizing: border-box;
     font-family: 'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+/* 拆分为上下两段（上传器夹在中间），需要调整 padding 让视觉连续 */
+.zine-welcome.zw-top {
+    padding: 36px 80px 24px;
+}
+.zine-welcome.zw-bottom {
+    padding: 24px 80px 60px;
+}
+/* 上传器外层块的横向 padding 与 zine 对齐 */
+body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) {
+    padding: 10px 80px 10px !important;
+    background-color: var(--zw-paper);
 }
 
 /* 顶部刊头 */
@@ -1663,12 +1676,12 @@ if has_file:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
 else:
     # 日式编辑 zine 风欢迎页（全屏覆盖 + 内嵌上传器）
+    # 拆成两段：上段（刊头 + Hero）→ 上传器 → 下段（流程 + 特性 + 底栏），
+    # 这样上传器在首屏可见，无需下滑。
     st.markdown("""
-    <div class="zine-welcome">
+    <div class="zine-welcome zw-top">
         <div class="zw-corner tl">[+]</div>
         <div class="zw-corner tr">[+]</div>
-        <div class="zw-corner bl">[+]</div>
-        <div class="zw-corner br">[+]</div>
         <div class="zw-topbar">
             <span>VOL.01 <span class="dot">■</span> EST.2026</span>
             <b>SWEET SWEET HOMELAND</b>
@@ -1770,6 +1783,30 @@ else:
                 <div class="zw-art-caption">READING CLUB · 001</div>
             </div>
         </div>
+    </div>
+    """, unsafe_allow_html=True)
+    # 上传区：标签 + 上传器（中央居中），夹在上下两段欢迎页之间
+    _ul_col1, _ul_col2, _ul_col3 = st.columns([1, 2, 1])
+    with _ul_col2:
+        st.markdown(
+            '<div class="zw-upload-label">&gt; PRESS UPLOAD TO BEGIN<span class="caret">_</span></div>',
+            unsafe_allow_html=True,
+        )
+        _welcome_upload = st.file_uploader(
+            "上传电子书",
+            type=SUPPORTED_FORMATS,
+            help="支持 EPUB、TXT、PDF、MOBI、AZW3",
+            key="upload_welcome",
+            label_visibility="collapsed",
+        )
+    if _welcome_upload:
+        st.session_state.file_bytes = _welcome_upload.getvalue()
+        st.session_state.file_name = _welcome_upload.name
+        st.rerun()
+    st.markdown("""
+    <div class="zine-welcome zw-bottom">
+        <div class="zw-corner bl">[+]</div>
+        <div class="zw-corner br">[+]</div>
         <!-- HOW IT WORKS 3 步 -->
         <div class="zw-howto">
             <div class="zw-howto-title">
@@ -1816,21 +1853,3 @@ else:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    # 上传区：标签 + 上传器（中央居中）
-    _ul_col1, _ul_col2, _ul_col3 = st.columns([1, 2, 1])
-    with _ul_col2:
-        st.markdown(
-            '<div class="zw-upload-label">&gt; PRESS UPLOAD TO BEGIN<span class="caret">_</span></div>',
-            unsafe_allow_html=True,
-        )
-        _welcome_upload = st.file_uploader(
-            "上传电子书",
-            type=SUPPORTED_FORMATS,
-            help="支持 EPUB、TXT、PDF、MOBI、AZW3",
-            key="upload_welcome",
-            label_visibility="collapsed",
-        )
-    if _welcome_upload:
-        st.session_state.file_bytes = _welcome_upload.getvalue()
-        st.session_state.file_name = _welcome_upload.name
-        st.rerun()
