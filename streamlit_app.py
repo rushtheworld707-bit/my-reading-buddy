@@ -218,12 +218,134 @@ st.markdown("""
 }
 
 /* ===== 阅读区域：像素风（与欢迎页同一套调色） ===== */
-/* 整体背景奶油色 */
+/* 隐藏顶部 Streamlit chrome，铺满全屏（与欢迎页逻辑一致） */
+body:has(.reading-area) header[data-testid="stHeader"] {
+    display: none !important;
+}
+body:has(.reading-area) [data-testid="stToolbar"] {
+    display: none !important;
+}
+/* 整体背景奶油色 + 铺满宽度 */
 body:has(.reading-area) [data-testid="stMainBlockContainer"],
 body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
 body:has(.reading-area) .main .block-container,
 body:has(.reading-area) [class*="block-container"] {
     background-color: #f3e9cf !important;
+    max-width: 100% !important;
+    padding: 28px 44px 60px !important;
+    min-height: 100vh;
+}
+
+/* ===== 侧栏：像素风 ===== */
+body:has(.reading-area) section[data-testid="stSidebar"] {
+    background: #e8dcbc !important;
+    border-right: 2px dashed #3b2e1e !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] * {
+    color: #3b2e1e !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] label,
+body:has(.reading-area) section[data-testid="stSidebar"] p,
+body:has(.reading-area) section[data-testid="stSidebar"] h1,
+body:has(.reading-area) section[data-testid="stSidebar"] h2,
+body:has(.reading-area) section[data-testid="stSidebar"] h3,
+body:has(.reading-area) section[data-testid="stSidebar"] strong {
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+}
+/* 侧栏 selectbox / number input / 输入框底色方角 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div,
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] input,
+body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="select"] > div,
+body:has(.reading-area) section[data-testid="stSidebar"] input {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 #d4b54c !important;
+    color: #3b2e1e !important;
+}
+/* number input 加减按钮 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
+    background: #3b2e1e !important;
+    color: #f3e9cf !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+/* 侧栏所有按钮：方角深棕像素 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button {
+    background: #3b2e1e !important;
+    color: #f3e9cf !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+    transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button:hover {
+    background: #c25a44 !important;
+    color: #fffef8 !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 5px 5px 0 #d4b54c !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button p {
+    color: #f3e9cf !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button:hover p {
+    color: #fffef8 !important;
+}
+/* 侧栏 slider 轨道 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="slider"] > div > div {
+    background: #3b2e1e !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="slider"] [role="slider"] {
+    background: #c25a44 !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 #d4b54c !important;
+}
+/* 侧栏文件上传器（章节切换后重新上传用） */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stFileUploader"] section {
+    background: #fffaec !important;
+    border: 2px dashed #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+}
+
+/* ===== 底部 AI 聊天输入框：像素风 ===== */
+body:has(.reading-area) [data-testid="stChatInput"] {
+    background: #e8dcbc !important;
+    border-top: 2px dashed #3b2e1e !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] > div,
+body:has(.reading-area) [data-testid="stChatInput"] textarea {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    color: #3b2e1e !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] button {
+    background: #3b2e1e !important;
+    border-radius: 0 !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] button svg {
+    fill: #f3e9cf !important;
+}
+/* AI 聊天气泡 */
+body:has(.reading-area) [data-testid="stChatMessage"] {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+    color: #3b2e1e !important;
+    margin-bottom: 12px !important;
+}
+body:has(.reading-area) [data-testid="stChatMessage"] * {
+    color: #3b2e1e !important;
 }
 /* 章节标题 */
 body:has(.reading-area) .main strong,
@@ -1566,34 +1688,34 @@ if has_file:
                 align-items: center;
                 gap: 6px;
                 padding: 4px 12px;
-                border-radius: 999px;
-                background: rgba(255, 107, 107, 0.10);
-                border: 1px solid rgba(255, 107, 107, 0.28);
-                color: #ff9a9a;
-                font-size: 12px;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-                letter-spacing: 0.3px;
+                border-radius: 0;
+                background: #fffaec;
+                border: 2px solid #3b2e1e;
+                color: #3b2e1e;
+                font-size: 11px;
+                font-family: 'Press Start 2P', 'Zpix', monospace;
+                letter-spacing: 1px;
                 user-select: none;
-                box-shadow: 0 1px 6px rgba(255, 107, 107, 0.10);
+                box-shadow: 3px 3px 0 #d4b54c;
               }
               .rb-kbd-hint kbd {
                 display: inline-block;
                 min-width: 18px;
                 padding: 1px 6px;
-                border: 1px solid rgba(255, 154, 154, 0.45);
-                border-radius: 5px;
-                background: rgba(255, 154, 154, 0.12);
-                color: #ffc7c7;
+                border: 1.5px solid #3b2e1e;
+                border-radius: 0;
+                background: #e8dcbc;
+                color: #3b2e1e;
                 font-size: 11px;
-                font-family: inherit;
+                font-family: 'Press Start 2P', monospace;
                 line-height: 1.4;
                 text-align: center;
-                box-shadow: 0 1px 0 rgba(0,0,0,0.25), inset 0 -1px 0 rgba(255,154,154,0.25);
+                box-shadow: 1px 1px 0 #3b2e1e;
               }
               .rb-kbd-hint.rb-err {
-                background: rgba(244, 67, 54, 0.12);
-                border-color: rgba(244, 67, 54, 0.35);
-                color: #ff8a80;
+                background: #fffaec;
+                border-color: #c25a44;
+                color: #c25a44;
               }
             </style>
             <div class="rb-kbd-wrap">
