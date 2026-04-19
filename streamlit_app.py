@@ -217,6 +217,115 @@ st.markdown("""
     .page-indicator { font-size: 12px; }
 }
 
+/* ===== 阅读区域：像素风（与欢迎页同一套调色） ===== */
+/* 整体背景奶油色 */
+body:has(.reading-area) [data-testid="stMainBlockContainer"],
+body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
+body:has(.reading-area) .main .block-container,
+body:has(.reading-area) [class*="block-container"] {
+    background-color: #f3e9cf !important;
+}
+/* 章节标题 */
+body:has(.reading-area) .main strong,
+body:has(.reading-area) .main h1,
+body:has(.reading-area) .main h2,
+body:has(.reading-area) .main h3 {
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 2px;
+}
+/* 顶部时间 */
+body:has(.reading-area) .time-display {
+    color: #6b5843 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 2px;
+}
+/* 进度条：方形像素 */
+body:has(.reading-area) .progress-container {
+    background: #e8dcbc !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    height: 10px !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+    padding: 0 !important;
+}
+body:has(.reading-area) .progress-fill {
+    background: #c25a44 !important;
+    border-radius: 0 !important;
+}
+/* 书页容器：虚线外框 + 芥末黄偏移阴影 */
+.reading-area .book-spread {
+    background: #fffaec !important;
+    border: 2px dashed #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 6px 6px 0 #d4b54c !important;
+    color: #3b2e1e !important;
+    position: relative;
+}
+.reading-area .book-page-left {
+    border-right: 1px dashed #3b2e1e !important;
+}
+.reading-area .book-page .page-num {
+    color: #3b2e1e !important;
+    opacity: 0.65 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 10px !important;
+}
+/* 书页四角的 [+] 像素标记 */
+.reading-area .book-spread::before,
+.reading-area .book-spread::after {
+    position: absolute;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: #c25a44;
+    z-index: 2;
+    letter-spacing: 0;
+}
+.reading-area .book-spread::before { content: "[+]"; top: 8px; left: 10px; }
+.reading-area .book-spread::after  { content: "[+]"; bottom: 8px; right: 10px; }
+
+/* 页码信息 */
+.reading-area .page-indicator {
+    color: #3b2e1e !important;
+    font-family: 'Press Start 2P', 'Zpix', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 2px !important;
+    margin-top: 14px !important;
+}
+
+/* 翻页按钮：方角 + 深棕底 + 芥末黄偏移阴影 */
+.reading-area .nav-btn {
+    background: #3b2e1e !important;
+    color: #f3e9cf !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 #d4b54c !important;
+    font-family: 'Press Start 2P', 'Zpix', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 2px !important;
+    padding: 10px 18px !important;
+    text-shadow: none !important;
+    transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s !important;
+}
+.reading-area .nav-btn:hover {
+    background: #c25a44 !important;
+    color: #fffef8 !important;
+    border-color: #3b2e1e !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 6px 6px 0 #d4b54c !important;
+}
+.reading-area .nav-btn.nav-disabled {
+    opacity: 0.35 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+}
+/* 像素风不再使用粉色爪印装饰 */
+.reading-area .nav-prev::before,
+.reading-area .nav-next::after {
+    display: none !important;
+}
+
 /* ===== 阅读区域 + 导航按钮 =====
    book-spread、页码指示、翻页按钮在同一个 .reading-area 里，宽度严格一致 */
 .reading-area {
@@ -1354,16 +1463,9 @@ if has_file:
         </div>
         """, unsafe_allow_html=True)
 
-        # 阅读主题样式映射（背景 + 对比度好的字体颜色）
-        theme_styles = {
-            "深海蓝": "background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: #d4d4e0;",
-            "暖光黄": "background: linear-gradient(135deg, #2c2416 0%, #3a2e1c 50%, #453622 100%); color: #e8d5b5;",
-            "护眼绿": "background: linear-gradient(135deg, #1a261a 0%, #1e301e 50%, #223a22 100%); color: #c8dcc0;",
-            "纯黑":   "background: #0e0e0e; color: #b0b0b0;",
-        }
-        current_theme = st.session_state.get("reading_theme", "深海蓝")
+        # 像素风主题：奶油纸底 + 深棕墨色（由 CSS 覆写，inline 仅占位保留结构）
         fs = st.session_state.get("font_size", 18)
-        theme_css = theme_styles.get(current_theme, theme_styles["深海蓝"])
+        theme_css = "background: #fffaec; color: #3b2e1e;"
         # 字体族（基于 session_state，默认系统字体）
         # 用单引号包裹字体名，以便安全嵌入 style="..." 属性
         _font_stacks = {
@@ -1603,14 +1705,6 @@ if has_file:
         )
         if _ff != st.session_state.font_family_name:
             st.session_state.font_family_name = _ff
-            st.rerun()
-
-        # 阅读主题
-        if "reading_theme" not in st.session_state:
-            st.session_state.reading_theme = "深海蓝"
-        theme = st.sidebar.selectbox("阅读主题", ["深海蓝", "暖光黄", "护眼绿", "纯黑"], index=["深海蓝", "暖光黄", "护眼绿", "纯黑"].index(st.session_state.reading_theme))
-        if theme != st.session_state.reading_theme:
-            st.session_state.reading_theme = theme
             st.rerun()
 
         # 页码跳转
