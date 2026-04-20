@@ -222,6 +222,16 @@ st.markdown("""
 body:has(.reading-area) header[data-testid="stHeader"] {
     background: #f3e9cf !important;
 }
+/* C2：顶栏右上角 toolbar 按钮透明化（Share / GitHub / 三点菜单等）
+   不用 display:none（会触发 DOM 累加 bug），用 opacity + hover 恢复
+   保留 pointer-events，需要时 hover 仍能点到 */
+body:has(.reading-area) [data-testid="stToolbar"] {
+    opacity: 0.25 !important;
+    transition: opacity 0.25s ease !important;
+}
+body:has(.reading-area) [data-testid="stToolbar"]:hover {
+    opacity: 1 !important;
+}
 /* 整体背景奶油色（不动 max-width / padding / min-height，避免影响 chat_input 等元素的定位） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"],
 body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
