@@ -284,6 +284,16 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="select"]
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
 }
 
+/* A5：侧栏 slider 拇指方角像素化
+   只改 role="slider" 的拇指本体；轨道与刻度保持 Streamlit 默认（不碰尺寸、
+   位置、transform，避免影响拖拽手势的命中区域） */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="slider"] [role="slider"] {
+    background: #c25a44 !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 #3b2e1e !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
