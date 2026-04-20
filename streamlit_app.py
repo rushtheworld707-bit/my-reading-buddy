@@ -342,6 +342,19 @@ body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownCo
     color: #3b2e1e !important;
 }
 
+/* B3：chat_input 只改 textarea 的文字颜色 + 字体（含 placeholder）
+   绝对不碰 stChatInput / stBottom 的 bg / border / box-shadow / position / margin
+   —— 之前改这些会导致 chat 跑位 + DOM 累加 */
+body:has(.reading-area) [data-testid="stChatInput"] textarea {
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] textarea::placeholder {
+    color: #6b5843 !important;
+    opacity: 0.7 !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
