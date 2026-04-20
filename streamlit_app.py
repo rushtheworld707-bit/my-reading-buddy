@@ -218,22 +218,16 @@ st.markdown("""
 }
 
 /* ===== 阅读区域：像素风（与欢迎页同一套调色） ===== */
-/* 隐藏顶部 Streamlit chrome，铺满全屏（与欢迎页逻辑一致） */
+/* 顶部 header 保持存在（防止 Streamlit 内部渲染失衡），只换成奶油色与页面融合 */
 body:has(.reading-area) header[data-testid="stHeader"] {
-    display: none !important;
+    background: #f3e9cf !important;
 }
-body:has(.reading-area) [data-testid="stToolbar"] {
-    display: none !important;
-}
-/* 整体背景奶油色 + 铺满宽度 */
+/* 整体背景奶油色（不动 max-width / padding / min-height，避免影响 chat_input 等元素的定位） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"],
 body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
 body:has(.reading-area) .main .block-container,
 body:has(.reading-area) [class*="block-container"] {
     background-color: #f3e9cf !important;
-    max-width: 100% !important;
-    padding: 28px 44px 60px !important;
-    min-height: 100vh;
 }
 
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
