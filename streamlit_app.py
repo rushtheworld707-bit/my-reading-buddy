@@ -422,6 +422,38 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 2px;
 }
+
+/* D1：阅读页顶部杂志刊头带（与欢迎页 zw-topbar 视觉呼应） */
+.rd-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    margin-bottom: 14px;
+    background: #e8dcbc;
+    border-top: 2px solid #3b2e1e;
+    border-bottom: 2px dashed #3b2e1e;
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #3b2e1e;
+    text-transform: uppercase;
+}
+.rd-topbar .rd-mid {
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #3b2e1e;
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-transform: none;
+}
+.rd-topbar .dot {
+    color: #c25a44;
+    margin: 0 6px;
+}
 /* 顶部时间 */
 body:has(.reading-area) .time-display {
     color: #6b5843 !important;
@@ -1633,6 +1665,17 @@ if has_file:
                         st.rerun()
 
         # --- 阅读界面 ---
+
+        # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX / XX 总章节）
+        _ch_title_safe = html.escape(chapter_titles[chapter_idx])
+        _topbar_html = (
+            '<div class="rd-topbar">'
+            f'<span>VOL.01 <span class="dot">■</span> EST.2026</span>'
+            f'<span class="rd-mid">{_ch_title_safe}</span>'
+            f'<span>CH.{chapter_idx + 1:02d}/{len(chapters):02d} <span class="dot">■</span> PIXEL EDITION</span>'
+            '</div>'
+        )
+        st.markdown(_topbar_html, unsafe_allow_html=True)
 
         # 顶部：时间 + 章节信息
         top_col1, top_col2 = st.columns([1, 1])
