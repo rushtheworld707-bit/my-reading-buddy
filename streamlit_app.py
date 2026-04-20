@@ -230,6 +230,12 @@ body:has(.reading-area) [class*="block-container"] {
     background-color: #f3e9cf !important;
 }
 
+/* A1：侧栏背景奶油 + 右侧虚线分隔（仅改最外层 section，不动任何子元素） */
+body:has(.reading-area) section[data-testid="stSidebar"] {
+    background: #e8dcbc !important;
+    border-right: 2px dashed #3b2e1e !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
