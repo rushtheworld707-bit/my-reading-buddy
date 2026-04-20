@@ -107,8 +107,12 @@ st.markdown("""
         border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
-    h1 { font-size: 24px !important; }
-    h2, .stSubheader { font-size: 18px !important; }
+    /* 不再通用压缩 h1 / h2：.zw-title 是 h1 超大像素字，不能被一刀切到 24px。
+       只对没有专属类名的 h1/h2 收敛（放 Streamlit 默认 st.title/st.subheader 的兜底）*/
+    h1:not(.zw-title):not(.handwrite-title) { font-size: 24px !important; }
+    h2:not([class]), .stSubheader { font-size: 18px !important; }
+    /* 手机上 .zw-title 专属大小，保持首屏冲击（但比桌面小一号） */
+    .zw-title { font-size: 54px !important; letter-spacing: 6px !important; }
 }
 
 @media (max-width: 480px) {
@@ -1063,8 +1067,19 @@ st.markdown(
 SUPPORTED_FORMATS = ['epub', 'txt', 'pdf', 'mobi', 'azw3']
 _has_prev_file = "file_bytes" in st.session_state and st.session_state.file_bytes
 if _has_prev_file:
+    # 回到欢迎页：清书 + 清会话相关 state，触发 rerun 显示 zine-welcome
+    if st.sidebar.button("← 回到欢迎页", key="back_to_welcome", use_container_width=True):
+        for _k in (
+            "file_bytes", "file_name", "loaded_book",
+            "messages", "chapter_select", "last_chapter",
+        ):
+            st.session_state.pop(_k, None)
+        # 清所有 page_N 记忆，避免新书串台
+        for _k in [k for k in st.session_state.keys() if str(k).startswith("page_")]:
+            st.session_state.pop(_k, None)
+        st.rerun()
     uploaded_file = st.sidebar.file_uploader(
-        "请上传一本电子书吧(๑•̀ㅂ•́)و✧",
+        "请上传一本电子书吧～",
         type=SUPPORTED_FORMATS,
         help="支持格式：EPUB、TXT、PDF、MOBI、AZW3",
         key="upload_sidebar",
@@ -1950,7 +1965,7 @@ if has_file:
                 st.write(m["content"])
 
         # 等待用户输入感悟
-        if prompt := st.chat_input("请尽情与我交谈ฅ՞•ﻌ•՞ฅ"):
+        if prompt := st.chat_input("跟我聊聊吧 [^_^]"):
 
             # 1. 存入并立刻在屏幕上显示用户发的消息
             st.session_state.messages.append({"role": "user", "content": prompt})
@@ -1960,23 +1975,24 @@ if has_file:
             # 2. 召唤豆包大脑开始思考并回复
             with st.chat_message("assistant"):
                 try:
-                    client = OpenAI(
-                        api_key=st.secrets["ARK_API_KEY"],
-                        base_url="https://ark.cn-beijing.volces.com/api/v3",
-                    )
+                    with st.spinner("嘟哒在思考…"):
+                        client = OpenAI(
+                            api_key=st.secrets["ARK_API_KEY"],
+                            base_url="https://ark.cn-beijing.volces.com/api/v3",
+                        )
 
-                    # 用当前页内容作为语境
-                    context_msg = f"你是一个博学的共读伙伴，擅长从哲学、生物学或行为因果的角度深度分析文本。正在阅读的内容：\n{pages[left_idx][:1200]}\n\n读者感悟：{prompt}"
+                        # 用当前页内容作为语境
+                        context_msg = f"你是一个博学的共读伙伴，擅长从哲学、生物学或行为因果的角度深度分析文本。正在阅读的内容：\n{pages[left_idx][:1200]}\n\n读者感悟：{prompt}"
 
-                    completion = client.chat.completions.create(
-                        model=st.secrets["ARK_MODEL_ID"],
-                        messages=[
-                            {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"},
-                            {"role": "user", "content": context_msg}
-                        ],
-                    )
+                        completion = client.chat.completions.create(
+                            model=st.secrets["ARK_MODEL_ID"],
+                            messages=[
+                                {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"},
+                                {"role": "user", "content": context_msg}
+                            ],
+                        )
 
-                    response_text = completion.choices[0].message.content
+                        response_text = completion.choices[0].message.content
                     st.write(response_text)
                     st.session_state.messages.append({"role": "assistant", "content": response_text})
 
