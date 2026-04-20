@@ -329,6 +329,19 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] hr {
     opacity: 1 !important;
 }
 
+/* B2：AI 聊天气泡只改 bg + text color，不动 border-radius/position/margin
+   —— 之前的 bug 正是因为改了 margin 和通配 * color 导致 chat_input 跑位 */
+body:has(.reading-area) [data-testid="stChatMessage"] {
+    background: #fffaec !important;
+}
+body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
+body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] strong,
+body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] em,
+body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li,
+body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] code {
+    color: #3b2e1e !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
