@@ -1855,8 +1855,14 @@ if has_file:
                 }
                 try {
                     const p = window.parent;
-                    if (p._rb_kbd_v2) { setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50'); return; }
-                    p._rb_kbd_v2 = true;
+                    // 移除之前 iframe 留下的 handler（iframe 被重新挂载时旧闭包会失效）
+                    if (p._rb_kbd_handler) {
+                        try { p.document.removeEventListener('keydown', p._rb_kbd_handler, true); } catch (_) {}
+                        try { p.removeEventListener('keydown', p._rb_kbd_handler, true); } catch (_) {}
+                    }
+                    if (p._rb_click_handler) {
+                        try { p.document.removeEventListener('click', p._rb_click_handler, true); } catch (_) {}
+                    }
                     function isTextEditing(el) {
                         if (!el) return false;
                         if (el.isContentEditable) return true;
@@ -1892,17 +1898,21 @@ if has_file:
                         try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
                         clickHiddenBtn(action);
                     }
+                    // 绑定并把 handler 引用存到 parent，下次 iframe 挂载时可以清掉
+                    p._rb_kbd_handler = handler;
                     p.document.addEventListener('keydown', handler, true);
                     p.addEventListener('keydown', handler, true);
                     // 点击委托：HTML 导航按钮 → 隐藏 st.button
-                    p.document.addEventListener('click', function(e) {
+                    const clickHandler = function(e) {
                         const btn = e.target.closest && e.target.closest('.nav-btn');
                         if (!btn) return;
                         e.preventDefault();
                         if (btn.classList.contains('nav-disabled')) return;
                         const action = btn.classList.contains('nav-prev') ? 'prev' : 'next';
                         clickHiddenBtn(action);
-                    }, true);
+                    };
+                    p._rb_click_handler = clickHandler;
+                    p.document.addEventListener('click', clickHandler, true);
                     setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
                 } catch (err) {
                     setMsg('⌨ 键盘翻页不可用: ' + (err && err.message || err), '#f44336');
