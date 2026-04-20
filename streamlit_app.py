@@ -1731,8 +1731,14 @@ if has_file:
         # 键盘 ← / → 翻页（点击 HTML 导航链接来触发翻页）
         components.html(
             """
+            <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
             <style>
-              body { margin: 0; background: transparent; }
+              @font-face {
+                font-family: 'Zpix';
+                src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font/dist/zpix.ttf') format('truetype');
+                font-display: swap;
+              }
+              body { margin: 0; background: #f3e9cf; }
               .rb-kbd-wrap {
                 display: flex;
                 justify-content: center;
@@ -1744,34 +1750,34 @@ if has_file:
                 align-items: center;
                 gap: 6px;
                 padding: 4px 12px;
-                border-radius: 999px;
-                background: rgba(255, 107, 107, 0.10);
-                border: 1px solid rgba(255, 107, 107, 0.28);
-                color: #ff9a9a;
-                font-size: 12px;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-                letter-spacing: 0.3px;
+                border-radius: 0;
+                background: #fffaec;
+                border: 2px solid #3b2e1e;
+                color: #3b2e1e;
+                font-size: 11px;
+                font-family: 'Press Start 2P', 'Zpix', monospace;
+                letter-spacing: 1px;
                 user-select: none;
-                box-shadow: 0 1px 6px rgba(255, 107, 107, 0.10);
+                box-shadow: 3px 3px 0 #d4b54c;
               }
               .rb-kbd-hint kbd {
                 display: inline-block;
                 min-width: 18px;
                 padding: 1px 6px;
-                border: 1px solid rgba(255, 154, 154, 0.45);
-                border-radius: 5px;
-                background: rgba(255, 154, 154, 0.12);
-                color: #ffc7c7;
+                border: 1.5px solid #3b2e1e;
+                border-radius: 0;
+                background: #e8dcbc;
+                color: #3b2e1e;
                 font-size: 11px;
-                font-family: inherit;
+                font-family: 'Press Start 2P', monospace;
                 line-height: 1.4;
                 text-align: center;
-                box-shadow: 0 1px 0 rgba(0,0,0,0.25), inset 0 -1px 0 rgba(255,154,154,0.25);
+                box-shadow: 1px 1px 0 #3b2e1e;
               }
               .rb-kbd-hint.rb-err {
-                background: rgba(244, 67, 54, 0.12);
-                border-color: rgba(244, 67, 54, 0.35);
-                color: #ff8a80;
+                background: #fffaec;
+                border-color: #c25a44;
+                color: #c25a44;
               }
             </style>
             <div class="rb-kbd-wrap">
