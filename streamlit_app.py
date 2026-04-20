@@ -89,116 +89,7 @@ st.markdown("""
 .book-page-left .page-num { left: 36px; }
 .book-page-right .page-num { right: 36px; }
 
-/* 进度条容器 */
-.progress-container {
-    background: #2a2a3e;
-    border-radius: 10px;
-    height: 6px;
-    margin: 8px 0 16px 0;
-    overflow: hidden;
-}
-.progress-fill {
-    background: linear-gradient(90deg, #e94560, #ff6b6b);
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
-
-/* 页码和进度信息 */
-.page-indicator {
-    text-align: center;
-    color: #ff9eb3;
-    font-size: 13px;
-    font-weight: 500;
-    margin: 8px 0;
-}
-
-/* 时间显示 */
-.time-display {
-    text-align: right;
-    color: #666;
-    font-size: 13px;
-    padding: 4px 8px;
-}
-
-
-/* 欢迎页面 */
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-}
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes glow {
-    0%, 100% { text-shadow: 0 0 10px rgba(233,69,96,0.3); }
-    50% { text-shadow: 0 0 25px rgba(233,69,96,0.6), 0 0 50px rgba(233,69,96,0.2); }
-}
-@keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
-
-.welcome-box {
-    text-align: center;
-    padding: 60px 40px 80px;
-    color: #ccc;
-}
-.welcome-cat {
-    font-size: 72px;
-    display: inline-block;
-    animation: float 3s ease-in-out infinite;
-    margin-bottom: 16px;
-}
-.welcome-title {
-    font-size: 28px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #e94560, #ff6b6b, #ffa07a, #e94560);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: shimmer 4s linear infinite, fadeInUp 1s ease-out;
-    margin-bottom: 20px;
-}
-.welcome-desc {
-    font-size: 16px;
-    color: #888;
-    animation: fadeInUp 1s ease-out 0.3s both;
-    line-height: 1.8;
-}
-.welcome-formats {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 28px;
-    flex-wrap: wrap;
-    animation: fadeInUp 1s ease-out 0.6s both;
-}
-.format-tag {
-    background: rgba(233, 69, 96, 0.12);
-    border: 1px solid rgba(233, 69, 96, 0.3);
-    color: #ff6b6b;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.3s;
-}
-.format-tag:hover {
-    background: rgba(233, 69, 96, 0.25);
-    transform: scale(1.05);
-}
-.welcome-hint {
-    margin-top: 32px;
-    font-size: 14px;
-    color: #555;
-    animation: fadeInUp 1s ease-out 0.9s both;
-}
-.welcome-hint span {
-    animation: glow 2s ease-in-out infinite;
-}
+/* progress / page-indicator / time-display 的基础态定义从未渲染（一进 reading-area 就被覆盖），已移除；欢迎页旧 .welcome-* 一并移除（含 BAN 2 渐变文字） */
 
 /* ===== 移动端适配 ===== */
 @media (max-width: 768px) {
@@ -216,15 +107,6 @@ st.markdown("""
         border-bottom: 1px solid rgba(255,255,255,0.08);
     }
 
-    /* 欢迎页面 */
-    .welcome-box { padding: 40px 16px; }
-    .welcome-cat { font-size: 56px; }
-    .welcome-title { font-size: 22px; }
-    .welcome-desc { font-size: 14px; }
-    .welcome-formats { gap: 8px; }
-    .format-tag { padding: 4px 12px; font-size: 12px; }
-    .time-display { font-size: 12px; }
-
     h1 { font-size: 24px !important; }
     h2, .stSubheader { font-size: 18px !important; }
 }
@@ -235,7 +117,6 @@ st.markdown("""
         min-height: 220px;
         font-size: 15px;
     }
-    .page-indicator { font-size: 12px; }
 }
 
 /* ===== 阅读区域：像素风（与欢迎页同一套调色） ===== */
@@ -491,12 +372,18 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
     color: #c25a44;
     margin: 0 6px;
 }
-/* 顶部时间 */
-body:has(.reading-area) .time-display {
-    color: #6b5843 !important;
-    font-family: 'Press Start 2P', monospace !important;
-    font-size: 11px !important;
-    letter-spacing: 2px;
+.rd-topbar .rd-clock {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+.rd-topbar .rd-clock .px-ic {
+    width: 10px;
+    height: 10px;
+    margin-bottom: 0;
 }
 /* 进度条：方形像素 */
 body:has(.reading-area) .progress-container {
@@ -542,17 +429,32 @@ body:has(.reading-area) .progress-fill {
 .reading-area .book-spread::before { content: "[+]"; top: 8px; left: 10px; }
 .reading-area .book-spread::after  { content: "[+]"; bottom: 8px; right: 10px; }
 
-/* 页码信息 */
+/* 页码信息：主行像素刊头字体，副行 Zpix 柔化 */
 .reading-area .page-indicator {
     color: #3b2e1e !important;
-    font-family: 'Press Start 2P', 'Zpix', monospace !important;
-    font-size: 10px !important;
-    letter-spacing: 2px !important;
     margin-top: 14px !important;
+    text-align: center;
+}
+.reading-area .page-indicator .pg-main {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+.reading-area .page-indicator .pg-sub {
+    font-family: 'Zpix', 'Noto Sans SC', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: 0.65;
+    margin-top: 4px;
 }
 
 /* 翻页按钮：方角 + 深棕底 + 芥末黄偏移阴影 */
 .reading-area .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none !important;
     background: #3b2e1e !important;
     color: #f3e9cf !important;
     border: 2px solid #3b2e1e !important;
@@ -577,11 +479,6 @@ body:has(.reading-area) .progress-fill {
     box-shadow: none !important;
     pointer-events: none !important;
 }
-/* 像素风不再使用粉色爪印装饰 */
-.reading-area .nav-prev::before,
-.reading-area .nav-next::after {
-    display: none !important;
-}
 
 /* ===== 阅读区域 + 导航按钮 =====
    book-spread、页码指示、翻页按钮在同一个 .reading-area 里，宽度严格一致 */
@@ -595,38 +492,6 @@ body:has(.reading-area) .progress-fill {
     width: 100%;
     margin-top: 4px;
 }
-.nav-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 20px;
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.20), rgba(255, 154, 154, 0.12));
-    border: 1.5px solid rgba(255, 154, 154, 0.50);
-    border-radius: 18px;
-    color: #ffd6d6;
-    font-weight: 600;
-    font-size: 14px;
-    font-family: inherit;
-    text-decoration: none !important;
-    transition: all 0.25s ease;
-    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.18);
-    cursor: pointer;
-    user-select: none;
-}
-.nav-btn:hover {
-    background: linear-gradient(135deg, rgba(255, 107, 107, 0.32), rgba(255, 154, 154, 0.20));
-    border-color: rgba(255, 154, 154, 0.75);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.30);
-    color: #fff !important;
-}
-.nav-btn.nav-disabled {
-    opacity: 0.35;
-    pointer-events: none;
-    transform: none;
-    box-shadow: none;
-}
-
 /* 隐藏的 Streamlit 按钮（仅用于通过 JS 点击触发 rerun） */
 .st-key-prev_page, .st-key-next_page {
     display: none !important;
@@ -1119,19 +984,6 @@ body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button p {
     .zw-art svg { max-width: 240px; }
 }
 
-/* 粉色爪印 SVG：左按钮在前，右按钮在后 */
-.nav-prev::before,
-.nav-next::after {
-    content: '';
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><ellipse cx="12" cy="15.5" rx="4" ry="3.2" fill="%23ff9eb3"/><ellipse cx="5.5" cy="10.5" rx="2" ry="2.4" fill="%23ff9eb3"/><ellipse cx="18.5" cy="10.5" rx="2" ry="2.4" fill="%23ff9eb3"/><ellipse cx="9" cy="5.5" rx="1.6" ry="2" fill="%23ff9eb3"/><ellipse cx="15" cy="5.5" rx="1.6" ry="2" fill="%23ff9eb3"/></svg>');
-    background-repeat: no-repeat;
-    background-size: contain;
-    vertical-align: middle;
-}
-
 /* ===== 像素图标通用 ===== */
 .px-ic {
     display: inline-block;
@@ -1141,7 +993,6 @@ body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button p {
 }
 .zw-step-icon .px-ic { width: 28px; height: 28px; }
 .zw-feature .ic .px-ic { width: 14px; height: 14px; margin-bottom: 1px; }
-.time-display .px-ic { width: 12px; height: 12px; margin-right: 5px; margin-bottom: 1px; }
 .ai-chat-heading .px-ic { width: 18px; height: 18px; margin-right: 8px; margin-bottom: 2px; }
 body:has(.reading-area) section[data-testid="stSidebar"] .sbh .px-ic {
     width: 12px; height: 12px; margin-right: 6px; margin-bottom: 1px;
@@ -1778,28 +1629,23 @@ if has_file:
 
         # --- 阅读界面 ---
 
-        # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX / XX 总章节）
+        # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX · 时钟）
+        # 时钟并入 rd-topbar 右段，替掉原装饰 "PIXEL EDITION"；
+        # 原 top_col1/top_col2（章节名重复 + 时间）整行删除
+        from datetime import timezone, timedelta
+        now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
         _ch_title_safe = html.escape(chapter_titles[chapter_idx])
         _topbar_html = (
             '<div class="rd-topbar">'
-            f'<span>VOL.01 <span class="dot">■</span> EST.2026</span>'
+            '<span>VOL.01 <span class="dot">■</span> EST.2026</span>'
             f'<span class="rd-mid">{_ch_title_safe}</span>'
-            f'<span>CH.{chapter_idx + 1:02d}/{len(chapters):02d} <span class="dot">■</span> PIXEL EDITION</span>'
+            f'<span>CH.{chapter_idx + 1:02d}/{len(chapters):02d} '
+            '<span class="dot">■</span> '
+            f'<span class="rd-clock">{PX_ICON["clock"]}{now}</span>'
+            '</span>'
             '</div>'
         )
         st.markdown(_topbar_html, unsafe_allow_html=True)
-
-        # 顶部：时间 + 章节信息
-        top_col1, top_col2 = st.columns([1, 1])
-        with top_col1:
-            st.markdown(f"**{chapter_titles[chapter_idx]}**")
-        with top_col2:
-            from datetime import timezone, timedelta
-            now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
-            st.markdown(
-                f'<div class="time-display">{PX_ICON["clock"]}{now}</div>',
-                unsafe_allow_html=True,
-            )
 
         # 进度条
         progress = (current_page + 1) / total_pages if total_pages > 0 else 1
@@ -1852,11 +1698,17 @@ if has_file:
             _mins = max(1, round(_remaining_chars / 300))
             _time_left = f"本章约剩 {_mins} 分钟"
 
-        page_range = (
-            f"第 {left_num}{f'-{right_num}' if right_num else ''} / {total_pages} 页"
-            f" · 全书 {overall:.1f}%"
-            f" · {_time_left}"
+        # page-indicator 拆两行：主行像素刊头字体，副行柔化
+        _pg_range_label = (
+            f"PAGE {left_num}"
+            + (f"-{right_num}" if right_num else "")
+            + f" / {total_pages}"
         )
+        _pg_main = f'<div class="pg-main">{_pg_range_label}</div>'
+        _pg_sub = (
+            f'<div class="pg-sub">全书 {overall:.1f}% · {_time_left}</div>'
+        )
+        page_range = _pg_main + _pg_sub
 
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
