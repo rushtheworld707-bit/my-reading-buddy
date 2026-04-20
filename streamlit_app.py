@@ -18,19 +18,40 @@ from openai import OpenAI
 # 1. 页面基础配置
 st.set_page_config(page_title="嘟哒", layout="wide")
 
+# 像素 SVG 图标库（替换 emoji，与猫 SVG 同像素语法：单色块 + crispEdges）
+# 调色板：#3b2e1e ink / #c25a44 terra / #d4b54c mustard / #4a6d4e moss / #fffaec cream
+PX_ICON = {
+    "upload": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="9" fill="#3b2e1e"/><rect x="5" y="4" width="2" height="1" fill="#3b2e1e"/><rect x="9" y="4" width="2" height="1" fill="#3b2e1e"/><rect x="3" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="1" height="2" fill="#3b2e1e"/><rect x="13" y="13" width="1" height="2" fill="#3b2e1e"/></svg>',
+    "read": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="3" width="6" height="1" fill="#3b2e1e"/><rect x="9" y="3" width="6" height="1" fill="#3b2e1e"/><rect x="1" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="6" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="9" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="14" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="1" y="12" width="14" height="1" fill="#3b2e1e"/><rect x="2" y="5" width="3" height="1" fill="#c25a44"/><rect x="2" y="7" width="3" height="1" fill="#c25a44"/><rect x="2" y="9" width="3" height="1" fill="#c25a44"/><rect x="10" y="5" width="3" height="1" fill="#c25a44"/><rect x="10" y="7" width="3" height="1" fill="#c25a44"/><rect x="10" y="9" width="3" height="1" fill="#c25a44"/></svg>',
+    "chat": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="3" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="10" width="8" height="1" fill="#3b2e1e"/><rect x="1" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="14" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="4" y="11" width="2" height="1" fill="#3b2e1e"/><rect x="5" y="12" width="1" height="1" fill="#3b2e1e"/><rect x="4" y="6" width="2" height="2" fill="#c25a44"/><rect x="7" y="6" width="2" height="2" fill="#c25a44"/><rect x="10" y="6" width="2" height="2" fill="#c25a44"/></svg>',
+    "keyboard": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="4" width="14" height="1" fill="#3b2e1e"/><rect x="1" y="11" width="14" height="1" fill="#3b2e1e"/><rect x="1" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="14" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="3" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="6" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="9" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="12" y="6" width="1" height="1" fill="#3b2e1e"/><rect x="3" y="8" width="2" height="1" fill="#3b2e1e"/><rect x="6" y="8" width="2" height="1" fill="#3b2e1e"/><rect x="9" y="8" width="2" height="1" fill="#3b2e1e"/><rect x="12" y="8" width="1" height="1" fill="#3b2e1e"/><rect x="4" y="10" width="8" height="1" fill="#3b2e1e"/></svg>',
+    "pin": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="6" y="2" width="4" height="1" fill="#3b2e1e"/><rect x="5" y="3" width="1" height="4" fill="#3b2e1e"/><rect x="10" y="3" width="1" height="4" fill="#3b2e1e"/><rect x="6" y="3" width="4" height="4" fill="#c25a44"/><rect x="7" y="4" width="1" height="1" fill="#e07b5a"/><rect x="3" y="7" width="10" height="2" fill="#3b2e1e"/><rect x="7" y="9" width="2" height="5" fill="#3b2e1e"/></svg>',
+    "palette": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="1" height="1" fill="#3b2e1e"/><rect x="12" y="3" width="1" height="1" fill="#3b2e1e"/><rect x="2" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="13" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="3" y="10" width="1" height="2" fill="#3b2e1e"/><rect x="4" y="12" width="3" height="1" fill="#3b2e1e"/><rect x="7" y="11" width="1" height="1" fill="#3b2e1e"/><rect x="8" y="10" width="5" height="1" fill="#3b2e1e"/><rect x="4" y="4" width="2" height="2" fill="#c25a44"/><rect x="9" y="4" width="2" height="2" fill="#d4b54c"/><rect x="4" y="7" width="2" height="2" fill="#4a6d4e"/><rect x="9" y="7" width="2" height="2" fill="#7a96b4"/></svg>',
+    "clock": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="5" y="2" width="6" height="1" fill="#3b2e1e"/><rect x="5" y="13" width="6" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="3" width="2" height="1" fill="#3b2e1e"/><rect x="3" y="12" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="12" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="13" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="7" y="5" width="2" height="4" fill="#3b2e1e"/><rect x="8" y="8" width="3" height="1" fill="#c25a44"/></svg>',
+    "save": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="2" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="2" width="1" height="12" fill="#3b2e1e"/><rect x="13" y="2" width="1" height="12" fill="#3b2e1e"/><rect x="4" y="3" width="7" height="3" fill="#3b2e1e"/><rect x="5" y="4" width="2" height="2" fill="#c25a44"/><rect x="4" y="8" width="8" height="5" fill="#3b2e1e"/><rect x="5" y="9" width="6" height="1" fill="#fffaec"/><rect x="5" y="11" width="6" height="1" fill="#fffaec"/></svg>',
+    "robot": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="2" fill="#3b2e1e"/><rect x="3" y="3" width="10" height="1" fill="#3b2e1e"/><rect x="3" y="9" width="10" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="1" height="7" fill="#3b2e1e"/><rect x="12" y="3" width="1" height="7" fill="#3b2e1e"/><rect x="5" y="5" width="2" height="2" fill="#c25a44"/><rect x="9" y="5" width="2" height="2" fill="#c25a44"/><rect x="6" y="8" width="4" height="1" fill="#3b2e1e"/><rect x="1" y="5" width="2" height="1" fill="#3b2e1e"/><rect x="13" y="5" width="2" height="1" fill="#3b2e1e"/><rect x="4" y="10" width="2" height="4" fill="#3b2e1e"/><rect x="10" y="10" width="2" height="4" fill="#3b2e1e"/></svg>',
+}
+
 # 2. 全局自定义样式
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""
 <style>
-/* 主标题手绘体 */
+/* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
-    font-family: 'Caveat', cursive;
-    font-size: 52px;
-    font-weight: 700;
-    color: #ff6b6b;
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: #3b2e1e;
     text-align: center;
-    margin: 8px 0 16px 0;
-    letter-spacing: 2px;
+    margin: 10px 0 14px 0;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 0 #d4b54c;
+    text-transform: uppercase;
+}
+.handwrite-title .hw-dot {
+    color: #c25a44;
+    margin: 0 10px;
+    text-shadow: none;
 }
 /* 书页区域 */
 .book-spread {
@@ -1110,10 +1131,82 @@ body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button p {
     background-size: contain;
     vertical-align: middle;
 }
+
+/* ===== 像素图标通用 ===== */
+.px-ic {
+    display: inline-block;
+    vertical-align: middle;
+    image-rendering: pixelated;
+    shape-rendering: crispEdges;
+}
+.zw-step-icon .px-ic { width: 28px; height: 28px; }
+.zw-feature .ic .px-ic { width: 14px; height: 14px; margin-bottom: 1px; }
+.time-display .px-ic { width: 12px; height: 12px; margin-right: 5px; margin-bottom: 1px; }
+.ai-chat-heading .px-ic { width: 18px; height: 18px; margin-right: 8px; margin-bottom: 2px; }
+body:has(.reading-area) section[data-testid="stSidebar"] .sbh .px-ic {
+    width: 12px; height: 12px; margin-right: 6px; margin-bottom: 1px;
+}
+
+/* ===== 原生 Streamlit 提示态像素化（alert / toast / spinner） ===== */
+/* st.warning / st.error / st.info / st.success 外框 */
+body:has(.reading-area) [data-testid="stAlert"] {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0 #d4b54c !important;
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+    padding: 14px 16px !important;
+}
+/* error 态改用 terra 色描边 / 投影，情绪层级清晰但仍然是像素语言 */
+body:has(.reading-area) [data-testid="stAlertContentError"],
+body:has(.reading-area) [data-testid="stAlert"]:has([data-testid="stAlertContentError"]) {
+    border-color: #c25a44 !important;
+    box-shadow: 4px 4px 0 #c25a44 !important;
+}
+body:has(.reading-area) [data-testid="stAlert"] p,
+body:has(.reading-area) [data-testid="stAlert"] div,
+body:has(.reading-area) [data-testid="stAlert"] span {
+    color: #3b2e1e !important;
+    font-family: inherit !important;
+}
+/* Toast（toast 可能挂在 body 根，不受 reading-area 作用域限制，不加 :has 前缀） */
+[data-testid="stToast"],
+[data-testid="stToastContainer"] [role="status"] {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+}
+[data-testid="stToast"] * {
+    color: #3b2e1e !important;
+    font-family: inherit !important;
+}
+/* Spinner：方角 + 深棕骨架（默认是彩色圆环旋转，和像素风冲突） */
+body:has(.reading-area) .stSpinner > div > div,
+body:has(.reading-area) [data-testid="stSpinner"] > div > div {
+    border-color: #3b2e1e #e8dcbc #e8dcbc #e8dcbc !important;
+    border-radius: 0 !important;
+    border-width: 3px !important;
+}
+body:has(.reading-area) .stSpinner,
+body:has(.reading-area) [data-testid="stSpinner"] {
+    color: #3b2e1e !important;
+    font-family: 'Zpix', monospace !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="handwrite-title">Sweet Sweet Homeland</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="handwrite-title">'
+    '<span class="hw-dot">■</span>SWEET SWEET HOMELAND<span class="hw-dot">■</span>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 
 # 3. 上传文件：有书在读时放侧边栏，空态时放在欢迎页中央
 SUPPORTED_FORMATS = ['epub', 'txt', 'pdf', 'mobi', 'azw3']
@@ -1651,10 +1744,13 @@ if has_file:
 
         # --- 侧边栏：书签 ---
         st.sidebar.divider()
-        st.sidebar.markdown("**📌 书签**")
+        st.sidebar.markdown(
+            f'<strong class="sbh">{PX_ICON["pin"]}书签</strong>',
+            unsafe_allow_html=True,
+        )
         if st.sidebar.button("加入当前位置", key="bm_add", use_container_width=True):
             added = _add_bookmark(book_key, chapter_idx, current_page)
-            st.toast("📌 已添加书签" if added else "此位置已有书签")
+            st.toast("[+] 已添加书签" if added else "此位置已有书签")
             st.rerun()
 
         _bms = _load_bookmarks().get(book_key, [])
@@ -1700,7 +1796,10 @@ if has_file:
         with top_col2:
             from datetime import timezone, timedelta
             now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
-            st.markdown(f'<div class="time-display">🕐 {now}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="time-display">{PX_ICON["clock"]}{now}</div>',
+                unsafe_allow_html=True,
+            )
 
         # 进度条
         progress = (current_page + 1) / total_pages if total_pages > 0 else 1
@@ -1984,7 +2083,10 @@ if has_file:
 
         # --- 分隔：AI 聊天区域 ---
         st.divider()
-        st.subheader("💬 与 AI 探讨本章内容")
+        st.markdown(
+            f'<h3 class="ai-chat-heading">{PX_ICON["chat"]}与 AI 探讨本章内容</h3>',
+            unsafe_allow_html=True,
+        )
 
         # 初始化聊天记录
         if "messages" not in st.session_state:
@@ -2027,7 +2129,9 @@ if has_file:
                     st.session_state.messages.append({"role": "assistant", "content": response_text})
 
                 except Exception as e:
-                    st.error(f"大脑连接出现了一点小状况：{str(e)}")
+                    st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
+                    with st.expander("详情"):
+                        st.code(str(e))
 
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
@@ -2173,21 +2277,21 @@ else:
             <div class="zw-steps">
                 <div class="zw-step">
                     <div class="zw-step-num">01</div>
-                    <div class="zw-step-icon">📤</div>
+                    <div class="zw-step-icon">""" + PX_ICON["upload"] + """</div>
                     <div class="zw-step-label">上传电子书</div>
                     <div class="zw-step-sub">UPLOAD</div>
                 </div>
                 <div class="zw-step-arrow">&gt;</div>
                 <div class="zw-step">
                     <div class="zw-step-num">02</div>
-                    <div class="zw-step-icon">📖</div>
+                    <div class="zw-step-icon">""" + PX_ICON["read"] + """</div>
                     <div class="zw-step-label">选章节阅读</div>
                     <div class="zw-step-sub">READ</div>
                 </div>
                 <div class="zw-step-arrow">&gt;</div>
                 <div class="zw-step">
                     <div class="zw-step-num">03</div>
-                    <div class="zw-step-icon">💬</div>
+                    <div class="zw-step-icon">""" + PX_ICON["chat"] + """</div>
                     <div class="zw-step-label">AI 深度对话</div>
                     <div class="zw-step-sub">CHAT</div>
                 </div>
@@ -2195,12 +2299,12 @@ else:
         </div>
         <!-- 特性徽章 -->
         <div class="zw-features">
-            <span class="zw-feature"><span class="ic">⌨</span> 键盘翻页</span>
-            <span class="zw-feature"><span class="ic">📌</span> 书签收藏</span>
-            <span class="zw-feature"><span class="ic">🎨</span> 主题字体自定义</span>
-            <span class="zw-feature"><span class="ic">⏱</span> 剩余时间估算</span>
-            <span class="zw-feature"><span class="ic">💾</span> 进度自动保存</span>
-            <span class="zw-feature"><span class="ic">🤖</span> AI 共读</span>
+            <span class="zw-feature"><span class="ic">""" + PX_ICON["keyboard"] + """</span> 键盘翻页</span>
+            <span class="zw-feature"><span class="ic">""" + PX_ICON["pin"] + """</span> 书签收藏</span>
+            <span class="zw-feature"><span class="ic">""" + PX_ICON["palette"] + """</span> 主题字体自定义</span>
+            <span class="zw-feature"><span class="ic">""" + PX_ICON["clock"] + """</span> 剩余时间估算</span>
+            <span class="zw-feature"><span class="ic">""" + PX_ICON["save"] + """</span> 进度自动保存</span>
+            <span class="zw-feature"><span class="ic">""" + PX_ICON["robot"] + """</span> AI 共读</span>
         </div>
         <!-- 底部装饰条 -->
         <div class="zw-footer-strip">
