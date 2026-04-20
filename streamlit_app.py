@@ -438,6 +438,22 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
     letter-spacing: 2px;
     color: #3b2e1e;
     text-transform: uppercase;
+    animation: rd-fade-in 0.55s ease-out both;
+}
+
+/* D2：阅读页 / 欢迎页切换淡入动画（纯 CSS，不动 DOM） */
+@keyframes rd-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.reading-area {
+    animation: rd-fade-in 0.55s ease-out 0.08s both;
+}
+.zine-welcome.zw-top {
+    animation: rd-fade-in 0.6s ease-out both;
+}
+.zine-welcome.zw-bottom {
+    animation: rd-fade-in 0.6s ease-out 0.15s both;
 }
 .rd-topbar .rd-mid {
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace;
