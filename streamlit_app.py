@@ -248,6 +248,30 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stMarkdow
     letter-spacing: 1px !important;
 }
 
+/* A3：侧栏按钮方角像素化（与欢迎页 upload 按钮同一视觉语言）
+   只改 stButton 的 button 元素本体和其内部 <p>；不碰 chat_input 的 send 按钮
+   （chat_input 是 stChatInput，不是 stButton，自然不会被命中） */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button {
+    background: #3b2e1e !important;
+    color: #f3e9cf !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+    transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button:hover {
+    background: #c25a44 !important;
+    color: #fffef8 !important;
+    transform: translate(-2px, -2px) !important;
+    box-shadow: 5px 5px 0 #d4b54c !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button p {
+    color: inherit !important;
+    font-family: inherit !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
