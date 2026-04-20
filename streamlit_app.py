@@ -272,6 +272,18 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"
     font-family: inherit !important;
 }
 
+/* A4：侧栏 selectbox 最外层可见框方角 + 奶油底
+   只命中 BaseWeb select 的外层 div；不动弹出层（弹出层走 portal 挂到 body 上，
+   不是这个选择器的后代），不动 position/display 相关属性 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 #d4b54c !important;
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
