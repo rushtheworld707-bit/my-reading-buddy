@@ -364,6 +364,15 @@ body:has(.reading-area) [data-testid="stBottom"] > div,
 body:has(.reading-area) [data-testid="stChatInput"] {
     background: #f3e9cf !important;
 }
+/* B3.6：chat_input 内层 baseweb 包装（真正那个黑色圆角框）也统一成米白
+   覆盖多种可能的内层 DOM 结构 */
+body:has(.reading-area) [data-testid="stChatInput"] > div,
+body:has(.reading-area) [data-testid="stChatInput"] > div > div,
+body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="textarea"],
+body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="input"],
+body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="base-input"] {
+    background: #fffaec !important;
+}
 
 
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
