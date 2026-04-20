@@ -235,6 +235,18 @@ body:has(.reading-area) section[data-testid="stSidebar"] {
     background: #e8dcbc !important;
     border-right: 2px dashed #3b2e1e !important;
 }
+/* A2：侧栏文字颜色深棕 + Zpix 像素字体
+   只命中 widget 的 <label>、独立 st.markdown/st.caption 的段落/粗体
+   —— 刻意避开按钮内的 stMarkdownContainer（按钮留到 A3 统一改），
+   避免当前阶段按钮文本字体或颜色错乱 */
+body:has(.reading-area) section[data-testid="stSidebar"] label,
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stMarkdown"] p,
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stMarkdown"] strong {
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
+    letter-spacing: 1px !important;
+}
 
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
