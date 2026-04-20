@@ -294,6 +294,31 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="slider"]
     box-shadow: 2px 2px 0 #3b2e1e !important;
 }
 
+/* A6：侧栏 number_input（跳转页码）方角像素化
+   分两部分：① 输入框本体 ② +/- 步进按钮；都只改颜色/边框/字体，不动尺寸与布局 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    color: #3b2e1e !important;
+    font-family: 'Press Start 2P', 'Zpix', monospace !important;
+    font-size: 12px !important;
+    letter-spacing: 1px !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
+    background: #3b2e1e !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    color: #f3e9cf !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button:hover {
+    background: #c25a44 !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button svg {
+    fill: #f3e9cf !important;
+    color: #f3e9cf !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
