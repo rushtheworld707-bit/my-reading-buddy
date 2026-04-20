@@ -39,18 +39,18 @@ st.markdown("""
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
     color: #3b2e1e;
     text-align: center;
-    margin: 10px 0 14px 0;
+    margin: 12px 0 12px 0;
     letter-spacing: 3px;
     text-shadow: 2px 2px 0 #d4b54c;
     text-transform: uppercase;
 }
 .handwrite-title .hw-dot {
     color: #c25a44;
-    margin: 0 10px;
+    margin: 0 8px;
     text-shadow: none;
 }
 /* 书页区域 */
@@ -123,6 +123,23 @@ st.markdown("""
     }
 }
 
+/* ===== 减少动效偏好（a11y）：所有入场 / 循环动画禁用或瞬完 ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    /* 仍然给 hover 反馈一个瞬时变化，不破坏可用性 */
+    .reading-area .nav-btn,
+    body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button {
+        transition: background 0.01ms !important;
+    }
+}
+
 /* ===== 阅读区域：像素风（与欢迎页同一套调色） ===== */
 /* 顶部 header 保持存在（防止 Streamlit 内部渲染失衡），只换成奶油色与页面融合 */
 body:has(.reading-area) header[data-testid="stHeader"] {
@@ -182,6 +199,10 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"
     color: #fffef8 !important;
     transform: translate(-2px, -2px) !important;
     box-shadow: 5px 5px 0 #d4b54c !important;
+}
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button:focus-visible {
+    outline: 2px solid #c25a44 !important;
+    outline-offset: 3px !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button p {
     color: inherit !important;
@@ -313,6 +334,10 @@ body:has(.reading-area) [data-testid="stChatInput"] button {
 }
 body:has(.reading-area) [data-testid="stChatInput"] button:hover {
     background: #c25a44 !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] button:focus-visible {
+    outline: 2px solid #c25a44 !important;
+    outline-offset: 3px !important;
 }
 body:has(.reading-area) [data-testid="stChatInput"] button svg {
     fill: #f3e9cf !important;
@@ -448,7 +473,7 @@ body:has(.reading-area) .progress-fill {
     font-family: 'Zpix', 'Noto Sans SC', monospace;
     font-size: 11px;
     letter-spacing: 1px;
-    opacity: 0.65;
+    color: #6b5843;
     margin-top: 4px;
 }
 
@@ -456,6 +481,8 @@ body:has(.reading-area) .progress-fill {
 .reading-area .nav-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-height: 40px;
     cursor: pointer;
     user-select: none;
     text-decoration: none !important;
@@ -477,6 +504,16 @@ body:has(.reading-area) .progress-fill {
     border-color: #3b2e1e !important;
     transform: translate(-2px, -2px) !important;
     box-shadow: 6px 6px 0 #d4b54c !important;
+}
+/* 键盘聚焦态：像素风用 terra 方框描边（默认浏览器圆角 outline 会破风格） */
+.reading-area .nav-btn:focus-visible {
+    outline: 2px solid #c25a44 !important;
+    outline-offset: 3px !important;
+}
+/* active（鼠标按下 / 键盘 space）：像素下压感 */
+.reading-area .nav-btn:active {
+    transform: translate(0, 0) !important;
+    box-shadow: 2px 2px 0 #d4b54c !important;
 }
 .reading-area .nav-btn.nav-disabled {
     opacity: 0.35 !important;
