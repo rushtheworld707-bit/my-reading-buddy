@@ -356,6 +356,15 @@ body:has(.reading-area) [data-testid="stChatInput"] textarea::placeholder {
     opacity: 0.6 !important;
 }
 
+/* B3.5：填补 chat_input 周围的黑空白
+   只改 background，不动 position/margin/padding/size */
+body:has(.reading-area) [data-testid="stApp"],
+body:has(.reading-area) [data-testid="stBottom"],
+body:has(.reading-area) [data-testid="stBottom"] > div,
+body:has(.reading-area) [data-testid="stChatInput"] {
+    background: #f3e9cf !important;
+}
+
 
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
