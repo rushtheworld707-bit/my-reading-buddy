@@ -319,6 +319,16 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberI
     color: #f3e9cf !important;
 }
 
+/* B1：主区分隔线（st.divider）换成虚线深棕；AI 小标题本身已由
+   MainBlockContainer h3 规则自动像素化，不再重复 */
+body:has(.reading-area) [data-testid="stMainBlockContainer"] hr {
+    border: none !important;
+    border-top: 2px dashed #3b2e1e !important;
+    background: transparent !important;
+    margin: 18px 0 !important;
+    opacity: 1 !important;
+}
+
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
