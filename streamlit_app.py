@@ -374,6 +374,35 @@ body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="base-input"] 
     background: #fffaec !important;
 }
 
+/* B4：chat_input 外观完整像素化
+   —— 仅最外层直接子 div 加边框 + 偏移阴影（避免多层重复描边）
+   —— 内层 baseweb / textarea 去掉圆角和边框，保持方角一致 */
+body:has(.reading-area) [data-testid="stChatInput"] > div {
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="textarea"],
+body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="input"],
+body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="base-input"],
+body:has(.reading-area) [data-testid="stChatInput"] textarea {
+    border-radius: 0 !important;
+    border: none !important;
+}
+/* 发送按钮（右侧向上箭头）像素化：方角深棕底 + 米白图标 */
+body:has(.reading-area) [data-testid="stChatInput"] button {
+    background: #3b2e1e !important;
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] button:hover {
+    background: #c25a44 !important;
+}
+body:has(.reading-area) [data-testid="stChatInput"] button svg {
+    fill: #f3e9cf !important;
+    color: #f3e9cf !important;
+}
+
 
 /* 章节标题（只改主区里的，避开侧栏和 chat 内部） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
