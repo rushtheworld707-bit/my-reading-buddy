@@ -2,10 +2,7 @@
 
 ## 🔴 已知 Bug / 数据风险
 
-- [ ] **P0 持久化**：`_PROGRESS_FILE` / `_BOOKMARKS_FILE` 写在 Streamlit Cloud 容器的临时文件系统，冷启即清。同时 app 无 user identity，所有用户共写一个 JSON —— 同名书会互相覆盖进度，朋友的书签也会出现在你侧栏。待决定方案：
-  - A: 只修持久化，用户共用（Gist，~1h）
-  - B: 持久化 + 隔离（localStorage 组件，~1.5h）
-  - C: Supabase + magic-link 登录（~3h）
+- [x] ~~**P0 持久化**~~ ✅ **Done**（commit `2b4d1b5`，方案 B：streamlit-local-storage）。每个浏览器各存各的，天然用户隔离，容器重启不丢。已知限制：清浏览器缓存会丢；跨设备独立（不同步）；iOS Safari 隐私模式 7 天后可能清。若想跨设备同步，后续切 Supabase（方案 C）。
 - [ ] **P1 分页性能**：`streamlit_app.py` 约 1850 行的 `chapter_page_counts = [len(split_into_pages(ch["text"])) for ch in chapters]` 每次 rerun 把整本书分页。长书翻一页就卡一次。用 `@st.cache_data(hash_funcs=...)` 缓存或只算当前章节。
 
 ## 🟡 功能 / 体验升级
