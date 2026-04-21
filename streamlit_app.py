@@ -2058,7 +2058,7 @@ if has_file:
                 _half = _CH_BUDGET // 2
                 _chapter_ctx = (
                     _full_chapter[:_half]
-                    + "\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n"
+                    + '\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n'
                     + _full_chapter[-_half:]
                 )
             _spread_text = pages[left_idx]
