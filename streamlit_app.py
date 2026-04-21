@@ -1490,8 +1490,11 @@ def extract_chapters(file_bytes, file_name):
     else:
         return None
 
+@st.cache_data(show_spinner=False)
 def split_into_pages(text, chars_per_page=600):
-    """将文本按段落智能分页，避免截断句子"""
+    """将文本按段落智能分页，避免截断句子。
+    cache_data：text 字符串哈希作 key；同一章节在整个进程里只分页一次。
+    chapter_page_counts 的列表推导会自动吃缓存，翻页不再重算全书。"""
     paragraphs = text.split('\n')
     pages = []
     current_page = ""
