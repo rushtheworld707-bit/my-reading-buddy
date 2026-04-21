@@ -1516,16 +1516,49 @@ def _to_html(page_text):
     return result
 
 
-_PROGRESS_FILE = os.path.join(os.path.expanduser("~"), ".reading_buddy_progress.json")
-_BOOKMARKS_FILE = os.path.join(os.path.expanduser("~"), ".reading_buddy_bookmarks.json")
+# ==== 持久化：浏览器 localStorage ====
+# 旧版写到容器 ~/.reading_buddy_*.json，Streamlit Cloud 冷启即清、且多用户共用同一文件。
+# 改用 streamlit-local-storage → 每个浏览器各存各的，天然隔离，容器重启不丢。
+# 注意：组件异步，首帧 getItem 可能返回 None，第二次 rerun 数据到位。
+from streamlit_local_storage import LocalStorage
+
+_LS_PROGRESS_KEY = "reading_buddy_progress_v1"
+_LS_BOOKMARKS_KEY = "reading_buddy_bookmarks_v1"
+
+
+def _get_ls():
+    """懒初始化 LocalStorage 组件；挂到 session_state 保证整个 session 内同一实例。"""
+    if "_rb_ls" not in st.session_state:
+        st.session_state["_rb_ls"] = LocalStorage()
+    return st.session_state["_rb_ls"]
+
+
+def _ls_read_dict(key):
+    """从 localStorage 读一个 JSON dict，容错：不存在 / 解析失败 → 空 dict。"""
+    try:
+        raw = _get_ls().getItem(key)
+    except Exception:
+        return {}
+    if raw in (None, "", "null"):
+        return {}
+    if isinstance(raw, dict):
+        return raw
+    try:
+        parsed = json.loads(raw)
+        return parsed if isinstance(parsed, dict) else {}
+    except Exception:
+        return {}
+
+
+def _ls_write_dict(key, data):
+    try:
+        _get_ls().setItem(key, json.dumps(data, ensure_ascii=False))
+    except Exception:
+        pass
 
 
 def _load_progress():
-    try:
-        with open(_PROGRESS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    return _ls_read_dict(_LS_PROGRESS_KEY)
 
 
 def _save_progress(book_key, chapter_idx, page):
@@ -1535,27 +1568,15 @@ def _save_progress(book_key, chapter_idx, page):
         "page": int(page),
         "updated_at": datetime.now().isoformat(timespec="seconds"),
     }
-    try:
-        with open(_PROGRESS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
+    _ls_write_dict(_LS_PROGRESS_KEY, data)
 
 
 def _load_bookmarks():
-    try:
-        with open(_BOOKMARKS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    return _ls_read_dict(_LS_BOOKMARKS_KEY)
 
 
 def _save_bookmarks(data):
-    try:
-        with open(_BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
+    _ls_write_dict(_LS_BOOKMARKS_KEY, data)
 
 
 def _add_bookmark(book_key, chapter_idx, page):
