@@ -7,9 +7,9 @@
 
 ## 🟡 功能 / 体验升级
 
-- [ ] AI 流式输出：`client.chat.completions.create(..., stream=True)` + 逐 token 写入气泡
-- [ ] AI 上下文扩大：当前仅 1200 字当前页 → 整章 or RAG
-- [ ] 聊天记录按书持久化（当前仅 session_state）
+- [x] ~~AI 流式输出~~ ✅ **Done**：`stream=True` + `st.write_stream`，token 到达即渲染，消除 3-10 秒等待
+- [x] ~~AI 上下文扩大~~ ✅ **Done**：当前章节全文（>8000 字头尾夹）+ 当前 spread 精确位置 + 最近 8 条对话历史
+- [x] ~~聊天记录按书持久化~~ ✅ **Done**：`_LS_MESSAGES_KEY`，结构 `{book_key: [msgs]}`，关 tab 重开同书记录还在
 - [ ] 全书文本搜索
 - [ ] 高亮 / 笔记
 

@@ -1527,6 +1527,7 @@ from streamlit_local_storage import LocalStorage
 
 _LS_PROGRESS_KEY = "reading_buddy_progress_v1"
 _LS_BOOKMARKS_KEY = "reading_buddy_bookmarks_v1"
+_LS_MESSAGES_KEY = "reading_buddy_messages_v1"
 
 
 def _get_ls():
@@ -1582,6 +1583,18 @@ def _save_bookmarks(data):
     _ls_write_dict(_LS_BOOKMARKS_KEY, data)
 
 
+def _load_all_messages():
+    """读取所有书的聊天记录 {book_key: [messages]}。"""
+    return _ls_read_dict(_LS_MESSAGES_KEY)
+
+
+def _save_book_messages(book_key, messages):
+    """把当前 book_key 的聊天数组写回 localStorage，保留其它书的记录不动。"""
+    all_msgs = _load_all_messages()
+    all_msgs[book_key] = messages
+    _ls_write_dict(_LS_MESSAGES_KEY, all_msgs)
+
+
 def _add_bookmark(book_key, chapter_idx, page):
     from datetime import timezone, timedelta
     data = _load_bookmarks()
@@ -1622,7 +1635,7 @@ if has_file:
         book_key = st.session_state.file_name
         sel_key = "chapter_select"
 
-        # 首次载入此书时，恢复上次的章节 + 页码
+        # 首次载入此书时，恢复上次的章节 + 页码 + 聊天记录
         if st.session_state.get("loaded_book") != book_key:
             saved = _load_progress().get(book_key, {})
             saved_ch = 0
@@ -1631,6 +1644,8 @@ if has_file:
                 st.session_state[f"page_{saved_ch}"] = int(saved.get("page", 0))
             st.session_state[sel_key] = saved_ch
             st.session_state.last_chapter = saved_ch
+            # 聊天记录按书隔离：从 localStorage hydrate 这本书之前的对话
+            st.session_state.messages = _load_all_messages().get(book_key, [])
             st.session_state.loaded_book = book_key
 
         # 书签跳转：在 selectbox 渲染之前应用 pending 状态
@@ -2030,32 +2045,74 @@ if has_file:
 
             # 1. 存入并立刻在屏幕上显示用户发的消息
             st.session_state.messages.append({"role": "user", "content": prompt})
+            _save_book_messages(book_key, st.session_state.messages)
             with st.chat_message("user"):
                 st.write(prompt)
 
-            # 2. 召唤豆包大脑开始思考并回复
+            # 2. 构造上下文：当前章节全文（长书头尾夹） + 当前 spread 精确位置
+            _full_chapter = chapters[chapter_idx]["text"]
+            _CH_BUDGET = 8000
+            if len(_full_chapter) <= _CH_BUDGET:
+                _chapter_ctx = _full_chapter
+            else:
+                _half = _CH_BUDGET // 2
+                _chapter_ctx = (
+                    _full_chapter[:_half]
+                    + "\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n"
+                    + _full_chapter[-_half:]
+                )
+            _spread_text = pages[left_idx]
+            if right_idx is not None:
+                _spread_text += "\n\n" + pages[right_idx]
+
+            context_msg = (
+                "你正在陪一位读者读书。以下是当前章节的上下文（长章节仅头尾）：\n"
+                "========== 章节内容 ==========\n"
+                f"{_chapter_ctx}\n"
+                "========== 章节内容结束 ==========\n\n"
+                f"读者现在正停在第 {left_num} 页"
+                + (f"-{right_num}" if right_idx is not None else "")
+                + f"（共 {total_pages} 页），这两页原文：\n"
+                "---\n"
+                f"{_spread_text}\n"
+                "---\n\n"
+                "最近的对话历史会在 messages 里给你，请结合。\n"
+                f"读者此刻说：{prompt}"
+            )
+
+            # 3. 召唤豆包大脑：流式输出
             with st.chat_message("assistant"):
                 try:
-                    with st.spinner("嘟哒在思考…"):
-                        client = OpenAI(
-                            api_key=st.secrets["ARK_API_KEY"],
-                            base_url="https://ark.cn-beijing.volces.com/api/v3",
+                    client = OpenAI(
+                        api_key=st.secrets["ARK_API_KEY"],
+                        base_url="https://ark.cn-beijing.volces.com/api/v3",
+                    )
+                    # 多轮：把最近 8 条历史消息带上，让 AI 有"刚才聊过什么"的记忆
+                    _history = st.session_state.messages[-9:-1]  # 除当前用户消息外的最近 8 条
+                    _api_messages = [
+                        {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"}
+                    ]
+                    _api_messages.extend(_history)
+                    _api_messages.append({"role": "user", "content": context_msg})
+
+                    stream = client.chat.completions.create(
+                        model=st.secrets["ARK_MODEL_ID"],
+                        messages=_api_messages,
+                        stream=True,
+                    )
+
+                    def _token_iter():
+                        for chunk in stream:
+                            delta = chunk.choices[0].delta.content if chunk.choices else None
+                            if delta:
+                                yield delta
+
+                    response_text = st.write_stream(_token_iter())
+                    if response_text:
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": response_text}
                         )
-
-                        # 用当前页内容作为语境
-                        context_msg = f"你是一个博学的共读伙伴，擅长从哲学、生物学或行为因果的角度深度分析文本。正在阅读的内容：\n{pages[left_idx][:1200]}\n\n读者感悟：{prompt}"
-
-                        completion = client.chat.completions.create(
-                            model=st.secrets["ARK_MODEL_ID"],
-                            messages=[
-                                {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"},
-                                {"role": "user", "content": context_msg}
-                            ],
-                        )
-
-                        response_text = completion.choices[0].message.content
-                    st.write(response_text)
-                    st.session_state.messages.append({"role": "assistant", "content": response_text})
+                        _save_book_messages(book_key, st.session_state.messages)
 
                 except Exception as e:
                     st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
