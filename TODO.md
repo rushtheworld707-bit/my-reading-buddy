@@ -3,7 +3,7 @@
 ## 🔴 已知 Bug / 数据风险
 
 - [x] ~~**P0 持久化**~~ ✅ **Done**（commit `2b4d1b5`，方案 B：streamlit-local-storage）。每个浏览器各存各的，天然用户隔离，容器重启不丢。已知限制：清浏览器缓存会丢；跨设备独立（不同步）；iOS Safari 隐私模式 7 天后可能清。若想跨设备同步，后续切 Supabase（方案 C）。
-- [ ] **P1 分页性能**：`streamlit_app.py` 约 1850 行的 `chapter_page_counts = [len(split_into_pages(ch["text"])) for ch in chapters]` 每次 rerun 把整本书分页。长书翻一页就卡一次。用 `@st.cache_data(hash_funcs=...)` 缓存或只算当前章节。
+- [x] ~~**P1 分页性能**~~ ✅ **Done**（commit `e9d75b0`）。给 `split_into_pages` 加 `@st.cache_data(show_spinner=False)`。chapter_page_counts 列表推导自动吃缓存，翻一页不再重算全书。
 
 ## 🟡 功能 / 体验升级
 
