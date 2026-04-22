@@ -1802,10 +1802,15 @@ if has_file:
             st.session_state[f"page_{_jch}"] = int(_jmp.get("page", 0))
             st.session_state.last_chapter = _jch
 
+        # 初始化已读章节集合（session 内追踪）
+        if "read_chapters" not in st.session_state:
+            st.session_state.read_chapters = set()
+        _rc = st.session_state.read_chapters
+
         chapter_idx = st.sidebar.selectbox(
             "选择章节",
             range(len(chapters)),
-            format_func=lambda x: chapter_titles[x],
+            format_func=lambda x: ("■ " if (book_key, x) in _rc else "  ") + chapter_titles[x],
             key=sel_key,
         )
         current_text = chapters[chapter_idx]["text"]
@@ -1842,7 +1847,7 @@ if has_file:
 
         _bms = _load_bookmarks().get(book_key, [])
         if not _bms:
-            st.sidebar.caption("还没有书签")
+            st.sidebar.caption("点「加入当前位置」收藏你想回来的页面")
         else:
             for _i, _b in enumerate(_bms):
                 _ch = int(_b.get("chapter_idx", 0))
@@ -1980,6 +1985,10 @@ if has_file:
         )
         page_range = _pg_main + _pg_sub
 
+        # 章节已读标记：到达最后一页时加入集合
+        if next_disabled:
+            st.session_state.read_chapters.add((book_key, chapter_idx))
+
         # 章末庆祝：4 个像素烟花爆炸点 + 中央横幅
         # 每个爆炸点：8 方向粒子 + 中心闪光，错开触发时间
         _FW_BURSTS = [
@@ -2021,8 +2030,8 @@ if has_file:
             </div>
             <div class="page-indicator">{page_range}</div>
             <div class="nav-row">
-                <button type="button" class="{prev_cls}">上一页</button>
-                <button type="button" class="{next_cls}">下一页</button>
+                <button type="button" class="{prev_cls}">← 上一页</button>
+                <button type="button" class="{next_cls}">下一页 →</button>
             </div>
             {_celebrate_html}
         </div>
@@ -2283,7 +2292,10 @@ if has_file:
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
-        st.sidebar.markdown("**阅读设置**")
+        st.sidebar.markdown(
+            f'<strong class="sbh">{PX_ICON["palette"]}阅读设置</strong>',
+            unsafe_allow_html=True,
+        )
 
         # 字体大小
         if "font_size" not in st.session_state:
@@ -2340,8 +2352,11 @@ if has_file:
             with st.chat_message(m["role"]):
                 st.write(m["content"])
 
+        if not st.session_state.messages:
+            st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。")
+
         # 等待用户输入感悟
-        if prompt := st.chat_input("跟我聊聊吧 [^_^]"):
+        if prompt := st.chat_input("对这段有什么想法？"):
 
             # 1. 存入并立刻在屏幕上显示用户发的消息
             st.session_state.messages.append({"role": "user", "content": prompt})
@@ -2416,6 +2431,9 @@ if has_file:
 
                 except Exception as e:
                     st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
+                    if st.button("重试", key="ai_retry"):
+                        st.session_state.messages.append({"role": "user", "content": prompt})
+                        st.rerun()
                     with st.expander("详情"):
                         st.code(str(e))
 
