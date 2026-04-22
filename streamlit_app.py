@@ -2740,5 +2740,38 @@ else:
         }
         attachCatBlink();
     })();
+
+    // 猫猫 parallax：鼠标在 hero 区域移动时，猫轻微跟随偏移
+    (function() {
+        function attachParallax() {
+            const p = window.parent.document;
+            const art = p.querySelector('.zw-art');
+            const svg = p.getElementById('zw-cat-svg');
+            const hero = p.querySelector('.zw-hero');
+            if (!art || !svg || !hero) { setTimeout(attachParallax, 200); return; }
+            if (art._rb_parallax_bound) return;
+            art._rb_parallax_bound = true;
+            art.style.transition = 'transform 0.12s steps(4)';
+            let raf = null;
+            hero.addEventListener('mousemove', function(e) {
+                if (raf) return;
+                raf = requestAnimationFrame(function() {
+                    raf = null;
+                    const rect = hero.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2;
+                    const cy = rect.top + rect.height / 2;
+                    const dx = (e.clientX - cx) / rect.width;
+                    const dy = (e.clientY - cy) / rect.height;
+                    const tx = Math.round(dx * 10);
+                    const ty = Math.round(dy * 6);
+                    art.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+                });
+            });
+            hero.addEventListener('mouseleave', function() {
+                art.style.transform = 'translate(0,0)';
+            });
+        }
+        attachParallax();
+    })();
     </script>
     """, height=0)
