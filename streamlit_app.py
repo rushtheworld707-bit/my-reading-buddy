@@ -725,13 +725,13 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
 }
 
 .zw-title {
-    font-family: 'Zpix', 'Noto Serif SC', serif;
-    font-size: 96px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 76px;
     font-weight: 400;
     line-height: 1.0;
     color: var(--zw-ink) !important;
     margin: 0 0 8px;
-    letter-spacing: 8px;
+    letter-spacing: 6px;
     animation: zw-bounce 0.9s cubic-bezier(.34,1.56,.64,1) 0.2s both;
     text-shadow: 4px 4px 0 var(--zw-mustard);
     transform-origin: left center;
@@ -749,11 +749,11 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
 }
 
 .zw-subtitle-zh {
-    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
-    font-size: 22px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
     color: var(--zw-ink) !important;
     margin: 0 0 24px;
-    letter-spacing: 4px;
+    letter-spacing: 2px;
     animation: zw-slide-in 0.5s cubic-bezier(.2,.8,.2,1) 1.3s both;
     -webkit-font-smoothing: none;
 }
@@ -964,6 +964,27 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
     animation: zw-fade-in 0.7s ease-out 1s both;
 }
 .zw-footer-strip .hearts { color: var(--zw-terra) !important; letter-spacing: 3px; }
+
+/* 像素粒子装饰 */
+@keyframes zw-sparkle {
+    0%   { opacity: 0; transform: translateY(0); }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-14px); }
+}
+.zw-sparkles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+.zw-sparkles .sp {
+    position: absolute;
+    animation: zw-sparkle 3s ease-in-out infinite;
+    opacity: 0;
+}
+@media (max-width: 900px) { .zw-sparkles { display: none; } }
 
 /* 上传区标签 */
 .zw-upload-label {
@@ -2533,6 +2554,23 @@ else:
     _q_text, _q_from = _QUOTES[_q_idx]
     st.markdown("""
     <div class="zine-welcome zw-top">
+        <div class="zw-sparkles" aria-hidden="true">
+            <span class="sp" style="left:1%;top:18%;width:4px;height:4px;background:#c25a44;animation-delay:0s;animation-duration:2.8s"></span>
+            <span class="sp" style="left:3%;top:42%;width:6px;height:6px;background:#d4b54c;animation-delay:1.1s;animation-duration:3.5s"></span>
+            <span class="sp" style="left:1.5%;top:68%;width:4px;height:4px;background:#4a6d4e;animation-delay:2.2s;animation-duration:2.5s"></span>
+            <span class="sp" style="left:4%;top:85%;width:2px;height:2px;background:#7a96b4;animation-delay:0.5s;animation-duration:4s"></span>
+            <span class="sp" style="left:2.5%;top:30%;width:4px;height:4px;background:#d4b54c;animation-delay:3s;animation-duration:3.2s"></span>
+            <span class="sp" style="left:5%;top:55%;width:2px;height:2px;background:#c25a44;animation-delay:1.7s;animation-duration:4.4s"></span>
+            <span class="sp" style="right:1%;top:25%;width:4px;height:4px;background:#d4b54c;animation-delay:0.7s;animation-duration:3.1s"></span>
+            <span class="sp" style="right:3%;top:58%;width:6px;height:6px;background:#c25a44;animation-delay:1.8s;animation-duration:2.7s"></span>
+            <span class="sp" style="right:1.5%;top:75%;width:4px;height:4px;background:#7a96b4;animation-delay:2.5s;animation-duration:3.8s"></span>
+            <span class="sp" style="right:4%;top:38%;width:2px;height:2px;background:#4a6d4e;animation-delay:0.3s;animation-duration:4.2s"></span>
+            <span class="sp" style="right:2%;top:88%;width:4px;height:4px;background:#d4b54c;animation-delay:3.5s;animation-duration:2.9s"></span>
+            <span class="sp" style="right:5%;top:14%;width:2px;height:2px;background:#c25a44;animation-delay:2.1s;animation-duration:3.6s"></span>
+            <span class="sp" style="left:8%;top:6%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.5s;animation-duration:5s"></span>
+            <span class="sp" style="right:9%;top:94%;width:2px;height:2px;background:#d4b54c;animation-delay:2.8s;animation-duration:4.5s"></span>
+            <span class="sp" style="right:12%;top:4%;width:4px;height:4px;background:#7a96b4;animation-delay:2s;animation-duration:4.1s"></span>
+        </div>
         <div class="zw-corner tl">[+]</div>
         <div class="zw-corner tr">[+]</div>
         <div class="zw-topbar">
@@ -2542,11 +2580,10 @@ else:
         </div>
         <div class="zw-hero">
             <div class="zw-hero-text">
-                <div class="zw-eyebrow">Sweet Sweet Homeland</div>
                 <div class="zw-kicker">A READING CLUB</div>
-                <h1 class="zw-title">嘟 哒</h1>
+                <h1 class="zw-title">DUDA</h1>
                 <div class="zw-title-bar"></div>
-                <div class="zw-subtitle-zh">你 的 共 读 伴 侣</div>
+                <div class="zw-subtitle-zh">YOUR COZY READING PAL</div>
                 <div class="zw-desc">
                     <span class="line line-1">在这里，每一本书都值得被深度对话。</span>
                     <span class="line line-3">「""" + _html.escape(_q_text) + """」</span>
@@ -2669,6 +2706,18 @@ else:
 
     st.markdown("""
     <div class="zine-welcome zw-bottom">
+        <div class="zw-sparkles" aria-hidden="true">
+            <span class="sp" style="left:1.5%;top:28%;width:4px;height:4px;background:#d4b54c;animation-delay:0.4s;animation-duration:3.2s"></span>
+            <span class="sp" style="left:3.5%;top:62%;width:6px;height:6px;background:#4a6d4e;animation-delay:1.6s;animation-duration:2.8s"></span>
+            <span class="sp" style="left:2%;top:82%;width:2px;height:2px;background:#c25a44;animation-delay:2.8s;animation-duration:4s"></span>
+            <span class="sp" style="left:5%;top:45%;width:2px;height:2px;background:#7a96b4;animation-delay:3.4s;animation-duration:3.7s"></span>
+            <span class="sp" style="right:1.5%;top:20%;width:4px;height:4px;background:#c25a44;animation-delay:1s;animation-duration:3.5s"></span>
+            <span class="sp" style="right:3%;top:52%;width:6px;height:6px;background:#7a96b4;animation-delay:2.2s;animation-duration:2.6s"></span>
+            <span class="sp" style="right:2%;top:76%;width:2px;height:2px;background:#d4b54c;animation-delay:0.6s;animation-duration:4.3s"></span>
+            <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:#4a6d4e;animation-delay:1.9s;animation-duration:3.1s"></span>
+            <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.8s;animation-duration:5s"></span>
+            <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:#c25a44;animation-delay:3.2s;animation-duration:3.8s"></span>
+        </div>
         <div class="zw-corner bl">[+]</div>
         <div class="zw-corner br">[+]</div>
         <!-- HOW IT WORKS 3 步 -->
