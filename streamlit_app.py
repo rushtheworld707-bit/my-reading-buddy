@@ -231,8 +231,17 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="slider"]
     box-shadow: 2px 2px 0 #3b2e1e !important;
 }
 
-/* A6：侧栏 number_input（跳转页码）方角像素化
-   分两部分：① 输入框本体 ② +/- 步进按钮；都只改颜色/边框/字体，不动尺寸与布局 */
+/* A6：侧栏 number_input（跳转页码）方角像素化 */
+/* 去掉外层容器多余的边框 / 圆角 / 阴影 */
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] > div,
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] [data-baseweb="input"],
+body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] [data-baseweb="base-input"] {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    outline: none !important;
+}
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
     background: #fffaec !important;
     border: 2px solid #3b2e1e !important;
@@ -1834,6 +1843,18 @@ if has_file:
             current_page = 0
             st.session_state.last_chapter = chapter_idx
 
+        # 页码跳转（章节选择器正下方）
+        jump_page = st.sidebar.number_input(
+            "跳到第几页",
+            min_value=1,
+            max_value=total_pages,
+            value=current_page + 1,
+            step=1,
+        )
+        if jump_page - 1 != current_page:
+            st.session_state[page_key] = jump_page - 1
+            st.rerun()
+
         # --- 侧边栏：书签 ---
         st.sidebar.divider()
         st.sidebar.markdown(
@@ -2322,18 +2343,6 @@ if has_file:
         )
         if _ff != st.session_state.font_family_name:
             st.session_state.font_family_name = _ff
-            st.rerun()
-
-        # 页码跳转
-        jump_page = st.sidebar.number_input(
-            "跳转到页码",
-            min_value=1,
-            max_value=total_pages,
-            value=current_page + 1,
-            step=1
-        )
-        if jump_page - 1 != current_page:
-            st.session_state[page_key] = jump_page - 1
             st.rerun()
 
         # --- 分隔：AI 聊天区域 ---
