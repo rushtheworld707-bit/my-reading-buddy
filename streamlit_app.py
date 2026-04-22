@@ -1103,6 +1103,29 @@ body:has(.reading-area) [data-testid="stSpinner"] {
 .reading-area .book-spread.rb-anim-in {
     animation: rb-flip-in 0.28s steps(7) both;
 }
+/* ===== /delight: 章末庆祝 ===== */
+@keyframes rb-petal {
+    0%   { opacity: 1;   transform: translate(0, 0) scale(1); }
+    60%  { opacity: 0.9; }
+    100% { opacity: 0;   transform: translate(var(--dx, -12px), -72px) scale(0.4); }
+}
+.rb-celebrate {
+    position: fixed;
+    bottom: 180px;
+    right: 60px;
+    width: 0; height: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 9999;
+}
+.rb-petal {
+    position: absolute;
+    width: 5px; height: 5px;
+    image-rendering: pixelated;
+    animation: rb-petal var(--dur, 1.4s) steps(9) var(--delay, 0s) 3 forwards;
+}
+/* 点猫猫：鼠标变小手 */
+#zw-cat-svg { cursor: pointer; }
 /* keyboard hint pill shake */
 @keyframes rb-shake {
     0%,100% { transform: translateX(0); }
@@ -1914,6 +1937,25 @@ if has_file:
         )
         page_range = _pg_main + _pg_sub
 
+        # 章末庆祝：读完最后一页时冒像素花瓣
+        _PETALS = [
+            {"bg": "#c25a44", "dx": "-18px", "dur": "1.3s", "delay": "0s"},
+            {"bg": "#d4b54c", "dx": "-8px",  "dur": "1.5s", "delay": "0.1s"},
+            {"bg": "#4a6d4e", "dx": "-28px", "dur": "1.2s", "delay": "0.2s"},
+            {"bg": "#7a96b4", "dx": "-14px", "dur": "1.6s", "delay": "0.05s"},
+            {"bg": "#c25a44", "dx": "-22px", "dur": "1.4s", "delay": "0.15s"},
+            {"bg": "#d4b54c", "dx": "-6px",  "dur": "1.3s", "delay": "0.25s"},
+            {"bg": "#4a6d4e", "dx": "-16px", "dur": "1.5s", "delay": "0.08s"},
+            {"bg": "#7a96b4", "dx": "-10px", "dur": "1.2s", "delay": "0.18s"},
+        ]
+        _celebrate_html = ""
+        if next_disabled:
+            _petal_tags = "".join(
+                f'<div class="rb-petal" style="background:{p["bg"]};--dx:{p["dx"]};--dur:{p["dur"]};--delay:{p["delay"]}"></div>'
+                for p in _PETALS
+            )
+            _celebrate_html = f'<div class="rb-celebrate">{_petal_tags}</div>'
+
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
         <div class="reading-area">
@@ -1932,6 +1974,7 @@ if has_file:
                 <button type="button" class="{prev_cls}">上一页</button>
                 <button type="button" class="{next_cls}">下一页</button>
             </div>
+            {_celebrate_html}
         </div>
         '''
         st.markdown(reading_html, unsafe_allow_html=True)
@@ -2361,7 +2404,7 @@ else:
                 </div>
             </div>
             <div class="zw-art">
-                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <svg id="zw-cat-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                     <!-- 书 1 底部 陶土红 -->
                     <rect x="6" y="50" width="52" height="8" fill="#c25a44"/>
                     <rect x="6" y="50" width="52" height="1" fill="#7d2e21"/>
@@ -2405,8 +2448,17 @@ else:
                     <!-- 底部浅灰阴影增加立体感 -->
                     <rect x="14" y="32" width="28" height="1" fill="#e5dcc0"/>
                     <!-- 闭眼（黑色短横线） -->
-                    <rect x="17" y="28" width="3" height="1" fill="#3b2e1e"/>
-                    <rect x="22" y="28" width="3" height="1" fill="#3b2e1e"/>
+                    <g id="zw-eyes-closed">
+                        <rect x="17" y="28" width="3" height="1" fill="#3b2e1e"/>
+                        <rect x="22" y="28" width="3" height="1" fill="#3b2e1e"/>
+                    </g>
+                    <!-- 睁眼（点击后短暂显示） -->
+                    <g id="zw-eyes-open" style="display:none">
+                        <rect x="17" y="27" width="3" height="3" fill="#3b2e1e"/>
+                        <rect x="18" y="28" width="1" height="1" fill="#fffef8"/>
+                        <rect x="22" y="27" width="3" height="3" fill="#3b2e1e"/>
+                        <rect x="23" y="28" width="1" height="1" fill="#fffef8"/>
+                    </g>
                     <!-- 鼻 -->
                     <rect x="20" y="30" width="2" height="1" fill="#c25a44"/>
                     <!-- 嘴 -->
@@ -2507,3 +2559,28 @@ else:
         </div>
     </div>
     """, unsafe_allow_html=True)
+    # 点猫眨眼：click → 睁眼 0.9s → 闭眼
+    components.html("""
+    <script>
+    (function() {
+        function attachCatBlink() {
+            const svg = window.parent.document.getElementById('zw-cat-svg');
+            if (!svg) { setTimeout(attachCatBlink, 200); return; }
+            if (svg._rb_blink_bound) return;
+            svg._rb_blink_bound = true;
+            svg.addEventListener('click', function() {
+                const closed = window.parent.document.getElementById('zw-eyes-closed');
+                const open   = window.parent.document.getElementById('zw-eyes-open');
+                if (!closed || !open) return;
+                closed.style.display = 'none';
+                open.style.display   = '';
+                setTimeout(function() {
+                    open.style.display   = 'none';
+                    closed.style.display = '';
+                }, 900);
+            });
+        }
+        attachCatBlink();
+    })();
+    </script>
+    """, height=0)
