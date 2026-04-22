@@ -1934,20 +1934,21 @@ if has_file:
                     _note_md += _pn_note
                 st.info(_note_md)
 
+        _nf_ver = st.session_state.get("_note_form_ver", 0)
         with st.expander("✏ 添加笔记"):
             _passage_in = st.text_area(
                 "摘录片段（可选）",
                 placeholder="粘贴你想记录的原文片段……",
-                key=f"note_passage_{chapter_idx}_{current_page}",
+                key=f"note_passage_{chapter_idx}_{current_page}_{_nf_ver}",
                 height=80,
             )
             _note_in = st.text_area(
                 "你的想法",
                 placeholder="写下你的感想、疑问或联想……",
-                key=f"note_text_{chapter_idx}_{current_page}",
+                key=f"note_text_{chapter_idx}_{current_page}_{_nf_ver}",
                 height=80,
             )
-            if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}"):
+            if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}_{_nf_ver}"):
                 if _note_in.strip() or _passage_in.strip():
                     from datetime import timezone, timedelta
                     import uuid as _uuid
@@ -1963,9 +1964,7 @@ if has_file:
                     _cur_notes.append(_new_note)
                     st.session_state.notes = _cur_notes
                     _save_book_notes(book_key, _cur_notes)
-                    # 清空输入框
-                    st.session_state[f"note_passage_{chapter_idx}_{current_page}"] = ""
-                    st.session_state[f"note_text_{chapter_idx}_{current_page}"] = ""
+                    st.session_state._note_form_ver = _nf_ver + 1
                     st.toast("[+] 笔记已保存")
                     st.rerun()
                 else:
