@@ -1960,6 +1960,9 @@ if has_file:
             "默认": "system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
             "宋体": "'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'SimSun', 'PingFang SC', serif",
             "楷体": "'Kaiti SC', 'STKaiti', 'KaiTi', 'BiauKai', serif",
+            "仿宋": "'FangSong', 'STFangsong', 'FangSong_GB2312', 'Noto Serif SC', serif",
+            "黑体": "'Source Han Sans SC', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif",
+            "隶书": "'LiSu', 'STLiti', 'Noto Serif SC', serif",
             "圆体": "'Yuanti SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
         }
         ff_css = _font_stacks.get(st.session_state.get("font_family_name", "默认"), _font_stacks["默认"])
@@ -2331,6 +2334,9 @@ if has_file:
             "默认": 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
             "宋体": '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", "PingFang SC", serif',
             "楷体": '"Kaiti SC", "STKaiti", "KaiTi", "BiauKai", serif',
+            "仿宋": '"FangSong", "STFangsong", "FangSong_GB2312", "Noto Serif SC", serif',
+            "黑体": '"Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif',
+            "隶书": '"LiSu", "STLiti", "Noto Serif SC", serif',
             "圆体": '"Yuanti SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
         }
         if "font_family_name" not in st.session_state:
