@@ -1103,41 +1103,57 @@ body:has(.reading-area) [data-testid="stSpinner"] {
 .reading-area .book-spread.rb-anim-in {
     animation: rb-flip-in 0.28s steps(7) both;
 }
-/* ===== /delight: 章末庆祝 ===== */
-@keyframes rb-petal {
+/* ===== /delight: 章末烟花庆祝 ===== */
+/* 烟花粒子：从爆炸点向外放射 */
+@keyframes rb-fw-burst {
     0%   { opacity: 1;   transform: translate(0, 0) scale(1); }
-    50%  { opacity: 1; }
-    100% { opacity: 0;   transform: translate(var(--dx, -12px), var(--dy, -120px)) scale(0.2); }
+    65%  { opacity: 0.9; }
+    100% { opacity: 0;   transform: translate(var(--dx), var(--dy)) scale(0.1); }
 }
-@keyframes rb-banner-pop {
-    0%   { opacity: 0;   transform: translate(-50%, -40%) scale(0.7); }
-    12%  { opacity: 1;   transform: translate(-50%, -52%) scale(1.06); }
-    22%  { opacity: 1;   transform: translate(-50%, -50%) scale(1); }
-    78%  { opacity: 1;   transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0;   transform: translate(-50%, -62%) scale(0.9); }
+/* 爆炸中心闪光 */
+@keyframes rb-fw-flash {
+    0%   { opacity: 1; transform: scale(0.4); }
+    40%  { opacity: 0; transform: scale(2.5); }
+    100% { opacity: 0; }
 }
-.rb-celebrate {
+.rb-firework {
     position: fixed;
-    bottom: 100px;
-    left: 0;
-    width: 100vw;
-    height: 0;
     pointer-events: none;
-    overflow: visible;
     z-index: 9999;
+    width: 0; height: 0;
+    overflow: visible;
 }
-.rb-petal {
+.rb-fw-p {
     position: absolute;
+    width: var(--sz, 7px);
+    height: var(--sz, 7px);
+    /* 粒子从中心点出发 */
+    left: calc(var(--sz, 7px) / -2);
+    top: calc(var(--sz, 7px) / -2);
     image-rendering: pixelated;
-    width: var(--sz, 8px);
-    height: var(--sz, 8px);
-    animation: rb-petal var(--dur, 1.5s) steps(10) var(--delay, 0s) 3 forwards;
+    animation: rb-fw-burst 1.3s steps(10) var(--bd, 0s) forwards;
+}
+.rb-fw-flash {
+    position: absolute;
+    width: 10px; height: 10px;
+    left: -5px; top: -5px;
+    background: #fffaec;
+    border: 1px solid #d4b54c;
+    image-rendering: pixelated;
+    animation: rb-fw-flash 0.35s steps(4) var(--bd, 0s) forwards;
+}
+/* 横幅 */
+@keyframes rb-banner-pop {
+    0%   { opacity: 0; transform: translate(-50%, -40%) scale(0.7); }
+    12%  { opacity: 1; transform: translate(-50%, -52%) scale(1.07); }
+    22%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    78%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -62%) scale(0.9); }
 }
 .rb-banner {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     background: #fffaec;
     border: 3px solid #3b2e1e;
     box-shadow: 6px 6px 0 #d4b54c;
@@ -1149,7 +1165,7 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     white-space: nowrap;
     z-index: 10000;
     pointer-events: none;
-    animation: rb-banner-pop 3.2s steps(12) forwards;
+    animation: rb-banner-pop 3.4s steps(12) 0.15s forwards;
 }
 /* 点猫猫：鼠标变小手 */
 #zw-cat-svg { cursor: pointer; }
@@ -1964,31 +1980,31 @@ if has_file:
         )
         page_range = _pg_main + _pg_sub
 
-        # 章末庆祝：读完最后一页时弹横幅 + 像素粒子铺满屏幕底部
-        _PETALS = [
-            {"left": "8%",  "bg": "#c25a44", "dx": "-25px", "dy": "-130px", "sz": "9px",  "dur": "1.6s", "delay": "0.1s"},
-            {"left": "16%", "bg": "#d4b54c", "dx": "-10px", "dy": "-110px", "sz": "7px",  "dur": "1.4s", "delay": "0.3s"},
-            {"left": "24%", "bg": "#4a6d4e", "dx": "-18px", "dy": "-150px", "sz": "10px", "dur": "1.7s", "delay": "0.0s"},
-            {"left": "32%", "bg": "#7a96b4", "dx": "8px",   "dy": "-120px", "sz": "8px",  "dur": "1.5s", "delay": "0.2s"},
-            {"left": "42%", "bg": "#c25a44", "dx": "-8px",  "dy": "-140px", "sz": "9px",  "dur": "1.6s", "delay": "0.15s"},
-            {"left": "51%", "bg": "#d4b54c", "dx": "12px",  "dy": "-130px", "sz": "11px", "dur": "1.8s", "delay": "0.05s"},
-            {"left": "60%", "bg": "#4a6d4e", "dx": "20px",  "dy": "-120px", "sz": "8px",  "dur": "1.5s", "delay": "0.25s"},
-            {"left": "68%", "bg": "#7a96b4", "dx": "15px",  "dy": "-145px", "sz": "10px", "dur": "1.7s", "delay": "0.1s"},
-            {"left": "76%", "bg": "#c25a44", "dx": "22px",  "dy": "-110px", "sz": "7px",  "dur": "1.4s", "delay": "0.2s"},
-            {"left": "83%", "bg": "#d4b54c", "dx": "18px",  "dy": "-135px", "sz": "9px",  "dur": "1.6s", "delay": "0.0s"},
-            {"left": "90%", "bg": "#4a6d4e", "dx": "28px",  "dy": "-125px", "sz": "8px",  "dur": "1.5s", "delay": "0.15s"},
-            {"left": "55%", "bg": "#7a96b4", "dx": "-5px",  "dy": "-160px", "sz": "12px", "dur": "1.9s", "delay": "0.08s"},
+        # 章末庆祝：4 个像素烟花爆炸点 + 中央横幅
+        # 每个爆炸点：8 方向粒子 + 中心闪光，错开触发时间
+        _FW_BURSTS = [
+            {"left": "18%", "top": "44vh", "bd": "0.0s",  "sz": "7px",
+             "colors": ["#c25a44", "#d4b54c", "#c25a44", "#fffaec", "#c25a44", "#d4b54c", "#c25a44", "#fffaec"]},
+            {"left": "40%", "top": "32vh", "bd": "0.45s", "sz": "9px",
+             "colors": ["#d4b54c", "#7a96b4", "#d4b54c", "#fffaec", "#d4b54c", "#7a96b4", "#d4b54c", "#fffaec"]},
+            {"left": "62%", "top": "38vh", "bd": "0.25s", "sz": "8px",
+             "colors": ["#4a6d4e", "#c25a44", "#4a6d4e", "#fffaec", "#4a6d4e", "#c25a44", "#4a6d4e", "#fffaec"]},
+            {"left": "82%", "top": "44vh", "bd": "0.7s",  "sz": "7px",
+             "colors": ["#7a96b4", "#4a6d4e", "#7a96b4", "#fffaec", "#7a96b4", "#4a6d4e", "#7a96b4", "#fffaec"]},
         ]
+        # 8 方向 (dx, dy) 单位 px
+        _FW_DIRS = [(0,-65),(46,-46),(65,0),(46,46),(0,65),(-46,46),(-65,0),(-46,-46)]
         _celebrate_html = ""
         if next_disabled:
-            _petal_tags = "".join(
-                f'<div class="rb-petal" style="left:{p["left"]};background:{p["bg"]};--dx:{p["dx"]};--dy:{p["dy"]};--sz:{p["sz"]};--dur:{p["dur"]};--delay:{p["delay"]}"></div>'
-                for p in _PETALS
-            )
-            _celebrate_html = (
-                '<div class="rb-celebrate">' + _petal_tags + '</div>'
-                '<div class="rb-banner">★ 本章读完 ★</div>'
-            )
+            _bursts_html = ""
+            for _b in _FW_BURSTS:
+                _particles = "".join(
+                    f'<div class="rb-fw-p" style="background:{_b["colors"][_i]};--dx:{_dx}px;--dy:{_dy}px;--sz:{_b["sz"]};--bd:{_b["bd"]}"></div>'
+                    for _i, (_dx, _dy) in enumerate(_FW_DIRS)
+                )
+                _flash = f'<div class="rb-fw-flash" style="--bd:{_b["bd"]}"></div>'
+                _bursts_html += f'<div class="rb-firework" style="left:{_b["left"]};top:{_b["top"]}">{_flash}{_particles}</div>'
+            _celebrate_html = _bursts_html + '<div class="rb-banner">★ 本章读完 ★</div>'
 
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
