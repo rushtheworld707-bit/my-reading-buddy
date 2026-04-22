@@ -1101,14 +1101,6 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     animation: rb-flip-in 0.22s steps(6) both;
     transform-style: preserve-3d;
 }
-/* flip-out: JS 点击后加此 class，动画结束后再触发 Streamlit 翻页 */
-@keyframes rb-flip-out {
-    0%   { opacity: 1;   transform: perspective(900px) rotateY(0deg)  scaleX(1); }
-    100% { opacity: 0.2; transform: perspective(900px) rotateY(-6deg) scaleX(0.98); }
-}
-.reading-area .book-spread.rb-flip-out {
-    animation: rb-flip-out 0.18s steps(5) both;
-}
 /* keyboard hint pill shake */
 @keyframes rb-shake {
     0%,100% { transform: translateX(0); }
@@ -2119,11 +2111,12 @@ if has_file:
                     function flipAndNavigate(action) {
                         const spread = p.document.querySelector('.book-spread');
                         if (spread) {
-                            spread.classList.add('rb-flip-out');
-                            setTimeout(() => clickHiddenBtn(action), 180);
-                        } else {
-                            clickHiddenBtn(action);
+                            // Inline style: hides old content immediately, cleared when
+                            // Streamlit creates a fresh .book-spread element on rerender
+                            spread.style.opacity = '0';
+                            spread.style.transform = 'perspective(900px) rotateY(-5deg) scaleX(0.98)';
                         }
+                        clickHiddenBtn(action);
                     }
                     function handler(e) {
                         if (e.ctrlKey || e.metaKey || e.altKey) return;
