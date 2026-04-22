@@ -1780,9 +1780,7 @@ if has_file:
             f'<strong class="sbh">{PX_ICON["save"]}笔记</strong>',
             unsafe_allow_html=True,
         )
-        _all_notes = _load_all_notes().get(book_key, [])
-        # 同步到 session_state（其它地方新增后保持一致）
-        st.session_state.notes = _all_notes
+        _all_notes = st.session_state.get("notes", [])
         if not _all_notes:
             st.sidebar.caption("还没有笔记")
         else:
@@ -1807,6 +1805,7 @@ if has_file:
                 with _nc2:
                     if st.button("✕", key=f"note_del_{_n['id']}", help="删除此笔记"):
                         _remove_note(book_key, _n["id"])
+                        st.session_state.notes = [x for x in st.session_state.get("notes", []) if x.get("id") != _n["id"]]
                         st.rerun()
 
         # --- 阅读界面 ---
@@ -1950,8 +1949,23 @@ if has_file:
             )
             if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}"):
                 if _note_in.strip() or _passage_in.strip():
-                    _add_note(book_key, chapter_idx, current_page, _passage_in, _note_in)
-                    st.session_state.notes = _load_all_notes().get(book_key, [])
+                    from datetime import timezone, timedelta
+                    import uuid as _uuid
+                    _new_note = {
+                        "id": str(_uuid.uuid4())[:8],
+                        "chapter_idx": int(chapter_idx),
+                        "page": int(current_page),
+                        "passage": _passage_in.strip(),
+                        "note": _note_in.strip(),
+                        "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
+                    }
+                    _cur_notes = list(st.session_state.get("notes", []))
+                    _cur_notes.append(_new_note)
+                    st.session_state.notes = _cur_notes
+                    _save_book_notes(book_key, _cur_notes)
+                    # 清空输入框
+                    st.session_state[f"note_passage_{chapter_idx}_{current_page}"] = ""
+                    st.session_state[f"note_text_{chapter_idx}_{current_page}"] = ""
                     st.toast("[+] 笔记已保存")
                     st.rerun()
                 else:
