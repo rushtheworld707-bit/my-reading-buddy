@@ -1106,23 +1106,50 @@ body:has(.reading-area) [data-testid="stSpinner"] {
 /* ===== /delight: 章末庆祝 ===== */
 @keyframes rb-petal {
     0%   { opacity: 1;   transform: translate(0, 0) scale(1); }
-    60%  { opacity: 0.9; }
-    100% { opacity: 0;   transform: translate(var(--dx, -12px), -72px) scale(0.4); }
+    50%  { opacity: 1; }
+    100% { opacity: 0;   transform: translate(var(--dx, -12px), var(--dy, -120px)) scale(0.2); }
+}
+@keyframes rb-banner-pop {
+    0%   { opacity: 0;   transform: translate(-50%, -40%) scale(0.7); }
+    12%  { opacity: 1;   transform: translate(-50%, -52%) scale(1.06); }
+    22%  { opacity: 1;   transform: translate(-50%, -50%) scale(1); }
+    78%  { opacity: 1;   transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0;   transform: translate(-50%, -62%) scale(0.9); }
 }
 .rb-celebrate {
     position: fixed;
-    bottom: 180px;
-    right: 60px;
-    width: 0; height: 0;
+    bottom: 100px;
+    left: 0;
+    width: 100vw;
+    height: 0;
     pointer-events: none;
     overflow: visible;
     z-index: 9999;
 }
 .rb-petal {
     position: absolute;
-    width: 5px; height: 5px;
     image-rendering: pixelated;
-    animation: rb-petal var(--dur, 1.4s) steps(9) var(--delay, 0s) 3 forwards;
+    width: var(--sz, 8px);
+    height: var(--sz, 8px);
+    animation: rb-petal var(--dur, 1.5s) steps(10) var(--delay, 0s) 3 forwards;
+}
+.rb-banner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fffaec;
+    border: 3px solid #3b2e1e;
+    box-shadow: 6px 6px 0 #d4b54c;
+    color: #3b2e1e;
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 13px;
+    padding: 18px 32px;
+    letter-spacing: 3px;
+    white-space: nowrap;
+    z-index: 10000;
+    pointer-events: none;
+    animation: rb-banner-pop 3.2s steps(12) forwards;
 }
 /* 点猫猫：鼠标变小手 */
 #zw-cat-svg { cursor: pointer; }
@@ -1937,24 +1964,31 @@ if has_file:
         )
         page_range = _pg_main + _pg_sub
 
-        # 章末庆祝：读完最后一页时冒像素花瓣
+        # 章末庆祝：读完最后一页时弹横幅 + 像素粒子铺满屏幕底部
         _PETALS = [
-            {"bg": "#c25a44", "dx": "-18px", "dur": "1.3s", "delay": "0s"},
-            {"bg": "#d4b54c", "dx": "-8px",  "dur": "1.5s", "delay": "0.1s"},
-            {"bg": "#4a6d4e", "dx": "-28px", "dur": "1.2s", "delay": "0.2s"},
-            {"bg": "#7a96b4", "dx": "-14px", "dur": "1.6s", "delay": "0.05s"},
-            {"bg": "#c25a44", "dx": "-22px", "dur": "1.4s", "delay": "0.15s"},
-            {"bg": "#d4b54c", "dx": "-6px",  "dur": "1.3s", "delay": "0.25s"},
-            {"bg": "#4a6d4e", "dx": "-16px", "dur": "1.5s", "delay": "0.08s"},
-            {"bg": "#7a96b4", "dx": "-10px", "dur": "1.2s", "delay": "0.18s"},
+            {"left": "8%",  "bg": "#c25a44", "dx": "-25px", "dy": "-130px", "sz": "9px",  "dur": "1.6s", "delay": "0.1s"},
+            {"left": "16%", "bg": "#d4b54c", "dx": "-10px", "dy": "-110px", "sz": "7px",  "dur": "1.4s", "delay": "0.3s"},
+            {"left": "24%", "bg": "#4a6d4e", "dx": "-18px", "dy": "-150px", "sz": "10px", "dur": "1.7s", "delay": "0.0s"},
+            {"left": "32%", "bg": "#7a96b4", "dx": "8px",   "dy": "-120px", "sz": "8px",  "dur": "1.5s", "delay": "0.2s"},
+            {"left": "42%", "bg": "#c25a44", "dx": "-8px",  "dy": "-140px", "sz": "9px",  "dur": "1.6s", "delay": "0.15s"},
+            {"left": "51%", "bg": "#d4b54c", "dx": "12px",  "dy": "-130px", "sz": "11px", "dur": "1.8s", "delay": "0.05s"},
+            {"left": "60%", "bg": "#4a6d4e", "dx": "20px",  "dy": "-120px", "sz": "8px",  "dur": "1.5s", "delay": "0.25s"},
+            {"left": "68%", "bg": "#7a96b4", "dx": "15px",  "dy": "-145px", "sz": "10px", "dur": "1.7s", "delay": "0.1s"},
+            {"left": "76%", "bg": "#c25a44", "dx": "22px",  "dy": "-110px", "sz": "7px",  "dur": "1.4s", "delay": "0.2s"},
+            {"left": "83%", "bg": "#d4b54c", "dx": "18px",  "dy": "-135px", "sz": "9px",  "dur": "1.6s", "delay": "0.0s"},
+            {"left": "90%", "bg": "#4a6d4e", "dx": "28px",  "dy": "-125px", "sz": "8px",  "dur": "1.5s", "delay": "0.15s"},
+            {"left": "55%", "bg": "#7a96b4", "dx": "-5px",  "dy": "-160px", "sz": "12px", "dur": "1.9s", "delay": "0.08s"},
         ]
         _celebrate_html = ""
         if next_disabled:
             _petal_tags = "".join(
-                f'<div class="rb-petal" style="background:{p["bg"]};--dx:{p["dx"]};--dur:{p["dur"]};--delay:{p["delay"]}"></div>'
+                f'<div class="rb-petal" style="left:{p["left"]};background:{p["bg"]};--dx:{p["dx"]};--dy:{p["dy"]};--sz:{p["sz"]};--dur:{p["dur"]};--delay:{p["delay"]}"></div>'
                 for p in _PETALS
             )
-            _celebrate_html = f'<div class="rb-celebrate">{_petal_tags}</div>'
+            _celebrate_html = (
+                '<div class="rb-celebrate">' + _petal_tags + '</div>'
+                '<div class="rb-banner">★ 本章读完 ★</div>'
+            )
 
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
