@@ -986,6 +986,34 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
 }
 @media (max-width: 900px) { .zw-sparkles { display: none; } }
 
+/* 像素便利贴 */
+.zw-sticky {
+    position: absolute;
+    background: #fffaec;
+    border: 2px solid var(--zw-ink);
+    box-shadow: 3px 3px 0 var(--zw-mustard);
+    padding: 6px 8px;
+    font-family: 'Zpix', monospace;
+    font-size: 10px;
+    color: var(--zw-ink);
+    line-height: 1.8;
+    width: 62px;
+    z-index: 2;
+    pointer-events: none;
+    -webkit-font-smoothing: none;
+}
+.zw-sticky-b { box-shadow: 3px 3px 0 var(--zw-terra); }
+@media (max-width: 900px) { .zw-sticky { display: none; } }
+
+/* 像素书架书本抽出动效 */
+@keyframes zw-book-pull {
+    0%, 30%  { transform: translateY(0); }
+    50%, 70% { transform: translateY(-10px); }
+    100%     { transform: translateY(0); }
+}
+.zw-book-pull { animation: zw-book-pull 5s ease-in-out infinite; animation-delay: 2s; }
+@media (max-width: 900px) { .zw-shelf { display: none; } }
+
 /* 上传区标签 */
 .zw-upload-label {
     font-family: 'Press Start 2P', monospace;
@@ -2571,6 +2599,44 @@ else:
             <span class="sp" style="right:9%;top:94%;width:2px;height:2px;background:#d4b54c;animation-delay:2.8s;animation-duration:4.5s"></span>
             <span class="sp" style="right:12%;top:4%;width:4px;height:4px;background:#7a96b4;animation-delay:2s;animation-duration:4.1s"></span>
         </div>
+        <!-- 左侧像素书架 -->
+        <div class="zw-shelf" style="position:absolute;left:8px;bottom:24px;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="52" height="122" viewBox="0 0 52 122" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;shape-rendering:crispEdges;display:block">
+            <rect x="0" y="112" width="52" height="2" fill="#3b2e1e"/>
+            <rect x="1" y="68" width="8" height="44" fill="#c25a44"/>
+            <rect x="1" y="68" width="8" height="1" fill="#7d2e21"/>
+            <rect x="1" y="111" width="8" height="1" fill="#7d2e21"/>
+            <rect x="2" y="75" width="5" height="1" fill="#f3e9cf" opacity="0.7"/>
+            <rect x="10" y="54" width="8" height="58" fill="#d4b54c"/>
+            <rect x="10" y="54" width="8" height="1" fill="#8a7420"/>
+            <rect x="10" y="111" width="8" height="1" fill="#8a7420"/>
+            <rect x="11" y="62" width="5" height="1" fill="#3b2e1e" opacity="0.35"/>
+            <rect x="11" y="66" width="4" height="1" fill="#3b2e1e" opacity="0.35"/>
+            <g class="zw-book-pull">
+              <rect x="19" y="72" width="7" height="40" fill="#4a6d4e"/>
+              <rect x="19" y="72" width="7" height="1" fill="#2d4130"/>
+              <rect x="19" y="111" width="7" height="1" fill="#2d4130"/>
+              <rect x="20" y="79" width="4" height="1" fill="#f3e9cf" opacity="0.5"/>
+            </g>
+            <rect x="27" y="63" width="8" height="49" fill="#7a96b4"/>
+            <rect x="27" y="63" width="8" height="1" fill="#4a6878"/>
+            <rect x="27" y="111" width="8" height="1" fill="#4a6878"/>
+            <rect x="36" y="76" width="5" height="36" fill="#3b2e1e"/>
+            <rect x="36" y="76" width="5" height="1" fill="#1a1209"/>
+            <rect x="36" y="111" width="5" height="1" fill="#1a1209"/>
+            <rect x="37" y="83" width="3" height="1" fill="#f3e9cf" opacity="0.3"/>
+            <rect x="42" y="70" width="9" height="42" fill="#e07b5a"/>
+            <rect x="42" y="70" width="9" height="1" fill="#c25a44"/>
+            <rect x="42" y="111" width="9" height="1" fill="#c25a44"/>
+          </svg>
+        </div>
+        <!-- 右侧便利贴 -->
+        <div class="zw-sticky" style="right:10px;top:24%;transform:rotate(-4deg)" aria-hidden="true">
+          <div>p.42</div><div>♥ 划线</div>
+        </div>
+        <div class="zw-sticky zw-sticky-b" style="right:14px;top:54%;transform:rotate(3deg)" aria-hidden="true">
+          <div>→ 精彩</div><div>!! 记住</div>
+        </div>
         <div class="zw-corner tl">[+]</div>
         <div class="zw-corner tr">[+]</div>
         <div class="zw-topbar">
@@ -2717,6 +2783,10 @@ else:
             <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:#4a6d4e;animation-delay:1.9s;animation-duration:3.1s"></span>
             <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.8s;animation-duration:5s"></span>
             <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:#c25a44;animation-delay:3.2s;animation-duration:3.8s"></span>
+        </div>
+        <!-- 右侧便利贴 -->
+        <div class="zw-sticky" style="right:10px;top:38%;transform:rotate(-2deg)" aria-hidden="true">
+          <div>UPLOAD</div><div>&amp; READ ♥</div>
         </div>
         <div class="zw-corner bl">[+]</div>
         <div class="zw-corner br">[+]</div>
