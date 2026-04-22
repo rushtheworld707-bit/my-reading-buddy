@@ -1092,14 +1092,16 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     font-family: 'Zpix', monospace !important;
 }
 /* ===== /animate: pixel motion ===== */
-/* flip-in: Streamlit rerun 重新挂载 .book-spread 时自动播放 */
+/* flip-in: JS 通过 MutationObserver 检测到翻页后添加此 class */
 @keyframes rb-flip-in {
-    0%   { opacity: 0.2; transform: perspective(900px) rotateY(6deg) scaleX(0.98); }
+    0%   { opacity: 0.1; transform: perspective(900px) rotateY(7deg) scaleX(0.97); }
     100% { opacity: 1;   transform: perspective(900px) rotateY(0deg) scaleX(1); }
 }
 .reading-area .book-spread {
-    animation: rb-flip-in 0.22s steps(6) both;
     transform-style: preserve-3d;
+}
+.reading-area .book-spread.rb-anim-in {
+    animation: rb-flip-in 0.28s steps(7) both;
 }
 /* keyboard hint pill shake */
 @keyframes rb-shake {
@@ -1915,7 +1917,7 @@ if has_file:
         # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
         reading_html = f'''
         <div class="reading-area">
-            <div class="book-spread" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
+            <div class="book-spread" data-page="{current_page}" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
                 <div class="book-page book-page-left">
                     {left_html}
                     <div class="page-num">{left_num}</div>
@@ -2146,6 +2148,26 @@ if has_file:
                     };
                     p._rb_click_handler = clickHandler;
                     p.document.addEventListener('click', clickHandler, true);
+
+                    // ── MutationObserver: 监听 data-page 变化，重启 flip-in 动画 ──
+                    let _animLastPage = null;
+                    function triggerFlipIn() {
+                        const spread = p.document.querySelector('.book-spread');
+                        if (!spread) return;
+                        const pg = spread.getAttribute('data-page');
+                        if (pg === _animLastPage) return;
+                        _animLastPage = pg;
+                        spread.classList.remove('rb-anim-in');
+                        void spread.offsetWidth; // force reflow to reset animation
+                        spread.classList.add('rb-anim-in');
+                    }
+                    if (p._rb_mo) { try { p._rb_mo.disconnect(); } catch(_) {} }
+                    const _moRoot = p.document.querySelector('.reading-area') || p.document.body;
+                    const _mo = new MutationObserver(triggerFlipIn);
+                    _mo.observe(_moRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-page'] });
+                    p._rb_mo = _mo;
+                    triggerFlipIn(); // 首次挂载时立刻播放
+
                     setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
                     // Shake hint pill once per session
                     if (!sessionStorage.getItem('rb_hint_shaken')) {
