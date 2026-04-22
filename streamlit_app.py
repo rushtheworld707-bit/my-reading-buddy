@@ -765,7 +765,7 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
     line-height: 1.9;
     color: var(--zw-ink-soft) !important;
     margin-bottom: 26px;
-    max-width: 440px;
+    max-width: 480px;
     -webkit-font-smoothing: none;
     position: relative;
 }
@@ -777,6 +777,8 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
 }
 .zw-desc .line-1 { animation-delay: 1.7s; }
 .zw-desc .line-2 { animation-delay: 3.1s; }
+.zw-desc .line-3 { animation: zw-typewriter 2s steps(32) 4.8s both; font-style: italic; color: var(--zw-ink) !important; }
+.zw-desc .line-4 { animation: zw-typewriter 1.2s steps(18) 6.8s both; font-size: 11px; color: var(--zw-ink-soft) !important; letter-spacing: 1px; }
 .zw-desc .caret {
     display: inline-block;
     width: 8px;
@@ -785,10 +787,10 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
     vertical-align: middle;
     margin-left: 2px;
     animation: zw-blink 1s step-end infinite;
-    animation-delay: 4.5s;
+    animation-delay: 8s;
     opacity: 0;
 }
-.zw-desc .caret.on { animation-delay: 4.5s; opacity: 1; }
+.zw-desc .caret.on { animation-delay: 8s; opacity: 1; }
 
 .zw-formats {
     display: flex;
@@ -2509,6 +2511,27 @@ else:
     # 日式编辑 zine 风欢迎页（全屏覆盖 + 内嵌上传器）
     # 拆成两段：上段（刊头 + Hero）→ 上传器 → 下段（流程 + 特性 + 底栏），
     # 这样上传器在首屏可见，无需下滑。
+    # 随机开场签：以当天日期为种子，一天内保持同一句
+    import html as _html
+    _QUOTES = [
+        ("不去想那些遥远的事，只是走，一步一步。", "《瓦尔登湖》亨利·梭罗"),
+        ("今天的太阳照在昨天的雪上。", "《局外人》阿尔贝·加缪"),
+        ("我只是个过客，可我爱这个世界。", "《挪威的森林》村上春树"),
+        ("细节是魔鬼，也是天使。", "《包法利夫人》福楼拜"),
+        ("人只有在孤独中才能认识自己。", "《约翰·克利斯朵夫》罗曼·罗兰"),
+        ("所谓青春，就是一种永久的失去。", "《挪威的森林》村上春树"),
+        ("书是人类进步的阶梯，也是孤独时最好的伴侣。", "高尔基"),
+        ("我们都是时间的旅人，只是速度不同。", "《时间简史》霍金"),
+        ("真正的旅行不是用眼睛看，而是用心感受。", "马塞尔·普鲁斯特"),
+        ("读一本好书，就是和许多高尚的人谈话。", "歌德"),
+        ("没有什么比一本旧书更让人感到安慰的了。", "简·奥斯汀"),
+        ("世界上只有一种英雄主义，就是认清生活的真相之后依然热爱生活。", "罗曼·罗兰"),
+        ("阅读是一种孤独。", "毕淑敏"),
+        ("每一本书都是一个世界。", "爱默生"),
+        ("书给了我一个世界，而我居住其中。", "乌苏拉·勒古恩"),
+    ]
+    _q_idx = datetime.now().timetuple().tm_yday % len(_QUOTES)
+    _q_text, _q_from = _QUOTES[_q_idx]
     st.markdown("""
     <div class="zine-welcome zw-top">
         <div class="zw-corner tl">[+]</div>
@@ -2527,7 +2550,9 @@ else:
                 <div class="zw-subtitle-zh">你 的 共 读 伴 侣</div>
                 <div class="zw-desc">
                     <span class="line line-1">在这里，每一本书都值得被深度对话。</span>
-                    <span class="line line-2">上传你的电子书，和 AI 一起开启阅读旅程。<span class="caret on"></span></span>
+                    <span class="line line-2">上传你的电子书，和 AI 一起开启阅读旅程。</span>
+                    <span class="line line-3">「""" + _html.escape(_q_text) + """」</span>
+                    <span class="line line-4">—— """ + _html.escape(_q_from) + """<span class="caret on"></span></span>
                 </div>
                 <div class="zw-formats">
                     <span class="zw-tag">EPUB</span>
@@ -2643,33 +2668,6 @@ else:
         st.session_state.file_bytes = _welcome_upload.getvalue()
         st.session_state.file_name = _welcome_upload.name
         st.rerun()
-    # 随机开场签：以当天日期为种子，一天内保持同一句
-    _QUOTES = [
-        ("不去想那些遥远的事，只是走，一步一步。", "《瓦尔登湖》亨利·梭罗"),
-        ("今天的太阳照在昨天的雪上。", "《局外人》阿尔贝·加缪"),
-        ("我只是个过客，可我爱这个世界。", "《挪威的森林》村上春树"),
-        ("细节是魔鬼，也是天使。", "《包法利夫人》福楼拜"),
-        ("人只有在孤独中才能认识自己。", "《约翰·克利斯朵夫》罗曼·罗兰"),
-        ("所谓青春，就是一种永久的失去。", "《挪威的森林》村上春树"),
-        ("书是人类进步的阶梯，也是孤独时最好的伴侣。", "高尔基"),
-        ("我们都是时间的旅人，只是速度不同。", "《时间简史》霍金"),
-        ("真正的旅行不是用眼睛看，而是用心感受。", "马塞尔·普鲁斯特"),
-        ("读一本好书，就是和许多高尚的人谈话。", "歌德"),
-        ("没有什么比一本旧书更让人感到安慰的了。", "简·奥斯汀"),
-        ("世界上只有一种英雄主义，就是认清生活的真相之后依然热爱生活。", "罗曼·罗兰"),
-        ("阅读是一种孤独。", "毕淑敏"),
-        ("每一本书都是一个世界。", "爱默生"),
-        ("书给了我一个世界，而我居住其中。", "乌苏拉·勒古恩"),
-    ]
-    _q_idx = datetime.now().timetuple().tm_yday % len(_QUOTES)
-    _q_text, _q_from = _QUOTES[_q_idx]
-    import html as _html
-    _q_html = (
-        f'<div class="zw-daily-quote">'
-        f'<span class="zw-dq-text">「{_html.escape(_q_text)}」</span>'
-        f'<span class="zw-dq-src">—— {_html.escape(_q_from)}</span>'
-        f'</div>'
-    )
 
     st.markdown("""
     <div class="zine-welcome zw-bottom">
@@ -2713,8 +2711,6 @@ else:
             <span class="zw-feature"><span class="ic">""" + PX_ICON["save"] + """</span> 进度自动保存</span>
             <span class="zw-feature"><span class="ic">""" + PX_ICON["robot"] + """</span> AI 共读</span>
         </div>
-        <!-- 每日开场签 -->
-        """ + _q_html + """
         <!-- 底部装饰条 -->
         <div class="zw-footer-strip">
             <span>PRESS UPLOAD TO BEGIN</span>
