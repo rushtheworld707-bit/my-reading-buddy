@@ -2746,29 +2746,29 @@ else:
         function attachParallax() {
             const p = window.parent.document;
             const art = p.querySelector('.zw-art');
-            const svg = p.getElementById('zw-cat-svg');
-            const hero = p.querySelector('.zw-hero');
-            if (!art || !svg || !hero) { setTimeout(attachParallax, 200); return; }
+            if (!art) { setTimeout(attachParallax, 200); return; }
             if (art._rb_parallax_bound) return;
             art._rb_parallax_bound = true;
-            art.style.transition = 'transform 0.12s steps(4)';
+            art.style.transition = 'transform 0.18s steps(3)';
             let raf = null;
-            hero.addEventListener('mousemove', function(e) {
+            p.addEventListener('mousemove', function(e) {
+                const hero = p.querySelector('.zw-hero');
+                if (!hero) return;
+                const rect = hero.getBoundingClientRect();
+                const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
+                               e.clientY >= rect.top  && e.clientY <= rect.bottom;
+                if (!inside) { art.style.transform = 'translate(0,0)'; return; }
                 if (raf) return;
                 raf = requestAnimationFrame(function() {
                     raf = null;
-                    const rect = hero.getBoundingClientRect();
                     const cx = rect.left + rect.width / 2;
-                    const cy = rect.top + rect.height / 2;
-                    const dx = (e.clientX - cx) / rect.width;
-                    const dy = (e.clientY - cy) / rect.height;
-                    const tx = Math.round(dx * 10);
-                    const ty = Math.round(dy * 6);
+                    const cy = rect.top  + rect.height / 2;
+                    const dx = (e.clientX - cx) / (rect.width  / 2);
+                    const dy = (e.clientY - cy) / (rect.height / 2);
+                    const tx = Math.round(dx * 16);
+                    const ty = Math.round(dy * 10);
                     art.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
                 });
-            });
-            hero.addEventListener('mouseleave', function() {
-                art.style.transform = 'translate(0,0)';
             });
         }
         attachParallax();
