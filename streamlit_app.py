@@ -776,9 +776,8 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
     animation: zw-typewriter 1.4s steps(30) both;
 }
 .zw-desc .line-1 { animation-delay: 1.7s; }
-.zw-desc .line-2 { animation-delay: 3.1s; }
-.zw-desc .line-3 { animation: zw-typewriter 2s steps(32) 4.8s both; font-style: italic; color: var(--zw-ink) !important; }
-.zw-desc .line-4 { animation: zw-typewriter 1.2s steps(18) 6.8s both; font-size: 11px; color: var(--zw-ink-soft) !important; letter-spacing: 1px; }
+.zw-desc .line-3 { animation: zw-typewriter 2s steps(32) 3.3s both; font-style: italic; color: var(--zw-ink) !important; }
+.zw-desc .line-4 { animation: zw-typewriter 1.2s steps(18) 5.3s both; font-size: 11px; color: var(--zw-ink-soft) !important; letter-spacing: 1px; }
 .zw-desc .caret {
     display: inline-block;
     width: 8px;
@@ -787,10 +786,10 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
     vertical-align: middle;
     margin-left: 2px;
     animation: zw-blink 1s step-end infinite;
-    animation-delay: 8s;
+    animation-delay: 6.5s;
     opacity: 0;
 }
-.zw-desc .caret.on { animation-delay: 8s; opacity: 1; }
+.zw-desc .caret.on { animation-delay: 6.5s; opacity: 1; }
 
 .zw-formats {
     display: flex;
@@ -2550,7 +2549,6 @@ else:
                 <div class="zw-subtitle-zh">你 的 共 读 伴 侣</div>
                 <div class="zw-desc">
                     <span class="line line-1">在这里，每一本书都值得被深度对话。</span>
-                    <span class="line line-2">上传你的电子书，和 AI 一起开启阅读旅程。</span>
                     <span class="line line-3">「""" + _html.escape(_q_text) + """」</span>
                     <span class="line line-4">—— """ + _html.escape(_q_from) + """<span class="caret on"></span></span>
                 </div>
