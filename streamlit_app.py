@@ -426,6 +426,7 @@ body:has(.reading-area) .progress-container {
 body:has(.reading-area) .progress-fill {
     background: #c25a44 !important;
     border-radius: 0 !important;
+    transition: width 0.3s steps(12) !important;
 }
 /* 书页容器：虚线外框 + 芥末黄偏移阴影 */
 .reading-area .book-spread {
@@ -1089,6 +1090,34 @@ body:has(.reading-area) .stSpinner,
 body:has(.reading-area) [data-testid="stSpinner"] {
     color: #3b2e1e !important;
     font-family: 'Zpix', monospace !important;
+}
+/* ===== /animate: pixel motion ===== */
+/* flip-in: Streamlit rerun 重新挂载 .book-spread 时自动播放 */
+@keyframes rb-flip-in {
+    0%   { opacity: 0.2; transform: perspective(900px) rotateY(6deg) scaleX(0.98); }
+    100% { opacity: 1;   transform: perspective(900px) rotateY(0deg) scaleX(1); }
+}
+.reading-area .book-spread {
+    animation: rb-flip-in 0.22s steps(6) both;
+    transform-style: preserve-3d;
+}
+/* flip-out: JS 点击后加此 class，动画结束后再触发 Streamlit 翻页 */
+@keyframes rb-flip-out {
+    0%   { opacity: 1;   transform: perspective(900px) rotateY(0deg)  scaleX(1); }
+    100% { opacity: 0.2; transform: perspective(900px) rotateY(-6deg) scaleX(0.98); }
+}
+.reading-area .book-spread.rb-flip-out {
+    animation: rb-flip-out 0.18s steps(5) both;
+}
+/* keyboard hint pill shake */
+@keyframes rb-shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-4px); }
+    50%     { transform: translateX(4px); }
+    80%     { transform: translateX(-2px); }
+}
+.rb-kbd-hint.rb-shake {
+    animation: rb-shake 0.35s steps(4);
 }
 /* 笔记 expander 像素风 */
 body:has(.reading-area) [data-testid="stExpander"] {
@@ -2087,6 +2116,15 @@ if has_file:
                         const btn = p.document.querySelector(sel);
                         if (btn && !btn.disabled) btn.click();
                     }
+                    function flipAndNavigate(action) {
+                        const spread = p.document.querySelector('.book-spread');
+                        if (spread) {
+                            spread.classList.add('rb-flip-out');
+                            setTimeout(() => clickHiddenBtn(action), 180);
+                        } else {
+                            clickHiddenBtn(action);
+                        }
+                    }
                     function handler(e) {
                         if (e.ctrlKey || e.metaKey || e.altKey) return;
                         if (isTextEditing(e.target)) return;
@@ -2098,24 +2136,34 @@ if has_file:
                         if (!visEl || visEl.classList.contains('nav-disabled')) return;
                         e.preventDefault();
                         try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
-                        clickHiddenBtn(action);
+                        flipAndNavigate(action);
                     }
                     // 绑定并把 handler 引用存到 parent，下次 iframe 挂载时可以清掉
                     p._rb_kbd_handler = handler;
                     p.document.addEventListener('keydown', handler, true);
                     p.addEventListener('keydown', handler, true);
-                    // 点击委托：HTML 导航按钮 → 隐藏 st.button
+                    // 点击委托：HTML 导航按钮 → flip-out → 隐藏 st.button
                     const clickHandler = function(e) {
                         const btn = e.target.closest && e.target.closest('.nav-btn');
                         if (!btn) return;
                         e.preventDefault();
                         if (btn.classList.contains('nav-disabled')) return;
                         const action = btn.classList.contains('nav-prev') ? 'prev' : 'next';
-                        clickHiddenBtn(action);
+                        flipAndNavigate(action);
                     };
                     p._rb_click_handler = clickHandler;
                     p.document.addEventListener('click', clickHandler, true);
                     setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
+                    // Shake hint pill once per session
+                    if (!sessionStorage.getItem('rb_hint_shaken')) {
+                        setTimeout(function() {
+                            s.classList.add('rb-shake');
+                            s.addEventListener('animationend', function() {
+                                s.classList.remove('rb-shake');
+                            }, { once: true });
+                            sessionStorage.setItem('rb_hint_shaken', '1');
+                        }, 600);
+                    }
                 } catch (err) {
                     setMsg('⌨ 键盘翻页不可用: ' + (err && err.message || err), '#f44336');
                 }
