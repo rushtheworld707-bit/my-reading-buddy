@@ -1090,6 +1090,26 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     color: #3b2e1e !important;
     font-family: 'Zpix', monospace !important;
 }
+/* 笔记 expander 像素风 */
+body:has(.reading-area) [data-testid="stExpander"] {
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    background: #fffaec !important;
+    box-shadow: 3px 3px 0 #d4b54c !important;
+}
+body:has(.reading-area) [data-testid="stExpander"] summary {
+    background: #fffaec !important;
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', monospace !important;
+    font-size: 13px !important;
+}
+body:has(.reading-area) [data-testid="stExpander"] textarea {
+    border: 2px solid #3b2e1e !important;
+    border-radius: 0 !important;
+    background: #fdf6e0 !important;
+    color: #3b2e1e !important;
+    font-family: 'Zpix', 'Noto Sans SC', monospace !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1528,6 +1548,7 @@ from streamlit_local_storage import LocalStorage
 _LS_PROGRESS_KEY = "reading_buddy_progress_v1"
 _LS_BOOKMARKS_KEY = "reading_buddy_bookmarks_v1"
 _LS_MESSAGES_KEY = "reading_buddy_messages_v1"
+_LS_NOTES_KEY = "reading_buddy_notes_v1"
 
 
 def _get_ls():
@@ -1619,6 +1640,39 @@ def _remove_bookmark(book_key, index):
         lst.pop(index)
         _save_bookmarks(data)
 
+
+def _load_all_notes():
+    return _ls_read_dict(_LS_NOTES_KEY)
+
+
+def _save_book_notes(book_key, notes):
+    all_notes = _load_all_notes()
+    all_notes[book_key] = notes
+    _ls_write_dict(_LS_NOTES_KEY, all_notes)
+
+
+def _add_note(book_key, chapter_idx, page, passage, note_text):
+    from datetime import timezone, timedelta
+    all_notes = _load_all_notes()
+    lst = all_notes.setdefault(book_key, [])
+    import uuid
+    lst.append({
+        "id": str(uuid.uuid4())[:8],
+        "chapter_idx": int(chapter_idx),
+        "page": int(page),
+        "passage": passage.strip(),
+        "note": note_text.strip(),
+        "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
+    })
+    _ls_write_dict(_LS_NOTES_KEY, all_notes)
+
+
+def _remove_note(book_key, note_id):
+    all_notes = _load_all_notes()
+    lst = all_notes.get(book_key, [])
+    all_notes[book_key] = [n for n in lst if n.get("id") != note_id]
+    _ls_write_dict(_LS_NOTES_KEY, all_notes)
+
 # 5. 主逻辑控制
 # 将上传文件缓存到 session_state，防止翻页时丢失
 if uploaded_file:
@@ -1646,6 +1700,8 @@ if has_file:
             st.session_state.last_chapter = saved_ch
             # 聊天记录按书隔离：从 localStorage hydrate 这本书之前的对话
             st.session_state.messages = _load_all_messages().get(book_key, [])
+            # 笔记按书隔离：hydrate 到 session_state
+            st.session_state.notes = _load_all_notes().get(book_key, [])
             st.session_state.loaded_book = book_key
 
         # 书签跳转：在 selectbox 渲染之前应用 pending 状态
@@ -1716,6 +1772,41 @@ if has_file:
                 with _bc2:
                     if st.button("✕", key=f"bm_del_{_i}", help="删除此书签"):
                         _remove_bookmark(book_key, _i)
+                        st.rerun()
+
+        # --- 侧边栏：笔记 ---
+        st.sidebar.divider()
+        st.sidebar.markdown(
+            f'<strong class="sbh">{PX_ICON["save"]}笔记</strong>',
+            unsafe_allow_html=True,
+        )
+        _all_notes = _load_all_notes().get(book_key, [])
+        # 同步到 session_state（其它地方新增后保持一致）
+        st.session_state.notes = _all_notes
+        if not _all_notes:
+            st.sidebar.caption("还没有笔记")
+        else:
+            for _n in _all_notes:
+                _nch = int(_n.get("chapter_idx", 0))
+                _npg = int(_n.get("page", 0))
+                _nts = _n.get("ts", "")
+                _nch_title = chapter_titles[_nch] if 0 <= _nch < len(chapter_titles) else f"章节 {_nch+1}"
+                _nshort = _nch_title if len(_nch_title) <= 8 else _nch_title[:8] + "…"
+                _passage_preview = _n.get("passage", "")
+                _passage_preview = _passage_preview[:20] + "…" if len(_passage_preview) > 20 else _passage_preview
+                _note_preview = _n.get("note", "")
+                _note_preview = _note_preview[:18] + "…" if len(_note_preview) > 18 else _note_preview
+                _nc1, _nc2 = st.sidebar.columns([6, 1])
+                with _nc1:
+                    _btn_label = f"{_nshort} · 第{_npg+1}页"
+                    if _passage_preview:
+                        _btn_label += f"\n「{_passage_preview}」"
+                    if st.button(_btn_label, key=f"note_go_{_n['id']}", use_container_width=True):
+                        st.session_state._pending_jump = {"chapter": _nch, "page": _npg}
+                        st.rerun()
+                with _nc2:
+                    if st.button("✕", key=f"note_del_{_n['id']}", help="删除此笔记"):
+                        _remove_note(book_key, _n["id"])
                         st.rerun()
 
         # --- 阅读界面 ---
@@ -1825,6 +1916,46 @@ if has_file:
 
         # 持久化阅读进度
         _save_progress(book_key, chapter_idx, current_page)
+
+        # --- 笔记：当前页提示 + 添加入口 ---
+        _page_notes = [
+            n for n in st.session_state.get("notes", [])
+            if int(n.get("chapter_idx", -1)) == chapter_idx
+            and int(n.get("page", -1)) == current_page
+        ]
+        if _page_notes:
+            for _pn in _page_notes:
+                _pn_passage = _pn.get("passage", "")
+                _pn_note = _pn.get("note", "")
+                _pn_ts = _pn.get("ts", "")
+                _note_md = f"**{_pn_ts}**　"
+                if _pn_passage:
+                    _note_md += f"「{_pn_passage}」  \n"
+                if _pn_note:
+                    _note_md += _pn_note
+                st.info(_note_md)
+
+        with st.expander("✏ 添加笔记"):
+            _passage_in = st.text_area(
+                "摘录片段（可选）",
+                placeholder="粘贴你想记录的原文片段……",
+                key=f"note_passage_{chapter_idx}_{current_page}",
+                height=80,
+            )
+            _note_in = st.text_area(
+                "你的想法",
+                placeholder="写下你的感想、疑问或联想……",
+                key=f"note_text_{chapter_idx}_{current_page}",
+                height=80,
+            )
+            if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}"):
+                if _note_in.strip() or _passage_in.strip():
+                    _add_note(book_key, chapter_idx, current_page, _passage_in, _note_in)
+                    st.session_state.notes = _load_all_notes().get(book_key, [])
+                    st.toast("[+] 笔记已保存")
+                    st.rerun()
+                else:
+                    st.warning("请至少填写摘录或想法其中一项。")
 
         # 隐藏的 Streamlit 按钮：真正处理翻页逻辑（HTML 按钮通过 JS 点击它们）
         hcol1, hcol2 = st.columns(2)
