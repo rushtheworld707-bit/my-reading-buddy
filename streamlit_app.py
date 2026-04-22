@@ -2671,7 +2671,7 @@ else:
         f'</div>'
     )
 
-    st.markdown(f"""
+    st.markdown("""
     <div class="zine-welcome zw-bottom">
         <div class="zw-corner bl">[+]</div>
         <div class="zw-corner br">[+]</div>
@@ -2714,7 +2714,7 @@ else:
             <span class="zw-feature"><span class="ic">""" + PX_ICON["robot"] + """</span> AI 共读</span>
         </div>
         <!-- 每日开场签 -->
-        {_q_html}
+        """ + _q_html + """
         <!-- 底部装饰条 -->
         <div class="zw-footer-strip">
             <span>PRESS UPLOAD TO BEGIN</span>
