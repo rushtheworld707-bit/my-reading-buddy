@@ -1188,6 +1188,32 @@ body:has(.reading-area) [data-testid="stSpinner"] {
 .rb-kbd-hint.rb-shake {
     animation: rb-shake 0.35s steps(4);
 }
+/* 每日开场签 */
+.zw-daily-quote {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 24px;
+    margin: 0 auto 8px;
+    max-width: 520px;
+    border-top: 1px dashed #8a7a5a;
+    border-bottom: 1px dashed #8a7a5a;
+    text-align: center;
+}
+.zw-dq-text {
+    color: #3b2e1e;
+    font-family: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+    font-size: 14px;
+    line-height: 1.8;
+    letter-spacing: 1px;
+}
+.zw-dq-src {
+    color: #8a7a5a;
+    font-family: 'Zpix', 'Noto Sans SC', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
 /* 笔记 expander 像素风 */
 body:has(.reading-area) [data-testid="stExpander"] {
     border: 2px solid #3b2e1e !important;
@@ -2294,6 +2320,31 @@ if has_file:
                     p._rb_mo = _mo;
                     triggerFlipIn(); // 首次挂载时立刻播放
 
+                    // ── 移动端 swipe 翻页 ──
+                    if (p._rb_touch_start) {
+                        try { p.document.removeEventListener('touchstart', p._rb_touch_start); } catch(_) {}
+                        try { p.document.removeEventListener('touchend',   p._rb_touch_end);   } catch(_) {}
+                    }
+                    let _tx0 = null, _ty0 = null;
+                    p._rb_touch_start = function(e) {
+                        _tx0 = e.touches[0].clientX;
+                        _ty0 = e.touches[0].clientY;
+                    };
+                    p._rb_touch_end = function(e) {
+                        if (_tx0 === null) return;
+                        const dx = e.changedTouches[0].clientX - _tx0;
+                        const dy = e.changedTouches[0].clientY - _ty0;
+                        _tx0 = null; _ty0 = null;
+                        // 水平滑动幅度 > 50px，且水平分量 > 垂直（防止上下滚动误触）
+                        if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+                        const action = dx < 0 ? 'next' : 'prev';
+                        const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
+                        if (!visEl || visEl.classList.contains('nav-disabled')) return;
+                        flipAndNavigate(action);
+                    };
+                    p.document.addEventListener('touchstart', p._rb_touch_start, { passive: true });
+                    p.document.addEventListener('touchend',   p._rb_touch_end,   { passive: true });
+
                     setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
                     // Shake hint pill once per session
                     if (!sessionStorage.getItem('rb_hint_shaken')) {
@@ -2592,7 +2643,35 @@ else:
         st.session_state.file_bytes = _welcome_upload.getvalue()
         st.session_state.file_name = _welcome_upload.name
         st.rerun()
-    st.markdown("""
+    # 随机开场签：以当天日期为种子，一天内保持同一句
+    _QUOTES = [
+        ("不去想那些遥远的事，只是走，一步一步。", "《瓦尔登湖》亨利·梭罗"),
+        ("今天的太阳照在昨天的雪上。", "《局外人》阿尔贝·加缪"),
+        ("我只是个过客，可我爱这个世界。", "《挪威的森林》村上春树"),
+        ("细节是魔鬼，也是天使。", "《包法利夫人》福楼拜"),
+        ("人只有在孤独中才能认识自己。", "《约翰·克利斯朵夫》罗曼·罗兰"),
+        ("所谓青春，就是一种永久的失去。", "《挪威的森林》村上春树"),
+        ("书是人类进步的阶梯，也是孤独时最好的伴侣。", "高尔基"),
+        ("我们都是时间的旅人，只是速度不同。", "《时间简史》霍金"),
+        ("真正的旅行不是用眼睛看，而是用心感受。", "马塞尔·普鲁斯特"),
+        ("读一本好书，就是和许多高尚的人谈话。", "歌德"),
+        ("没有什么比一本旧书更让人感到安慰的了。", "简·奥斯汀"),
+        ("世界上只有一种英雄主义，就是认清生活的真相之后依然热爱生活。", "罗曼·罗兰"),
+        ("阅读是一种孤独。", "毕淑敏"),
+        ("每一本书都是一个世界。", "爱默生"),
+        ("书给了我一个世界，而我居住其中。", "乌苏拉·勒古恩"),
+    ]
+    _q_idx = datetime.now().timetuple().tm_yday % len(_QUOTES)
+    _q_text, _q_from = _QUOTES[_q_idx]
+    import html as _html
+    _q_html = (
+        f'<div class="zw-daily-quote">'
+        f'<span class="zw-dq-text">「{_html.escape(_q_text)}」</span>'
+        f'<span class="zw-dq-src">—— {_html.escape(_q_from)}</span>'
+        f'</div>'
+    )
+
+    st.markdown(f"""
     <div class="zine-welcome zw-bottom">
         <div class="zw-corner bl">[+]</div>
         <div class="zw-corner br">[+]</div>
@@ -2634,6 +2713,8 @@ else:
             <span class="zw-feature"><span class="ic">""" + PX_ICON["save"] + """</span> 进度自动保存</span>
             <span class="zw-feature"><span class="ic">""" + PX_ICON["robot"] + """</span> AI 共读</span>
         </div>
+        <!-- 每日开场签 -->
+        {_q_html}
         <!-- 底部装饰条 -->
         <div class="zw-footer-strip">
             <span>PRESS UPLOAD TO BEGIN</span>
