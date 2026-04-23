@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint — syntax, undefined names, unused imports
+        # E9 = 语法错; F63 = 比较错(is/==); F7 = 关键字误用;
+        # F82 = 未定义名称(typo); F401 = 未使用的 import
+        run: ruff check streamlit_app.py --select E9,F63,F7,F82,F401 --output-format=github
+
+      - name: Compile check — syntax + bytecode
+        run: python -m py_compile streamlit_app.py
