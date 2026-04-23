@@ -30,6 +30,7 @@ PX_ICON = {
     "clock": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="5" y="2" width="6" height="1" fill="#3b2e1e"/><rect x="5" y="13" width="6" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="3" width="2" height="1" fill="#3b2e1e"/><rect x="3" y="12" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="12" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="13" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="7" y="5" width="2" height="4" fill="#3b2e1e"/><rect x="8" y="8" width="3" height="1" fill="#c25a44"/></svg>',
     "save": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="2" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="2" width="1" height="12" fill="#3b2e1e"/><rect x="13" y="2" width="1" height="12" fill="#3b2e1e"/><rect x="4" y="3" width="7" height="3" fill="#3b2e1e"/><rect x="5" y="4" width="2" height="2" fill="#c25a44"/><rect x="4" y="8" width="8" height="5" fill="#3b2e1e"/><rect x="5" y="9" width="6" height="1" fill="#fffaec"/><rect x="5" y="11" width="6" height="1" fill="#fffaec"/></svg>',
     "robot": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="2" fill="#3b2e1e"/><rect x="3" y="3" width="10" height="1" fill="#3b2e1e"/><rect x="3" y="9" width="10" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="1" height="7" fill="#3b2e1e"/><rect x="12" y="3" width="1" height="7" fill="#3b2e1e"/><rect x="5" y="5" width="2" height="2" fill="#c25a44"/><rect x="9" y="5" width="2" height="2" fill="#c25a44"/><rect x="6" y="8" width="4" height="1" fill="#3b2e1e"/><rect x="1" y="5" width="2" height="1" fill="#3b2e1e"/><rect x="13" y="5" width="2" height="1" fill="#3b2e1e"/><rect x="4" y="10" width="2" height="4" fill="#3b2e1e"/><rect x="10" y="10" width="2" height="4" fill="#3b2e1e"/></svg>',
+    "download": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="5" fill="#3b2e1e"/><rect x="5" y="7" width="6" height="1" fill="#3b2e1e"/><rect x="6" y="8" width="4" height="1" fill="#3b2e1e"/><rect x="7" y="9" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="12" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="12" width="1" height="2" fill="#3b2e1e"/><rect x="13" y="12" width="1" height="2" fill="#3b2e1e"/></svg>',
 }
 
 # 2. 全局自定义样式
@@ -1869,6 +1870,87 @@ def _remove_note(book_key, note_id):
     all_notes[book_key] = [n for n in lst if n.get("id") != note_id]
     _ls_write_dict(_LS_NOTES_KEY, all_notes)
 
+
+def _build_export_markdown(book_name, messages, notes, bookmarks, chapter_titles):
+    """把当前书的书签/笔记/AI 对话打包成一份 markdown 文本。"""
+    from datetime import timezone, timedelta
+    now_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M")
+    book_title = book_name.rsplit(".", 1)[0] if "." in book_name else book_name
+
+    def _ch_title(idx):
+        try:
+            return chapter_titles[int(idx)]
+        except (IndexError, ValueError, TypeError):
+            return f"章节 {int(idx) + 1}"
+
+    def _quote_block(text):
+        return "\n".join("> " + line if line else ">" for line in text.split("\n"))
+
+    lines = [
+        f"# 《{book_title}》读书笔记",
+        "",
+        f"> 导出时间：{now_str}  ",
+        f"> {len(bookmarks)} 条书签 · {len(notes)} 条笔记 · {len(messages)} 条 AI 对话",
+        "",
+        "---",
+        "",
+    ]
+
+    if bookmarks:
+        lines.append(f"## 📌 书签 ({len(bookmarks)})")
+        lines.append("")
+        for b in bookmarks:
+            ch = _ch_title(b.get("chapter_idx", 0))
+            pg = int(b.get("page", 0)) + 1
+            ts = b.get("ts", "")
+            ts_part = f" — *{ts}*" if ts else ""
+            lines.append(f"- **{ch}** · 第 {pg} 页{ts_part}")
+        lines.append("")
+
+    if notes:
+        lines.append(f"## ✏️ 笔记 ({len(notes)})")
+        lines.append("")
+        for i, n in enumerate(notes):
+            ch = _ch_title(n.get("chapter_idx", 0))
+            pg = int(n.get("page", 0)) + 1
+            ts = n.get("ts", "")
+            passage = (n.get("passage") or "").strip()
+            note_text = (n.get("note") or "").strip()
+            lines.append(f"### {ch} · 第 {pg} 页")
+            if ts:
+                lines.append(f"*{ts}*")
+            lines.append("")
+            if passage:
+                lines.append(_quote_block(passage))
+                lines.append("")
+            if note_text:
+                lines.append(f"**笔记：** {note_text}")
+                lines.append("")
+            if i < len(notes) - 1:
+                lines.append("---")
+                lines.append("")
+
+    if messages:
+        lines.append(f"## 💭 AI 对话 ({len(messages)})")
+        lines.append("")
+        for i, m in enumerate(messages):
+            role_label = "🙋 我" if m.get("role") == "user" else "🤖 AI"
+            content = (m.get("content") or "").strip()
+            lines.append(f"**{role_label}：**")
+            lines.append("")
+            lines.append(content)
+            lines.append("")
+            if i < len(messages) - 1:
+                lines.append("---")
+                lines.append("")
+
+    if not bookmarks and not notes and not messages:
+        lines.append("*还没有任何书签、笔记或 AI 对话。去读几页试试吧。*")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
 # 5. 主逻辑控制
 # 将上传文件缓存到 session_state，防止翻页时丢失
 if uploaded_file:
@@ -2020,6 +2102,44 @@ if has_file:
                         _remove_note(book_key, _n["id"])
                         st.session_state.notes = [x for x in st.session_state.get("notes", []) if x.get("id") != _n["id"]]
                         st.rerun()
+
+        # --- 侧边栏：导出 ---
+        st.sidebar.divider()
+        st.sidebar.markdown(
+            f'<strong class="sbh">{PX_ICON["download"]}导出</strong>',
+            unsafe_allow_html=True,
+        )
+        _export_bookmarks = _load_bookmarks().get(book_key, [])
+        _export_notes = st.session_state.get("notes", [])
+        _export_messages = st.session_state.get("messages", [])
+        _export_md = _build_export_markdown(
+            st.session_state.file_name,
+            _export_messages,
+            _export_notes,
+            _export_bookmarks,
+            chapter_titles,
+        )
+        _safe_stem = (
+            st.session_state.file_name.rsplit(".", 1)[0]
+            .replace("/", "_").replace("\\", "_").replace(":", "_")
+        )
+        _export_date = datetime.now().strftime("%Y%m%d")
+        _export_filename = f"{_safe_stem}_读书笔记_{_export_date}.md"
+        st.sidebar.download_button(
+            label="下载 Markdown",
+            data=_export_md.encode("utf-8"),
+            file_name=_export_filename,
+            mime="text/markdown",
+            use_container_width=True,
+            key="export_md_btn",
+        )
+        _total = len(_export_bookmarks) + len(_export_notes) + len(_export_messages)
+        if _total == 0:
+            st.sidebar.caption("还没有书签/笔记/对话")
+        else:
+            st.sidebar.caption(
+                f"📌 {len(_export_bookmarks)} · ✏️ {len(_export_notes)} · 💭 {len(_export_messages)}"
+            )
 
         # --- 阅读界面 ---
 
