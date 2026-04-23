@@ -1820,6 +1820,7 @@ _LS_PROGRESS_KEY = "reading_buddy_progress_v1"
 _LS_BOOKMARKS_KEY = "reading_buddy_bookmarks_v1"
 _LS_MESSAGES_KEY = "reading_buddy_messages_v1"
 _LS_NOTES_KEY = "reading_buddy_notes_v1"
+_LS_READTIME_KEY = "reading_buddy_readtime_v1"
 
 
 def _get_ls():
@@ -1943,6 +1944,25 @@ def _remove_note(book_key, note_id):
     lst = all_notes.get(book_key, [])
     all_notes[book_key] = [n for n in lst if n.get("id") != note_id]
     _ls_write_dict(_LS_NOTES_KEY, all_notes)
+
+
+def _load_reading_times():
+    """读取所有书的累计阅读秒数 {book_key: seconds}。"""
+    return _ls_read_dict(_LS_READTIME_KEY)
+
+
+def _format_duration(seconds):
+    """把秒数格式化成中文友好的时长字符串。"""
+    seconds = int(seconds or 0)
+    if seconds < 60:
+        return f"{seconds} 秒"
+    if seconds < 3600:
+        return f"{seconds // 60} 分钟"
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    if minutes == 0:
+        return f"{hours} 小时"
+    return f"{hours} 小时 {minutes} 分钟"
 
 
 def _build_export_markdown(book_name, messages, notes, bookmarks, chapter_titles):
@@ -2243,6 +2263,12 @@ if has_file:
             '</div>'
         )
         st.markdown(_topbar_html, unsafe_allow_html=True)
+
+        # 阅读时长追踪：用 data-key 给 JS 传递 book_key
+        st.markdown(
+            f'<div class="rd-book-key" data-key="{html.escape(book_key)}" style="display:none"></div>',
+            unsafe_allow_html=True,
+        )
 
         # 进度条
         progress = (current_page + 1) / total_pages if total_pages > 0 else 1
@@ -2829,12 +2855,86 @@ if has_file:
         </script>
         """, height=0)
 
+        # 阅读时长追踪：后台累计每本书的阅读秒数到 localStorage
+        components.html("""
+        <script>
+        (function() {
+            const p = window.parent;
+            const pd = p.document;
+            const STORAGE_KEY = 'reading_buddy_readtime_v1';
+            const FLUSH_INTERVAL_MS = 15000;  // 每 15s 刷到 localStorage
+            const TICK_INTERVAL_MS = 5000;     // 每 5s 累加
+            const MAX_DELTA_S = 60;            // 单次 delta 封顶（防止系统睡眠误算）
+
+            let accumulated = 0;
+            let lastTick = Date.now();
+            let active = true;
+
+            function getBookKey() {
+                const el = pd.querySelector('.rd-book-key');
+                return el ? el.dataset.key : null;
+            }
+
+            function flush() {
+                const bookKey = getBookKey();
+                if (!bookKey || accumulated <= 0) return;
+                try {
+                    const raw = p.localStorage.getItem(STORAGE_KEY);
+                    let data = {};
+                    if (raw) {
+                        try { data = JSON.parse(raw); } catch(_) { data = {}; }
+                        if (typeof data !== 'object' || data === null) data = {};
+                    }
+                    data[bookKey] = (data[bookKey] || 0) + accumulated;
+                    p.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    accumulated = 0;
+                } catch (e) { /* silent */ }
+            }
+
+            if (pd._rb_readtime_bound) return;
+            pd._rb_readtime_bound = true;
+
+            setInterval(() => {
+                if (!active) { lastTick = Date.now(); return; }
+                const now = Date.now();
+                const delta = Math.floor((now - lastTick) / 1000);
+                if (delta > 0 && delta <= MAX_DELTA_S) {
+                    accumulated += delta;
+                }
+                lastTick = now;
+            }, TICK_INTERVAL_MS);
+
+            setInterval(flush, FLUSH_INTERVAL_MS);
+
+            pd.addEventListener('visibilitychange', () => {
+                if (pd.hidden) {
+                    active = false;
+                    flush();
+                } else {
+                    active = true;
+                    lastTick = Date.now();
+                }
+            });
+            p.addEventListener('pagehide', flush);
+            p.addEventListener('beforeunload', flush);
+        })();
+        </script>
+        """, height=0)
+
         # 侧边栏：阅读设置
         st.sidebar.divider()
         st.sidebar.markdown(
             f'<strong class="sbh">{PX_ICON["palette"]}阅读设置</strong>',
             unsafe_allow_html=True,
         )
+
+        # 阅读时长（累计到 localStorage，JS 后台计数）
+        _rt_all = _load_reading_times()
+        _rt_book = int(_rt_all.get(book_key, 0))
+        if _rt_book >= 60:
+            st.sidebar.caption(f"📚 你和这本书相处了 {_format_duration(_rt_book)}")
+        elif _rt_book > 0:
+            st.sidebar.caption(f"📚 刚开始读这本书（{_rt_book} 秒）")
 
         # 专注模式：一键隐藏所有 UI，只剩书页
         if st.sidebar.button(
