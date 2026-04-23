@@ -1109,6 +1109,14 @@ body:has(.zine-welcome) [data-testid="stFileUploaderDropzone"] button p {
 .zw-step-icon .px-ic { width: 28px; height: 28px; }
 .zw-feature .ic .px-ic { width: 14px; height: 14px; margin-bottom: 1px; }
 .ai-chat-heading .px-ic { width: 18px; height: 18px; margin-right: 8px; margin-bottom: 2px; }
+.ai-quick-actions-label {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #8b5e3c;
+    margin: 6px 0 8px 2px;
+    opacity: 0.85;
+}
 body:has(.reading-area) section[data-testid="stSidebar"] .sbh .px-ic {
     width: 12px; height: 12px; margin-right: 6px; margin-bottom: 1px;
 }
@@ -2473,6 +2481,26 @@ if has_file:
             unsafe_allow_html=True,
         )
 
+        # 快捷分析按钮：一键让 AI 做摘要 / 生词 / 讨论问题 / 人物分析
+        st.markdown('<div class="ai-quick-actions-label">⚡ 快捷分析</div>', unsafe_allow_html=True)
+        _qa_c1, _qa_c2, _qa_c3, _qa_c4 = st.columns(4)
+        with _qa_c1:
+            if st.button("📖 本章摘要", key="qa_summary", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请用简洁清晰的语言总结本章的核心内容、主要事件和关键转折，控制在 6-10 行。"
+                st.rerun()
+        with _qa_c2:
+            if st.button("📝 生词释义", key="qa_vocab", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请从本章找出 6-10 个较难理解的生词、成语或关键术语，用 Markdown 表格列出：| 词语 | 释义 | 在本章中的用法 |。"
+                st.rerun()
+        with _qa_c3:
+            if st.button("💭 讨论问题", key="qa_questions", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请基于本章内容，生成 3 个值得深入思考的开放式讨论问题，每个问题后附一行简短的思考方向提示。"
+                st.rerun()
+        with _qa_c4:
+            if st.button("🎭 人物分析", key="qa_characters", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请分析本章出场的主要人物：他们的身份、言行特点、彼此之间的关系，以及本章中展现出的性格变化或动机。如果本章是非虚构作品没有明显人物，请改为提取本章的核心论点/观点主体。"
+                st.rerun()
+
         # 初始化聊天记录
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -2483,10 +2511,13 @@ if has_file:
                 st.write(m["content"])
 
         if not st.session_state.messages:
-            st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。")
+            st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。上方 4 个快捷按钮也可以一键让 AI 帮你分析本章。")
 
-        # 等待用户输入感悟
-        if prompt := st.chat_input("对这段有什么想法？"):
+        # 等待用户输入感悟（快捷按钮的 prompt 优先）
+        _queued_prompt = st.session_state.pop("_queued_ai_prompt", None)
+        _chat_prompt = st.chat_input("对这段有什么想法？")
+        prompt = _queued_prompt or _chat_prompt
+        if prompt:
 
             # 1. 存入并立刻在屏幕上显示用户发的消息
             st.session_state.messages.append({"role": "user", "content": prompt})
