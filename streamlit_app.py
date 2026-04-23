@@ -986,24 +986,27 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
 }
 @media (max-width: 900px) { .zw-sparkles { display: none; } }
 
-/* 像素便利贴 */
-.zw-sticky {
-    position: absolute;
-    background: #fffaec;
-    border: 2px solid var(--zw-ink);
-    box-shadow: 3px 3px 0 var(--zw-mustard);
-    padding: 6px 8px;
-    font-family: 'Zpix', monospace;
-    font-size: 10px;
-    color: var(--zw-ink);
-    line-height: 1.8;
-    width: 62px;
-    z-index: 2;
-    pointer-events: none;
-    -webkit-font-smoothing: none;
+/* 像素壁挂火把 */
+@keyframes zw-f {
+    0%    { opacity: 1; }
+    32%   { opacity: 1; }
+    32.1% { opacity: 0; }
+    100%  { opacity: 0; }
 }
-.zw-sticky-b { box-shadow: 3px 3px 0 var(--zw-terra); }
-@media (max-width: 900px) { .zw-sticky { display: none; } }
+.zw-f1 { animation: zw-f 0.6s linear 0s infinite; }
+.zw-f2 { animation: zw-f 0.6s linear 0.2s infinite; opacity: 0; }
+.zw-f3 { animation: zw-f 0.6s linear 0.4s infinite; opacity: 0; }
+@media (max-width: 900px) { .zw-torch { display: none; } }
+/* 像素心形生命值 */
+@keyframes zw-heartbeat {
+    0%,100% { transform: scale(1); }
+    15%     { transform: scale(1.35); }
+    30%     { transform: scale(1); }
+    45%     { transform: scale(1.18); }
+    60%     { transform: scale(1); }
+}
+.zw-heart-beat { animation: zw-heartbeat 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@media (max-width: 900px) { .zw-hearts { display: none; } }
 
 /* 像素书架书本抽出动效 */
 @keyframes zw-book-pull {
@@ -2630,12 +2633,63 @@ else:
             <rect x="42" y="111" width="9" height="1" fill="#c25a44"/>
           </svg>
         </div>
-        <!-- 右侧便利贴 -->
-        <div class="zw-sticky" style="right:10px;top:24%;transform:rotate(-4deg)" aria-hidden="true">
-          <div>p.42</div><div>♥ 划线</div>
+        <!-- 右侧像素火把 -->
+        <div class="zw-torch" style="position:absolute;right:8px;top:18%;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="24" height="48" viewBox="0 0 24 48" style="image-rendering:pixelated;shape-rendering:crispEdges">
+            <rect x="0" y="20" width="24" height="3" fill="#3b2e1e"/>
+            <rect x="9" y="23" width="6" height="20" fill="#6b4226"/>
+            <rect x="9" y="23" width="6" height="1" fill="#4a2d16"/>
+            <rect x="6" y="14" width="12" height="8" fill="#8b5e3c"/>
+            <rect x="7" y="13" width="10" height="2" fill="#a0723c"/>
+            <rect x="6" y="21" width="12" height="1" fill="#4a2d16"/>
+            <g class="zw-f1">
+              <rect x="10" y="4" width="4" height="10" fill="#ff8c00"/>
+              <rect x="9" y="7" width="6" height="7" fill="#ff4500"/>
+              <rect x="11" y="1" width="2" height="5" fill="#ffd700"/>
+            </g>
+            <g class="zw-f2">
+              <rect x="8" y="5" width="4" height="9" fill="#ff8c00"/>
+              <rect x="7" y="8" width="7" height="6" fill="#ff4500"/>
+              <rect x="9" y="2" width="2" height="5" fill="#ffd700"/>
+            </g>
+            <g class="zw-f3">
+              <rect x="12" y="5" width="4" height="9" fill="#ff8c00"/>
+              <rect x="10" y="8" width="7" height="6" fill="#ff4500"/>
+              <rect x="13" y="2" width="2" height="5" fill="#ffd700"/>
+            </g>
+          </svg>
         </div>
-        <div class="zw-sticky zw-sticky-b" style="right:14px;top:54%;transform:rotate(3deg)" aria-hidden="true">
-          <div>→ 精彩</div><div>!! 记住</div>
+        <!-- 右侧像素心形 -->
+        <div class="zw-hearts" style="position:absolute;right:5px;top:56%;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="56" height="24" viewBox="0 0 56 24" style="image-rendering:pixelated;shape-rendering:crispEdges">
+            <g fill="#e04040">
+              <rect x="2" y="0" width="4" height="4"/>
+              <rect x="10" y="0" width="4" height="4"/>
+              <rect x="0" y="4" width="16" height="8"/>
+              <rect x="2" y="12" width="12" height="4"/>
+              <rect x="4" y="16" width="8" height="4"/>
+              <rect x="6" y="20" width="4" height="4"/>
+            </g>
+            <rect x="2" y="2" width="3" height="2" fill="#ff6868" opacity="0.6"/>
+            <g fill="#e04040">
+              <rect x="22" y="0" width="4" height="4"/>
+              <rect x="30" y="0" width="4" height="4"/>
+              <rect x="20" y="4" width="16" height="8"/>
+              <rect x="22" y="12" width="12" height="4"/>
+              <rect x="24" y="16" width="8" height="4"/>
+              <rect x="26" y="20" width="4" height="4"/>
+            </g>
+            <rect x="22" y="2" width="3" height="2" fill="#ff6868" opacity="0.6"/>
+            <g class="zw-heart-beat" fill="#e04040">
+              <rect x="42" y="0" width="4" height="4"/>
+              <rect x="50" y="0" width="4" height="4"/>
+              <rect x="40" y="4" width="16" height="8"/>
+              <rect x="42" y="12" width="12" height="4"/>
+              <rect x="44" y="16" width="8" height="4"/>
+              <rect x="46" y="20" width="4" height="4"/>
+              <rect x="42" y="2" width="3" height="2" fill="#ff6868" opacity="0.6"/>
+            </g>
+          </svg>
         </div>
         <div class="zw-corner tl">[+]</div>
         <div class="zw-corner tr">[+]</div>
@@ -2783,10 +2837,6 @@ else:
             <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:#4a6d4e;animation-delay:1.9s;animation-duration:3.1s"></span>
             <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.8s;animation-duration:5s"></span>
             <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:#c25a44;animation-delay:3.2s;animation-duration:3.8s"></span>
-        </div>
-        <!-- 右侧便利贴 -->
-        <div class="zw-sticky" style="right:10px;top:38%;transform:rotate(-2deg)" aria-hidden="true">
-          <div>UPLOAD</div><div>&amp; READ ♥</div>
         </div>
         <div class="zw-corner bl">[+]</div>
         <div class="zw-corner br">[+]</div>
