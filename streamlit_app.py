@@ -1316,6 +1316,71 @@ body:has(.reading-area) [data-testid="stExpander"] textarea {
     color: #3b2e1e !important;
     font-family: 'Zpix', 'Noto Sans SC', monospace !important;
 }
+
+/* ===== 专注模式：隐藏所有干扰 UI，只留书页 ===== */
+body:has(.rd-focus-flag) section[data-testid="stSidebar"],
+body:has(.rd-focus-flag) [data-testid="collapsedControl"],
+body:has(.rd-focus-flag) .rd-topbar,
+body:has(.rd-focus-flag) .progress-container,
+body:has(.rd-focus-flag) .page-indicator,
+body:has(.rd-focus-flag) .nav-row,
+body:has(.rd-focus-flag) [data-testid="stChatInput"],
+body:has(.rd-focus-flag) [data-testid="stBottom"],
+body:has(.rd-focus-flag) [data-testid="stMainBlockContainer"] hr,
+body:has(.rd-focus-flag) .rd-focus-flag {
+    display: none !important;
+}
+/* 隐藏 AI 聊天区的标题及其之后所有元素容器（快捷按钮、消息、caption 都在其后） */
+body:has(.rd-focus-flag) [data-testid="stElementContainer"]:has(.ai-chat-heading),
+body:has(.rd-focus-flag) [data-testid="stElementContainer"]:has(.ai-chat-heading) ~ [data-testid="stElementContainer"],
+body:has(.rd-focus-flag) [data-testid="stVerticalBlock"]:has(.ai-chat-heading) + [data-testid="stVerticalBlock"],
+body:has(.rd-focus-flag) [data-testid="stHorizontalBlock"]:has(.st-key-qa_summary) {
+    display: none !important;
+}
+/* 专注模式：顶部 Streamlit header 也隐藏 */
+body:has(.rd-focus-flag) header[data-testid="stHeader"] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+/* 专注模式：主容器居中 + 更大阅读空间 */
+body:has(.rd-focus-flag) [data-testid="stMainBlockContainer"] {
+    padding-top: 64px !important;
+    max-width: 960px !important;
+}
+body:has(.rd-focus-flag) .book-spread {
+    box-shadow: 0 12px 48px rgba(0,0,0,0.35) !important;
+}
+/* 浮动退出按钮（Streamlit 会给 key 加 st-key-XXX class） */
+body:has(.rd-focus-flag) .st-key-rd_focus_exit {
+    position: fixed !important;
+    top: 14px !important;
+    right: 14px !important;
+    z-index: 99999 !important;
+    width: auto !important;
+}
+body:has(.rd-focus-flag) .st-key-rd_focus_exit button {
+    background: #fffaec !important;
+    border: 2px solid #3b2e1e !important;
+    color: #3b2e1e !important;
+    box-shadow: 3px 3px 0 #c25a44 !important;
+    font-family: 'Press Start 2P', 'Zpix', monospace !important;
+    font-size: 11px !important;
+    letter-spacing: 1.5px !important;
+    padding: 8px 14px !important;
+    border-radius: 0 !important;
+}
+body:has(.rd-focus-flag) .st-key-rd_focus_exit button:hover {
+    background: #c25a44 !important;
+    color: #fffaec !important;
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 #3b2e1e !important;
+}
+/* 键盘翻页提示也隐藏（保持画面纯净，键盘照常可用） */
+body:has(.rd-focus-flag) iframe[title*="components"] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -2152,6 +2217,15 @@ if has_file:
 
         # --- 阅读界面 ---
 
+        # 专注模式：flag + 浮动退出按钮（CSS 会把它固定到右上角）
+        if "focus_mode" not in st.session_state:
+            st.session_state.focus_mode = False
+        if st.session_state.focus_mode:
+            st.markdown('<div class="rd-focus-flag"></div>', unsafe_allow_html=True)
+            if st.button("✕ 退出专注", key="rd_focus_exit"):
+                st.session_state.focus_mode = False
+                st.rerun()
+
         # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX · 时钟）
         # 时钟并入 rd-topbar 右段，替掉原装饰 "PIXEL EDITION"；
         # 原 top_col1/top_col2（章节名重复 + 时间）整行删除
@@ -2761,6 +2835,16 @@ if has_file:
             f'<strong class="sbh">{PX_ICON["palette"]}阅读设置</strong>',
             unsafe_allow_html=True,
         )
+
+        # 专注模式：一键隐藏所有 UI，只剩书页
+        if st.sidebar.button(
+            "▶ 进入专注模式",
+            key="rd_focus_enter",
+            use_container_width=True,
+            help="隐藏侧栏/进度条/导航/聊天。键盘 ← → 仍可翻页。",
+        ):
+            st.session_state.focus_mode = True
+            st.rerun()
 
         # 字体大小
         if "font_size" not in st.session_state:
