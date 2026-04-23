@@ -11,11 +11,14 @@ AI 协作上下文。新会话开始前读一遍。
 ```
 my-reading-buddy/
 ├── .github/workflows/ci.yml    # ruff + py_compile（push 即跑）
+├── docs/design-preview.png     # UI 改版预览图
 ├── streamlit_app.py            # ~3800 行，所有代码在这一个文件
 ├── requirements.txt            # 8 个包
 ├── README.md
 ├── TODO.md                     # 活的 backlog
-└── CLAUDE.md                   # 本文件
+├── CLAUDE.md                   # 本文件
+├── DESIGN_SPEC.md              # UI 改版设计规格书（SSOT，946 行）
+└── MIGRATION.md                # UI 改版迁移计划（阶段拆分 + 技术决策）
 ```
 
 没有 `src/`、没有模块拆分、没有测试。**所有改动都在 `streamlit_app.py`**。

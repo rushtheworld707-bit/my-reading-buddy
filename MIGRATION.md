@@ -5,6 +5,8 @@
 > **范围：** 仅 UI 重构，不改后端、不迁移技术栈、不删除功能。
 >
 > **工作模式：** 本地小阶段 commit → 收工统一 push（见 CLAUDE.md）。
+>
+> **设计终态参考：** [DESIGN_SPEC.md](./DESIGN_SPEC.md)（视觉/文案/交互/组件规范的 SSOT）+ 预览图 `docs/design-preview.png`。每阶段开工前必查对应模块章节。
 
 ---
 
