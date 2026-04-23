@@ -33,6 +33,15 @@ PX_ICON = {
     "download": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="5" fill="#3b2e1e"/><rect x="5" y="7" width="6" height="1" fill="#3b2e1e"/><rect x="6" y="8" width="4" height="1" fill="#3b2e1e"/><rect x="7" y="9" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="12" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="12" width="1" height="2" fill="#3b2e1e"/><rect x="13" y="12" width="1" height="2" fill="#3b2e1e"/></svg>',
 }
 
+# 阅读页配色主题（bg = 纸底，fg = 墨色）
+READING_THEMES = {
+    "奶油": {"bg": "#fffaec", "fg": "#3b2e1e"},
+    "米黄": {"bg": "#f3e4c0", "fg": "#4a3419"},
+    "护眼": {"bg": "#dae8d1", "fg": "#2d3e2a"},
+    "凉灰": {"bg": "#e0e6ec", "fg": "#2a3340"},
+    "暮色": {"bg": "#3a3228", "fg": "#e8d9b4"},
+}
+
 # 2. 全局自定义样式
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""
@@ -2169,9 +2178,10 @@ if has_file:
         </div>
         """, unsafe_allow_html=True)
 
-        # 像素风主题：奶油纸底 + 深棕墨色（由 CSS 覆写，inline 仅占位保留结构）
+        # 像素风主题：根据用户选择的配色
         fs = st.session_state.get("font_size", 18)
-        theme_css = "background: #fffaec; color: #3b2e1e;"
+        _rt = READING_THEMES.get(st.session_state.get("reading_theme", "奶油"), READING_THEMES["奶油"])
+        theme_css = f"background: {_rt['bg']}; color: {_rt['fg']};"
         # 字体族（基于 session_state，默认系统字体）
         # 用单引号包裹字体名，以便安全嵌入 style="..." 属性
         _font_stacks = {
@@ -2592,6 +2602,20 @@ if has_file:
         )
         if _ff != st.session_state.font_family_name:
             st.session_state.font_family_name = _ff
+            st.rerun()
+
+        # 配色主题
+        if "reading_theme" not in st.session_state:
+            st.session_state.reading_theme = "奶油"
+        _theme_keys = list(READING_THEMES.keys())
+        _rt_pick = st.sidebar.selectbox(
+            "配色主题",
+            _theme_keys,
+            index=_theme_keys.index(st.session_state.reading_theme)
+            if st.session_state.reading_theme in _theme_keys else 0,
+        )
+        if _rt_pick != st.session_state.reading_theme:
+            st.session_state.reading_theme = _rt_pick
             st.rerun()
 
         # --- 分隔：AI 聊天区域 ---
