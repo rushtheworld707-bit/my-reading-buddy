@@ -566,7 +566,10 @@ body:has(.zine-welcome) [class*="block-container"] {
     padding: 0 !important;
     max-width: 100% !important;
     background-color: #f3e9cf !important;
-    min-height: 100vh;
+    min-height: unset;
+}
+body:has(.zine-welcome) {
+    background-color: #f3e9cf !important;
 }
 body:has(.zine-welcome) .handwrite-title {
     display: none !important;
@@ -1016,6 +1019,14 @@ body:has(.zine-welcome) [data-testid="stHorizontalBlock"]:has(.zw-upload-label) 
 }
 .zw-book-pull { animation: zw-book-pull 5s ease-in-out infinite; animation-delay: 2s; }
 @media (max-width: 900px) { .zw-shelf { display: none; } }
+/* 星星浮动 + 药水浮动 */
+@keyframes zw-float {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-5px); }
+}
+.zw-stars  { animation: zw-float 4s ease-in-out infinite; }
+.zw-potion { animation: zw-float 3.5s ease-in-out 0.8s infinite; }
+@media (max-width: 900px) { .zw-stars,.zw-mushroom,.zw-plant,.zw-potion { display: none; } }
 
 /* 上传区标签 */
 .zw-upload-label {
@@ -2633,6 +2644,38 @@ else:
             <rect x="42" y="111" width="9" height="1" fill="#c25a44"/>
           </svg>
         </div>
+        <!-- 左侧像素星星群 -->
+        <div class="zw-stars" style="position:absolute;left:6px;top:10%;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="24" height="26" viewBox="0 0 24 26" style="image-rendering:pixelated;shape-rendering:crispEdges">
+            <rect x="3" y=  "8" width="1" height="5" fill="#d4b54c"/>
+            <rect x="1" y="10" width="5" height="1" fill="#d4b54c"/>
+            <rect x="16" y="2" width="1" height="5" fill="#d4b54c"/>
+            <rect x="14" y="4" width="5" height="1" fill="#d4b54c"/>
+            <rect x="18" y="13" width="1" height="3" fill="#7a96b4"/>
+            <rect x="17" y="14" width="3" height="1" fill="#7a96b4"/>
+            <rect x="7" y="1" width="1" height="3" fill="#c25a44" opacity="0.7"/>
+            <rect x="6" y="2" width="3" height="1" fill="#c25a44" opacity="0.7"/>
+            <rect x="0" y="18" width="2" height="2" fill="#d4b54c" opacity="0.5"/>
+            <rect x="11" y="9" width="2" height="2" fill="#4a6d4e" opacity="0.6"/>
+            <rect x="9" y="20" width="2" height="2" fill="#7a96b4" opacity="0.5"/>
+            <rect x="21" y="20" width="2" height="2" fill="#d4b54c" opacity="0.4"/>
+          </svg>
+        </div>
+        <!-- 左侧像素蘑菇 -->
+        <div class="zw-mushroom" style="position:absolute;left:6px;top:46%;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="24" height="22" viewBox="0 0 12 11" style="image-rendering:pixelated;shape-rendering:crispEdges">
+            <rect x="3" y="0" width="6" height="1" fill="#c25a44"/>
+            <rect x="1" y="1" width="10" height="1" fill="#c25a44"/>
+            <rect x="0" y="2" width="12" height="3" fill="#c25a44"/>
+            <rect x="1" y="2" width="2" height="1" fill="#f3e9cf"/>
+            <rect x="9" y="2" width="2" height="1" fill="#f3e9cf"/>
+            <rect x="5" y="3" width="2" height="1" fill="#f3e9cf" opacity="0.7"/>
+            <rect x="1" y="5" width="10" height="1" fill="#8b3f2a"/>
+            <rect x="3" y="6" width="6" height="1" fill="#f0e6cc"/>
+            <rect x="4" y="7" width="4" height="3" fill="#e8d8b0"/>
+            <rect x="3" y="10" width="6" height="1" fill="#8b7450"/>
+          </svg>
+        </div>
         <!-- 右侧像素火把 -->
         <div class="zw-torch" style="position:absolute;right:8px;top:18%;z-index:2;pointer-events:none" aria-hidden="true">
           <svg width="24" height="48" viewBox="0 0 24 48" style="image-rendering:pixelated;shape-rendering:crispEdges">
@@ -2837,6 +2880,39 @@ else:
             <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:#4a6d4e;animation-delay:1.9s;animation-duration:3.1s"></span>
             <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.8s;animation-duration:5s"></span>
             <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:#c25a44;animation-delay:3.2s;animation-duration:3.8s"></span>
+        </div>
+        <!-- 左侧像素盆栽 -->
+        <div class="zw-plant" style="position:absolute;left:6px;top:24%;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="20" height="28" viewBox="0 0 10 14" style="image-rendering:pixelated;shape-rendering:crispEdges">
+            <rect x="3" y="0" width="4" height="1" fill="#4a6d4e"/>
+            <rect x="2" y="1" width="6" height="2" fill="#5a8060"/>
+            <rect x="0" y="3" width="4" height="2" fill="#4a6d4e"/>
+            <rect x="6" y="3" width="4" height="2" fill="#5a8060"/>
+            <rect x="1" y="4" width="2" height="1" fill="#3a5a3e"/>
+            <rect x="7" y="4" width="2" height="1" fill="#3a5a3e"/>
+            <rect x="4" y="3" width="2" height="2" fill="#6b4226"/>
+            <rect x="1" y="5" width="8" height="1" fill="#d46a4a"/>
+            <rect x="2" y="6" width="6" height="5" fill="#c25a44"/>
+            <rect x="3" y="6" width="4" height="1" fill="#d46a4a"/>
+            <rect x="3" y="11" width="4" height="1" fill="#8b3f2a"/>
+            <rect x="4" y="12" width="2" height="2" fill="#8b3f2a"/>
+          </svg>
+        </div>
+        <!-- 右侧像素药水 -->
+        <div class="zw-potion" style="position:absolute;right:8px;top:32%;z-index:2;pointer-events:none" aria-hidden="true">
+          <svg width="20" height="30" viewBox="0 0 10 15" style="image-rendering:pixelated;shape-rendering:crispEdges">
+            <rect x="3" y="0" width="4" height="1" fill="#8b5e3c"/>
+            <rect x="3" y="1" width="4" height="2" fill="#9ab6c4"/>
+            <rect x="2" y="3" width="6" height="1" fill="#4a6878"/>
+            <rect x="1" y="4" width="8" height="8" fill="#7a96b4"/>
+            <rect x="1" y="7" width="8" height="5" fill="#5a86b4"/>
+            <rect x="2" y="4" width="2" height="3" fill="#b8d0dc" opacity="0.5"/>
+            <rect x="5" y="9" width="2" height="1" fill="#9ab6c4" opacity="0.6"/>
+            <rect x="4" y="11" width="1" height="1" fill="#9ab6c4" opacity="0.5"/>
+            <rect x="1" y="12" width="8" height="1" fill="#4a6878"/>
+            <rect x="2" y="13" width="6" height="1" fill="#3a5868"/>
+            <rect x="3" y="14" width="4" height="1" fill="#2a4858"/>
+          </svg>
         </div>
         <div class="zw-corner bl">[+]</div>
         <div class="zw-corner br">[+]</div>
