@@ -2567,6 +2567,194 @@ if has_file:
             height=36,
         )
 
+        # 双击词语查词典：悬浮小窗（萌典 API 优先 + 百度回退）
+        components.html("""
+        <script>
+        (function() {
+            const p = window.parent;
+            const pd = p.document;
+            const STYLE_CONTENT = `
+                #rb-dict-overlay {
+                    position: fixed;
+                    display: none;
+                    z-index: 99999;
+                    background: #fffaec;
+                    border: 2px solid #3b2e1e;
+                    box-shadow: 4px 4px 0 #c25a44;
+                    padding: 14px 16px 14px 14px;
+                    font-family: 'Zpix', 'Microsoft YaHei', monospace;
+                    font-size: 13px;
+                    color: #3b2e1e;
+                    width: 280px;
+                    max-height: 360px;
+                    overflow-y: auto;
+                    line-height: 1.65;
+                }
+                #rb-dict-overlay .rb-dict-title {
+                    font-family: 'Press Start 2P', monospace;
+                    font-size: 12px;
+                    color: #c25a44;
+                    margin: 0 0 6px 0;
+                    padding-right: 18px;
+                    letter-spacing: 1px;
+                }
+                #rb-dict-overlay .rb-dict-close {
+                    position: absolute;
+                    top: 6px; right: 8px;
+                    background: none; border: none;
+                    color: #3b2e1e;
+                    font-size: 18px;
+                    cursor: pointer;
+                    font-family: 'Press Start 2P', monospace;
+                    line-height: 1;
+                    padding: 2px 6px;
+                }
+                #rb-dict-overlay .rb-dict-close:hover { color: #c25a44; }
+                #rb-dict-overlay .rb-dict-pinyin {
+                    color: #4a6d4e;
+                    font-size: 11px;
+                    margin: 4px 0;
+                    font-style: italic;
+                }
+                #rb-dict-overlay .rb-dict-def { margin: 5px 0; }
+                #rb-dict-overlay .rb-dict-link {
+                    display: inline-block;
+                    margin-top: 10px;
+                    color: #c25a44;
+                    text-decoration: none;
+                    font-size: 11px;
+                    border-bottom: 1px dashed #c25a44;
+                    padding-bottom: 1px;
+                }
+                #rb-dict-overlay .rb-dict-link:hover { background: #fff2d8; }
+                #rb-dict-overlay .rb-dict-loading { color: #8b5e3c; font-style: italic; }
+            `;
+
+            function escapeHtml(s) {
+                return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            }
+            function ensureStyles() {
+                if (pd.getElementById('rb-dict-overlay-style')) return;
+                const s = pd.createElement('style');
+                s.id = 'rb-dict-overlay-style';
+                s.textContent = STYLE_CONTENT;
+                pd.head.appendChild(s);
+            }
+            function ensureOverlay() {
+                let ov = pd.getElementById('rb-dict-overlay');
+                if (ov) return ov;
+                ensureStyles();
+                ov = pd.createElement('div');
+                ov.id = 'rb-dict-overlay';
+                pd.body.appendChild(ov);
+                return ov;
+            }
+            function closeOverlay() {
+                const ov = pd.getElementById('rb-dict-overlay');
+                if (ov) ov.style.display = 'none';
+            }
+            function positionOverlay(ov, x, y) {
+                const vw = p.innerWidth;
+                const vh = p.innerHeight;
+                const ow = 300;
+                const oh = 240;
+                let left = x + 12;
+                let top = y + 16;
+                if (left + ow > vw - 10) left = vw - ow - 10;
+                if (top + oh > vh - 10) top = y - oh - 10;
+                if (top < 10) top = 10;
+                ov.style.left = Math.max(10, left) + 'px';
+                ov.style.top = top + 'px';
+            }
+            async function showDefinition(word, x, y) {
+                const ov = ensureOverlay();
+                positionOverlay(ov, x, y);
+                const baiduUrl = 'https://dict.baidu.com/s?wd=' + encodeURIComponent(word);
+                ov.innerHTML = `
+                    <button class="rb-dict-close" aria-label="关闭">×</button>
+                    <div class="rb-dict-title">「${escapeHtml(word)}」</div>
+                    <div class="rb-dict-loading">查询中…</div>
+                `;
+                ov.style.display = 'block';
+                ov.querySelector('.rb-dict-close').onclick = closeOverlay;
+
+                const hasCJK = /[\\u4e00-\\u9fff]/.test(word);
+                if (!hasCJK) {
+                    renderNotFound(ov, word, baiduUrl, '外部词典可能有释义');
+                    return;
+                }
+                try {
+                    const res = await fetch('https://www.moedict.tw/uni/' + encodeURIComponent(word) + '.json');
+                    if (!res.ok) { renderNotFound(ov, word, baiduUrl); return; }
+                    const data = await res.json();
+                    renderDefinition(ov, word, data, baiduUrl);
+                } catch (err) {
+                    renderNotFound(ov, word, baiduUrl);
+                }
+            }
+            function renderDefinition(ov, word, data, baiduUrl) {
+                if (!data || !data.heteronyms || !data.heteronyms.length) {
+                    renderNotFound(ov, word, baiduUrl);
+                    return;
+                }
+                let html = `<button class="rb-dict-close" aria-label="关闭">×</button>
+                            <div class="rb-dict-title">「${escapeHtml(word)}」</div>`;
+                let hasDef = false;
+                data.heteronyms.slice(0, 3).forEach(h => {
+                    if (h.pinyin) html += `<div class="rb-dict-pinyin">${escapeHtml(h.pinyin)}</div>`;
+                    if (h.definitions) {
+                        h.definitions.slice(0, 4).forEach((d, i) => {
+                            const defText = (d.def || '').trim();
+                            if (!defText) return;
+                            html += `<div class="rb-dict-def">${i + 1}. ${escapeHtml(defText)}</div>`;
+                            hasDef = true;
+                        });
+                    }
+                });
+                if (!hasDef) { renderNotFound(ov, word, baiduUrl); return; }
+                html += `<a class="rb-dict-link" href="${baiduUrl}" target="_blank" rel="noopener">查百度词典 →</a>`;
+                ov.innerHTML = html;
+                ov.querySelector('.rb-dict-close').onclick = closeOverlay;
+            }
+            function renderNotFound(ov, word, baiduUrl, hint) {
+                ov.innerHTML = `
+                    <button class="rb-dict-close" aria-label="关闭">×</button>
+                    <div class="rb-dict-title">「${escapeHtml(word)}」</div>
+                    <div class="rb-dict-def">${hint || '萌典未收录此词。'}</div>
+                    <a class="rb-dict-link" href="${baiduUrl}" target="_blank" rel="noopener">查百度词典 →</a>
+                `;
+                ov.querySelector('.rb-dict-close').onclick = closeOverlay;
+            }
+            function attach() {
+                if (pd._rb_dict_bound) return;
+                pd._rb_dict_bound = true;
+                pd.addEventListener('dblclick', function(e) {
+                    const inRead = e.target && e.target.closest && e.target.closest('.book-page');
+                    if (!inRead) return;
+                    const selObj = p.getSelection ? p.getSelection() : null;
+                    const sel = (selObj && selObj.toString() || '').trim();
+                    if (!sel || sel.length > 15) return;
+                    showDefinition(sel, e.clientX, e.clientY);
+                });
+                pd.addEventListener('mousedown', function(e) {
+                    const ov = pd.getElementById('rb-dict-overlay');
+                    if (!ov || ov.style.display === 'none') return;
+                    if (!ov.contains(e.target)) closeOverlay();
+                });
+                pd.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') closeOverlay();
+                });
+            }
+            function boot() {
+                if (!pd || !pd.body) { setTimeout(boot, 200); return; }
+                ensureOverlay();
+                attach();
+            }
+            boot();
+        })();
+        </script>
+        """, height=0)
+
         # 侧边栏：阅读设置
         st.sidebar.divider()
         st.sidebar.markdown(
