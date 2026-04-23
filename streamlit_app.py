@@ -2855,6 +2855,202 @@ if has_file:
         </script>
         """, height=0)
 
+        # 选中文本 → 浮动"📷 分享"按钮 → 生成像素风引用卡片 PNG
+        components.html("""
+        <script>
+        (function() {
+            const p = window.parent;
+            const pd = p.document;
+            const STYLE = `
+                #rb-share-btn {
+                    position: fixed;
+                    display: none;
+                    z-index: 99998;
+                    background: #fffaec;
+                    border: 2px solid #3b2e1e;
+                    box-shadow: 3px 3px 0 #d4b54c;
+                    padding: 6px 12px;
+                    font-family: 'Press Start 2P', 'Zpix', monospace;
+                    font-size: 11px;
+                    color: #3b2e1e;
+                    cursor: pointer;
+                    letter-spacing: 1px;
+                    user-select: none;
+                    border-radius: 0;
+                }
+                #rb-share-btn:hover {
+                    background: #c25a44;
+                    color: #fffaec;
+                    transform: translate(-1px, -1px);
+                    box-shadow: 4px 4px 0 #3b2e1e;
+                }
+                #rb-share-btn.is-loading { pointer-events: none; opacity: 0.6; }
+            `;
+
+            function escapeHtml(s) {
+                return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            }
+            function ensureStyles() {
+                if (pd.getElementById('rb-share-style')) return;
+                const s = pd.createElement('style');
+                s.id = 'rb-share-style';
+                s.textContent = STYLE;
+                pd.head.appendChild(s);
+            }
+            function ensureButton() {
+                let btn = pd.getElementById('rb-share-btn');
+                if (btn) return btn;
+                ensureStyles();
+                btn = pd.createElement('button');
+                btn.id = 'rb-share-btn';
+                btn.textContent = '📷 分享';
+                btn.type = 'button';
+                pd.body.appendChild(btn);
+                btn.addEventListener('click', onShareClick);
+                btn.addEventListener('mousedown', e => e.stopPropagation());
+                return btn;
+            }
+
+            let pendingQuote = '';
+
+            function getBookTitle() {
+                const el = pd.querySelector('.rd-book-key');
+                if (!el) return '未命名';
+                const key = el.dataset.key || '';
+                const idx = key.lastIndexOf('.');
+                return idx > 0 ? key.substring(0, idx) : key;
+            }
+
+            function loadHtml2Canvas() {
+                return new Promise((resolve, reject) => {
+                    if (p.html2canvas) return resolve(p.html2canvas);
+                    const s = pd.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                    s.onload = () => resolve(p.html2canvas);
+                    s.onerror = () => reject(new Error('html2canvas load failed'));
+                    pd.head.appendChild(s);
+                });
+            }
+
+            function buildCardElement(quote, bookTitle) {
+                const wrap = pd.createElement('div');
+                wrap.style.cssText = `
+                    position: absolute; left: -10000px; top: 0;
+                    padding: 8px 32px 32px 8px; background: transparent;
+                `;
+                const cornerStyle = "position:absolute;font-family:'Press Start 2P','Zpix',monospace;color:#c25a44;font-size:14px";
+                const noStr = String(Math.floor(Math.random() * 999)).padStart(3, '0');
+                wrap.innerHTML = `
+                    <div style="position:relative;width:680px;padding:56px 56px 40px 56px;background:#fffaec;border:5px solid #3b2e1e;box-shadow:14px 14px 0 #c25a44;font-family:'Zpix','Noto Serif SC','PingFang SC','Microsoft YaHei',monospace;color:#3b2e1e;box-sizing:border-box">
+                        <div style="${cornerStyle};top:10px;left:14px">[+]</div>
+                        <div style="${cornerStyle};top:10px;right:14px">[+]</div>
+                        <div style="${cornerStyle};bottom:10px;left:14px">[+]</div>
+                        <div style="${cornerStyle};bottom:10px;right:14px">[+]</div>
+                        <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#8b5e3c;letter-spacing:2px;margin-bottom:24px">VOL.01 · QUOTE · NO.${noStr}</div>
+                        <div style="font-family:Georgia,serif;font-size:64px;color:#d4b54c;line-height:0.5;margin:0 0 -6px -6px">&ldquo;</div>
+                        <div style="font-size:19px;line-height:1.9;letter-spacing:0.5px;padding:0 8px 0 20px;border-left:4px solid #c25a44;white-space:pre-wrap;color:#3b2e1e;min-height:60px">${escapeHtml(quote)}</div>
+                        <div style="font-family:Georgia,serif;font-size:64px;color:#d4b54c;line-height:0.5;text-align:right;margin:-2px -6px 0 0">&rdquo;</div>
+                        <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #8b5e3c;display:flex;justify-content:space-between;align-items:baseline;gap:16px">
+                            <div style="font-size:14px;color:#8b5e3c;letter-spacing:0.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">——《${escapeHtml(bookTitle)}》</div>
+                            <div style="font-size:10px;color:#4a6d4e;font-family:'Press Start 2P',monospace;letter-spacing:2px;white-space:nowrap">★ VIA 嘟哒 DUDA</div>
+                        </div>
+                    </div>
+                `;
+                return wrap;
+            }
+
+            async function onShareClick(e) {
+                e.stopPropagation();
+                const btn = pd.getElementById('rb-share-btn');
+                if (!pendingQuote || !btn) return;
+                btn.classList.add('is-loading');
+                btn.textContent = '⏳ 生成中…';
+                const quote = pendingQuote;
+                try {
+                    const html2canvas = await loadHtml2Canvas();
+                    const wrap = buildCardElement(quote, getBookTitle());
+                    pd.body.appendChild(wrap);
+                    await new Promise(r => setTimeout(r, 120));
+                    const canvas = await html2canvas(wrap, {
+                        scale: 2,
+                        backgroundColor: null,
+                        logging: false,
+                        useCORS: true,
+                    });
+                    wrap.remove();
+                    canvas.toBlob(blob => {
+                        if (!blob) return;
+                        const url = URL.createObjectURL(blob);
+                        const a = pd.createElement('a');
+                        a.href = url;
+                        a.download = `嘟哒_引用_${Date.now()}.png`;
+                        pd.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }, 'image/png');
+                } catch (err) {
+                    console.error('Card generation failed:', err);
+                } finally {
+                    btn.classList.remove('is-loading');
+                    btn.textContent = '📷 分享';
+                    btn.style.display = 'none';
+                    pendingQuote = '';
+                }
+            }
+
+            function attach() {
+                if (pd._rb_share_bound) return;
+                pd._rb_share_bound = true;
+
+                pd.addEventListener('mouseup', function(e) {
+                    if (e.target && e.target.id === 'rb-share-btn') return;
+                    const btn = pd.getElementById('rb-share-btn');
+                    const inRead = e.target && e.target.closest && e.target.closest('.book-page');
+                    const selObj = p.getSelection ? p.getSelection() : null;
+                    const sel = (selObj && selObj.toString() || '').trim();
+                    if (!inRead || !sel || sel.length < 8 || sel.length > 500) {
+                        if (btn) btn.style.display = 'none';
+                        pendingQuote = '';
+                        return;
+                    }
+                    // 确认选区在 book-page 内
+                    if (selObj.rangeCount > 0) {
+                        const range = selObj.getRangeAt(0);
+                        const node = range.commonAncestorContainer;
+                        const el = node.nodeType === 1 ? node : node.parentElement;
+                        if (!el || !el.closest('.book-page')) {
+                            if (btn) btn.style.display = 'none';
+                            pendingQuote = '';
+                            return;
+                        }
+                    }
+                    pendingQuote = sel;
+                    const sb = ensureButton();
+                    const x = Math.min(p.innerWidth - 130, Math.max(10, e.clientX + 12));
+                    const y = Math.min(p.innerHeight - 50, Math.max(10, e.clientY + 14));
+                    sb.style.left = x + 'px';
+                    sb.style.top = y + 'px';
+                    sb.style.display = 'block';
+                });
+
+                pd.addEventListener('mousedown', function(e) {
+                    if (e.target && e.target.id === 'rb-share-btn') return;
+                    const btn = pd.getElementById('rb-share-btn');
+                    if (btn) btn.style.display = 'none';
+                });
+            }
+
+            function boot() {
+                if (!pd || !pd.body) { setTimeout(boot, 200); return; }
+                ensureButton();
+                attach();
+            }
+            boot();
+        })();
+        </script>
+        """, height=0)
+
         # 阅读时长追踪：后台累计每本书的阅读秒数到 localStorage
         components.html("""
         <script>
