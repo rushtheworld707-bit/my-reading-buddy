@@ -19,23 +19,23 @@ from openai import OpenAI
 st.set_page_config(page_title="嘟哒", layout="wide")
 
 # 像素 SVG 图标库（替换 emoji，与猫 SVG 同像素语法：单色块 + crispEdges）
-# 调色板：#3b2e1e ink / #c25a44 terra / #d4b54c mustard / #4a6d4e moss / #fffaec cream
+# 调色板：var(--mc-ink) ink / var(--mc-terra) terra / var(--mc-mustard) mustard / var(--mc-moss) moss / var(--mc-cream) cream
 PX_ICON = {
-    "upload": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="9" fill="#3b2e1e"/><rect x="5" y="4" width="2" height="1" fill="#3b2e1e"/><rect x="9" y="4" width="2" height="1" fill="#3b2e1e"/><rect x="3" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="1" height="2" fill="#3b2e1e"/><rect x="13" y="13" width="1" height="2" fill="#3b2e1e"/></svg>',
-    "read": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="3" width="6" height="1" fill="#3b2e1e"/><rect x="9" y="3" width="6" height="1" fill="#3b2e1e"/><rect x="1" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="6" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="9" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="14" y="3" width="1" height="10" fill="#3b2e1e"/><rect x="1" y="12" width="14" height="1" fill="#3b2e1e"/><rect x="2" y="5" width="3" height="1" fill="#c25a44"/><rect x="2" y="7" width="3" height="1" fill="#c25a44"/><rect x="2" y="9" width="3" height="1" fill="#c25a44"/><rect x="10" y="5" width="3" height="1" fill="#c25a44"/><rect x="10" y="7" width="3" height="1" fill="#c25a44"/><rect x="10" y="9" width="3" height="1" fill="#c25a44"/></svg>',
-    "chat": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="3" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="10" width="8" height="1" fill="#3b2e1e"/><rect x="1" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="14" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="4" y="11" width="2" height="1" fill="#3b2e1e"/><rect x="5" y="12" width="1" height="1" fill="#3b2e1e"/><rect x="4" y="6" width="2" height="2" fill="#c25a44"/><rect x="7" y="6" width="2" height="2" fill="#c25a44"/><rect x="10" y="6" width="2" height="2" fill="#c25a44"/></svg>',
-    "keyboard": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="4" width="14" height="1" fill="#3b2e1e"/><rect x="1" y="11" width="14" height="1" fill="#3b2e1e"/><rect x="1" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="14" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="3" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="6" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="9" y="6" width="2" height="1" fill="#3b2e1e"/><rect x="12" y="6" width="1" height="1" fill="#3b2e1e"/><rect x="3" y="8" width="2" height="1" fill="#3b2e1e"/><rect x="6" y="8" width="2" height="1" fill="#3b2e1e"/><rect x="9" y="8" width="2" height="1" fill="#3b2e1e"/><rect x="12" y="8" width="1" height="1" fill="#3b2e1e"/><rect x="4" y="10" width="8" height="1" fill="#3b2e1e"/></svg>',
-    "pin": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="6" y="2" width="4" height="1" fill="#3b2e1e"/><rect x="5" y="3" width="1" height="4" fill="#3b2e1e"/><rect x="10" y="3" width="1" height="4" fill="#3b2e1e"/><rect x="6" y="3" width="4" height="4" fill="#c25a44"/><rect x="7" y="4" width="1" height="1" fill="#e07b5a"/><rect x="3" y="7" width="10" height="2" fill="#3b2e1e"/><rect x="7" y="9" width="2" height="5" fill="#3b2e1e"/></svg>',
-    "palette": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="1" height="1" fill="#3b2e1e"/><rect x="12" y="3" width="1" height="1" fill="#3b2e1e"/><rect x="2" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="13" y="4" width="1" height="6" fill="#3b2e1e"/><rect x="3" y="10" width="1" height="2" fill="#3b2e1e"/><rect x="4" y="12" width="3" height="1" fill="#3b2e1e"/><rect x="7" y="11" width="1" height="1" fill="#3b2e1e"/><rect x="8" y="10" width="5" height="1" fill="#3b2e1e"/><rect x="4" y="4" width="2" height="2" fill="#c25a44"/><rect x="9" y="4" width="2" height="2" fill="#d4b54c"/><rect x="4" y="7" width="2" height="2" fill="#4a6d4e"/><rect x="9" y="7" width="2" height="2" fill="#7a96b4"/></svg>',
-    "clock": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="5" y="2" width="6" height="1" fill="#3b2e1e"/><rect x="5" y="13" width="6" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="3" width="2" height="1" fill="#3b2e1e"/><rect x="3" y="12" width="2" height="1" fill="#3b2e1e"/><rect x="11" y="12" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="13" y="4" width="1" height="8" fill="#3b2e1e"/><rect x="7" y="5" width="2" height="4" fill="#3b2e1e"/><rect x="8" y="8" width="3" height="1" fill="#c25a44"/></svg>',
-    "save": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="2" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="13" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="2" width="1" height="12" fill="#3b2e1e"/><rect x="13" y="2" width="1" height="12" fill="#3b2e1e"/><rect x="4" y="3" width="7" height="3" fill="#3b2e1e"/><rect x="5" y="4" width="2" height="2" fill="#c25a44"/><rect x="4" y="8" width="8" height="5" fill="#3b2e1e"/><rect x="5" y="9" width="6" height="1" fill="#fffaec"/><rect x="5" y="11" width="6" height="1" fill="#fffaec"/></svg>',
-    "robot": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="2" fill="#3b2e1e"/><rect x="3" y="3" width="10" height="1" fill="#3b2e1e"/><rect x="3" y="9" width="10" height="1" fill="#3b2e1e"/><rect x="3" y="3" width="1" height="7" fill="#3b2e1e"/><rect x="12" y="3" width="1" height="7" fill="#3b2e1e"/><rect x="5" y="5" width="2" height="2" fill="#c25a44"/><rect x="9" y="5" width="2" height="2" fill="#c25a44"/><rect x="6" y="8" width="4" height="1" fill="#3b2e1e"/><rect x="1" y="5" width="2" height="1" fill="#3b2e1e"/><rect x="13" y="5" width="2" height="1" fill="#3b2e1e"/><rect x="4" y="10" width="2" height="4" fill="#3b2e1e"/><rect x="10" y="10" width="2" height="4" fill="#3b2e1e"/></svg>',
-    "download": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="5" fill="#3b2e1e"/><rect x="5" y="7" width="6" height="1" fill="#3b2e1e"/><rect x="6" y="8" width="4" height="1" fill="#3b2e1e"/><rect x="7" y="9" width="2" height="1" fill="#3b2e1e"/><rect x="2" y="12" width="12" height="1" fill="#3b2e1e"/><rect x="2" y="12" width="1" height="2" fill="#3b2e1e"/><rect x="13" y="12" width="1" height="2" fill="#3b2e1e"/></svg>',
+    "upload": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="9" fill="#2E1D12"/><rect x="5" y="4" width="2" height="1" fill="#2E1D12"/><rect x="9" y="4" width="2" height="1" fill="#2E1D12"/><rect x="3" y="6" width="2" height="1" fill="#2E1D12"/><rect x="11" y="6" width="2" height="1" fill="#2E1D12"/><rect x="2" y="13" width="12" height="1" fill="#2E1D12"/><rect x="2" y="13" width="1" height="2" fill="#2E1D12"/><rect x="13" y="13" width="1" height="2" fill="#2E1D12"/></svg>',
+    "read": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="3" width="6" height="1" fill="#2E1D12"/><rect x="9" y="3" width="6" height="1" fill="#2E1D12"/><rect x="1" y="3" width="1" height="10" fill="#2E1D12"/><rect x="6" y="3" width="1" height="10" fill="#2E1D12"/><rect x="9" y="3" width="1" height="10" fill="#2E1D12"/><rect x="14" y="3" width="1" height="10" fill="#2E1D12"/><rect x="1" y="12" width="14" height="1" fill="#2E1D12"/><rect x="2" y="5" width="3" height="1" fill="#B96A4A"/><rect x="2" y="7" width="3" height="1" fill="#B96A4A"/><rect x="2" y="9" width="3" height="1" fill="#B96A4A"/><rect x="10" y="5" width="3" height="1" fill="#B96A4A"/><rect x="10" y="7" width="3" height="1" fill="#B96A4A"/><rect x="10" y="9" width="3" height="1" fill="#B96A4A"/></svg>',
+    "chat": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="3" width="12" height="1" fill="#2E1D12"/><rect x="2" y="10" width="8" height="1" fill="#2E1D12"/><rect x="1" y="4" width="1" height="6" fill="#2E1D12"/><rect x="14" y="4" width="1" height="6" fill="#2E1D12"/><rect x="4" y="11" width="2" height="1" fill="#2E1D12"/><rect x="5" y="12" width="1" height="1" fill="#2E1D12"/><rect x="4" y="6" width="2" height="2" fill="#B96A4A"/><rect x="7" y="6" width="2" height="2" fill="#B96A4A"/><rect x="10" y="6" width="2" height="2" fill="#B96A4A"/></svg>',
+    "keyboard": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="4" width="14" height="1" fill="#2E1D12"/><rect x="1" y="11" width="14" height="1" fill="#2E1D12"/><rect x="1" y="4" width="1" height="8" fill="#2E1D12"/><rect x="14" y="4" width="1" height="8" fill="#2E1D12"/><rect x="3" y="6" width="2" height="1" fill="#2E1D12"/><rect x="6" y="6" width="2" height="1" fill="#2E1D12"/><rect x="9" y="6" width="2" height="1" fill="#2E1D12"/><rect x="12" y="6" width="1" height="1" fill="#2E1D12"/><rect x="3" y="8" width="2" height="1" fill="#2E1D12"/><rect x="6" y="8" width="2" height="1" fill="#2E1D12"/><rect x="9" y="8" width="2" height="1" fill="#2E1D12"/><rect x="12" y="8" width="1" height="1" fill="#2E1D12"/><rect x="4" y="10" width="8" height="1" fill="#2E1D12"/></svg>',
+    "pin": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="6" y="2" width="4" height="1" fill="#2E1D12"/><rect x="5" y="3" width="1" height="4" fill="#2E1D12"/><rect x="10" y="3" width="1" height="4" fill="#2E1D12"/><rect x="6" y="3" width="4" height="4" fill="#B96A4A"/><rect x="7" y="4" width="1" height="1" fill="#e07b5a"/><rect x="3" y="7" width="10" height="2" fill="#2E1D12"/><rect x="7" y="9" width="2" height="5" fill="#2E1D12"/></svg>',
+    "palette": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="1" fill="#2E1D12"/><rect x="3" y="3" width="1" height="1" fill="#2E1D12"/><rect x="12" y="3" width="1" height="1" fill="#2E1D12"/><rect x="2" y="4" width="1" height="6" fill="#2E1D12"/><rect x="13" y="4" width="1" height="6" fill="#2E1D12"/><rect x="3" y="10" width="1" height="2" fill="#2E1D12"/><rect x="4" y="12" width="3" height="1" fill="#2E1D12"/><rect x="7" y="11" width="1" height="1" fill="#2E1D12"/><rect x="8" y="10" width="5" height="1" fill="#2E1D12"/><rect x="4" y="4" width="2" height="2" fill="#B96A4A"/><rect x="9" y="4" width="2" height="2" fill="#D7A441"/><rect x="4" y="7" width="2" height="2" fill="#6E8B5B"/><rect x="9" y="7" width="2" height="2" fill="#7a96b4"/></svg>',
+    "clock": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="5" y="2" width="6" height="1" fill="#2E1D12"/><rect x="5" y="13" width="6" height="1" fill="#2E1D12"/><rect x="3" y="3" width="2" height="1" fill="#2E1D12"/><rect x="11" y="3" width="2" height="1" fill="#2E1D12"/><rect x="3" y="12" width="2" height="1" fill="#2E1D12"/><rect x="11" y="12" width="2" height="1" fill="#2E1D12"/><rect x="2" y="4" width="1" height="8" fill="#2E1D12"/><rect x="13" y="4" width="1" height="8" fill="#2E1D12"/><rect x="7" y="5" width="2" height="4" fill="#2E1D12"/><rect x="8" y="8" width="3" height="1" fill="#B96A4A"/></svg>',
+    "save": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="2" width="12" height="1" fill="#2E1D12"/><rect x="2" y="13" width="12" height="1" fill="#2E1D12"/><rect x="2" y="2" width="1" height="12" fill="#2E1D12"/><rect x="13" y="2" width="1" height="12" fill="#2E1D12"/><rect x="4" y="3" width="7" height="3" fill="#2E1D12"/><rect x="5" y="4" width="2" height="2" fill="#B96A4A"/><rect x="4" y="8" width="8" height="5" fill="#2E1D12"/><rect x="5" y="9" width="6" height="1" fill="#FFF6E8"/><rect x="5" y="11" width="6" height="1" fill="#FFF6E8"/></svg>',
+    "robot": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="2" fill="#2E1D12"/><rect x="3" y="3" width="10" height="1" fill="#2E1D12"/><rect x="3" y="9" width="10" height="1" fill="#2E1D12"/><rect x="3" y="3" width="1" height="7" fill="#2E1D12"/><rect x="12" y="3" width="1" height="7" fill="#2E1D12"/><rect x="5" y="5" width="2" height="2" fill="#B96A4A"/><rect x="9" y="5" width="2" height="2" fill="#B96A4A"/><rect x="6" y="8" width="4" height="1" fill="#2E1D12"/><rect x="1" y="5" width="2" height="1" fill="#2E1D12"/><rect x="13" y="5" width="2" height="1" fill="#2E1D12"/><rect x="4" y="10" width="2" height="4" fill="#2E1D12"/><rect x="10" y="10" width="2" height="4" fill="#2E1D12"/></svg>',
+    "download": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="5" fill="#2E1D12"/><rect x="5" y="7" width="6" height="1" fill="#2E1D12"/><rect x="6" y="8" width="4" height="1" fill="#2E1D12"/><rect x="7" y="9" width="2" height="1" fill="#2E1D12"/><rect x="2" y="12" width="12" height="1" fill="#2E1D12"/><rect x="2" y="12" width="1" height="2" fill="#2E1D12"/><rect x="13" y="12" width="1" height="2" fill="#2E1D12"/></svg>',
 }
 
 # 阅读页配色主题（bg = 纸底，fg = 墨色）
 READING_THEMES = {
-    "奶油": {"bg": "#fffaec", "fg": "#3b2e1e"},
+    "奶油": {"bg": "var(--mc-cream)", "fg": "var(--mc-ink)"},
     "米黄": {"bg": "#f3e4c0", "fg": "#4a3419"},
     "护眼": {"bg": "#dae8d1", "fg": "#2d3e2a"},
     "凉灰": {"bg": "#e0e6ec", "fg": "#2a3340"},
@@ -46,20 +46,53 @@ READING_THEMES = {
 st.markdown('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">', unsafe_allow_html=True)
 st.markdown("""
 <style>
+/* ==========================================================================
+   色板 token（spec v1 第 5.1 节）
+   —— mc-* = main-console，UI 改版后新色板
+   —— SVG fill/stroke 不能用 var()，直接用具体 hex（以下 token 仅用于 CSS）
+   —— 详见 DESIGN_SPEC.md §5.1
+   ========================================================================== */
+:root {
+    /* 核心色 */
+    --mc-ink: #2E1D12;              /* 深文字 */
+    --mc-cream: #FFF6E8;            /* 浅纸白（书页纸张） */
+    --mc-paper: #F6E7C8;            /* 奶油纸（卡片底） */
+    --mc-mustard: #D7A441;          /* 金黄强调（进度/高亮） */
+    --mc-terra: #B96A4A;            /* 柔红棕（强调按钮/shadow） */
+    --mc-moss: #6E8B5B;             /* 苔绿（成功/已读） */
+    --mc-dusty: #7a96b4;            /* 蓝调（spec 无，保留原值） */
+
+    /* 木质系列 */
+    --mc-wood-deep: #3B2416;        /* 最外层深木棕（背景） */
+    --mc-wood-mid: #6B4024;         /* 中木棕（中层框） */
+    --mc-wood-light: #A86A33;       /* 焦糖棕（主按钮底） */
+
+    /* 辅助色 */
+    --mc-lamp-yellow: #F2C66D;      /* 暖灯黄 */
+    --mc-gray-brown: #8E735B;       /* 次级灰棕（placeholder/分隔） */
+
+    /* 次级变体（兼容现有样式） */
+    --mc-paper-highlight: #FFFEF8;
+    --mc-paper-alt: #E8DCBC;
+    --mc-terra-light: #E07B5A;
+    --mc-ink-soft: #6B5843;
+    --mc-wood-brown: #8B5E3C;
+}
+
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
     font-size: 12px;
     font-weight: 400;
-    color: #3b2e1e;
+    color: var(--mc-ink);
     text-align: center;
     margin: 12px 0 12px 0;
     letter-spacing: 3px;
-    text-shadow: 2px 2px 0 #d4b54c;
+    text-shadow: 2px 2px 0 var(--mc-mustard);
     text-transform: uppercase;
 }
 .handwrite-title .hw-dot {
-    color: #c25a44;
+    color: var(--mc-terra);
     margin: 0 8px;
     text-shadow: none;
 }
@@ -153,7 +186,7 @@ st.markdown("""
 /* ===== 阅读区域：像素风（与欢迎页同一套调色） ===== */
 /* 顶部 header 保持存在（防止 Streamlit 内部渲染失衡），只换成奶油色与页面融合 */
 body:has(.reading-area) header[data-testid="stHeader"] {
-    background: #f3e9cf !important;
+    background: var(--mc-paper) !important;
 }
 /* C2：顶栏右上角 toolbar 按钮透明化（Share / GitHub / 三点菜单等）
    不用 display:none（会触发 DOM 累加 bug），用 opacity + hover 恢复
@@ -170,13 +203,13 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"],
 body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
 body:has(.reading-area) .main .block-container,
 body:has(.reading-area) [class*="block-container"] {
-    background-color: #f3e9cf !important;
+    background-color: var(--mc-paper) !important;
 }
 
 /* A1：侧栏背景奶油 + 右侧虚线分隔（仅改最外层 section，不动任何子元素） */
 body:has(.reading-area) section[data-testid="stSidebar"] {
     background: #e8dcbc !important;
-    border-right: 2px dashed #3b2e1e !important;
+    border-right: 2px dashed var(--mc-ink) !important;
 }
 /* A2：侧栏文字颜色深棕 + Zpix 像素字体
    只命中 widget 的 <label>、独立 st.markdown/st.caption 的段落/粗体
@@ -186,7 +219,7 @@ body:has(.reading-area) section[data-testid="stSidebar"] label,
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stMarkdown"] p,
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stMarkdown"] strong {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 1px !important;
 }
@@ -195,23 +228,23 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stMarkdow
    只改 stButton 的 button 元素本体和其内部 <p>；不碰 chat_input 的 send 按钮
    （chat_input 是 stChatInput，不是 stButton，自然不会被命中） */
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button {
-    background: #3b2e1e !important;
-    color: #f3e9cf !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-ink) !important;
+    color: var(--mc-paper) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 3px 3px 0 #d4b54c !important;
+    box-shadow: 3px 3px 0 var(--mc-mustard) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 1px !important;
     transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button:hover {
-    background: #c25a44 !important;
+    background: var(--mc-terra) !important;
     color: #fffef8 !important;
     transform: translate(-2px, -2px) !important;
-    box-shadow: 5px 5px 0 #d4b54c !important;
+    box-shadow: 5px 5px 0 var(--mc-mustard) !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button:focus-visible {
-    outline: 2px solid #c25a44 !important;
+    outline: 2px solid var(--mc-terra) !important;
     outline-offset: 3px !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"] > button p {
@@ -223,11 +256,11 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stButton"
    只命中 BaseWeb select 的外层 div；不动弹出层（弹出层走 portal 挂到 body 上，
    不是这个选择器的后代），不动 position/display 相关属性 */
 body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="select"] > div {
-    background: #fffaec !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 2px 2px 0 #d4b54c !important;
-    color: #3b2e1e !important;
+    box-shadow: 2px 2px 0 var(--mc-mustard) !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
 }
 
@@ -235,10 +268,10 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="select"]
    只改 role="slider" 的拇指本体；轨道与刻度保持 Streamlit 默认（不碰尺寸、
    位置、transform，避免影响拖拽手势的命中区域） */
 body:has(.reading-area) section[data-testid="stSidebar"] [data-baseweb="slider"] [role="slider"] {
-    background: #c25a44 !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-terra) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 2px 2px 0 #3b2e1e !important;
+    box-shadow: 2px 2px 0 var(--mc-ink) !important;
 }
 
 /* A6：侧栏 number_input（跳转页码）方角像素化 */
@@ -253,33 +286,33 @@ body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberI
     outline: none !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] input {
-    background: #fffaec !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: 'Press Start 2P', 'Zpix', monospace !important;
     font-size: 12px !important;
     letter-spacing: 1px !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button {
-    background: #3b2e1e !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-ink) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    color: #f3e9cf !important;
+    color: var(--mc-paper) !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button:hover {
-    background: #c25a44 !important;
+    background: var(--mc-terra) !important;
 }
 body:has(.reading-area) section[data-testid="stSidebar"] [data-testid="stNumberInput"] button svg {
-    fill: #f3e9cf !important;
-    color: #f3e9cf !important;
+    fill: var(--mc-paper) !important;
+    color: var(--mc-paper) !important;
 }
 
 /* B1：主区分隔线（st.divider）换成虚线深棕；AI 小标题本身已由
    MainBlockContainer h3 规则自动像素化，不再重复 */
 body:has(.reading-area) [data-testid="stMainBlockContainer"] hr {
     border: none !important;
-    border-top: 2px dashed #3b2e1e !important;
+    border-top: 2px dashed var(--mc-ink) !important;
     background: transparent !important;
     margin: 18px 0 !important;
     opacity: 1 !important;
@@ -288,22 +321,22 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] hr {
 /* B2：AI 聊天气泡只改 bg + text color，不动 border-radius/position/margin
    —— 之前的 bug 正是因为改了 margin 和通配 * color 导致 chat_input 跑位 */
 body:has(.reading-area) [data-testid="stChatMessage"] {
-    background: #fffaec !important;
+    background: var(--mc-cream) !important;
 }
 body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
 body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] strong,
 body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] em,
 body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li,
 body:has(.reading-area) [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] code {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
 }
 
 /* B3（新版）：chat_input 的 textarea 同时设 bg + text color + 字体
    不碰 stChatInput / stBottom 外层容器的 position/margin/bg/border/box-shadow
    textarea 是叶子元素，覆盖其 bg 不影响布局定位 */
 body:has(.reading-area) [data-testid="stChatInput"] textarea {
-    background: #fffaec !important;
-    color: #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 1px !important;
 }
@@ -318,7 +351,7 @@ body:has(.reading-area) [data-testid="stApp"],
 body:has(.reading-area) [data-testid="stBottom"],
 body:has(.reading-area) [data-testid="stBottom"] > div,
 body:has(.reading-area) [data-testid="stChatInput"] {
-    background: #f3e9cf !important;
+    background: var(--mc-paper) !important;
 }
 /* B3.6：chat_input 内层 baseweb 包装（真正那个黑色圆角框）也统一成米白
    覆盖多种可能的内层 DOM 结构 */
@@ -327,16 +360,16 @@ body:has(.reading-area) [data-testid="stChatInput"] > div > div,
 body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="textarea"],
 body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="input"],
 body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="base-input"] {
-    background: #fffaec !important;
+    background: var(--mc-cream) !important;
 }
 
 /* B4：chat_input 外观完整像素化
    —— 仅最外层直接子 div 加边框 + 偏移阴影（避免多层重复描边）
    —— 内层 baseweb / textarea 去掉圆角和边框，保持方角一致 */
 body:has(.reading-area) [data-testid="stChatInput"] > div {
-    border: 2px solid #3b2e1e !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 3px 3px 0 #d4b54c !important;
+    box-shadow: 3px 3px 0 var(--mc-mustard) !important;
 }
 body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="textarea"],
 body:has(.reading-area) [data-testid="stChatInput"] [data-baseweb="input"],
@@ -347,20 +380,20 @@ body:has(.reading-area) [data-testid="stChatInput"] textarea {
 }
 /* 发送按钮（右侧向上箭头）像素化：方角深棕底 + 米白图标 */
 body:has(.reading-area) [data-testid="stChatInput"] button {
-    background: #3b2e1e !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-ink) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
 }
 body:has(.reading-area) [data-testid="stChatInput"] button:hover {
-    background: #c25a44 !important;
+    background: var(--mc-terra) !important;
 }
 body:has(.reading-area) [data-testid="stChatInput"] button:focus-visible {
-    outline: 2px solid #c25a44 !important;
+    outline: 2px solid var(--mc-terra) !important;
     outline-offset: 3px !important;
 }
 body:has(.reading-area) [data-testid="stChatInput"] button svg {
-    fill: #f3e9cf !important;
-    color: #f3e9cf !important;
+    fill: var(--mc-paper) !important;
+    color: var(--mc-paper) !important;
 }
 
 
@@ -368,7 +401,7 @@ body:has(.reading-area) [data-testid="stChatInput"] button svg {
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h1,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h2,
 body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 2px;
 }
@@ -381,12 +414,12 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
     padding: 8px 14px;
     margin-bottom: 14px;
     background: #e8dcbc;
-    border-top: 2px solid #3b2e1e;
-    border-bottom: 2px dashed #3b2e1e;
+    border-top: 2px solid var(--mc-ink);
+    border-bottom: 2px dashed var(--mc-ink);
     font-family: 'Press Start 2P', 'Zpix', monospace;
     font-size: 10px;
     letter-spacing: 2px;
-    color: #3b2e1e;
+    color: var(--mc-ink);
     text-transform: uppercase;
     animation: rd-fade-in 0.55s ease-out both;
 }
@@ -409,7 +442,7 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace;
     font-size: 12px;
     letter-spacing: 1.5px;
-    color: #3b2e1e;
+    color: var(--mc-ink);
     max-width: 50%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -417,7 +450,7 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
     text-transform: none;
 }
 .rd-topbar .dot {
-    color: #c25a44;
+    color: var(--mc-terra);
     margin: 0 6px;
 }
 .rd-topbar .rd-clock {
@@ -436,31 +469,31 @@ body:has(.reading-area) [data-testid="stMainBlockContainer"] h3 {
 /* 进度条：方形像素 */
 body:has(.reading-area) .progress-container {
     background: #e8dcbc !important;
-    border: 2px solid #3b2e1e !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
     height: 10px !important;
-    box-shadow: 3px 3px 0 #d4b54c !important;
+    box-shadow: 3px 3px 0 var(--mc-mustard) !important;
     padding: 0 !important;
 }
 body:has(.reading-area) .progress-fill {
-    background: #c25a44 !important;
+    background: var(--mc-terra) !important;
     border-radius: 0 !important;
     transition: width 0.3s steps(12) !important;
 }
 /* 书页容器：虚线外框 + 芥末黄偏移阴影 */
 .reading-area .book-spread {
-    background: #fffaec !important;
-    border: 2px dashed #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    border: 2px dashed var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 6px 6px 0 #d4b54c !important;
-    color: #3b2e1e !important;
+    box-shadow: 6px 6px 0 var(--mc-mustard) !important;
+    color: var(--mc-ink) !important;
     position: relative;
 }
 .reading-area .book-page-left {
-    border-right: 1px dashed #3b2e1e !important;
+    border-right: 1px dashed var(--mc-ink) !important;
 }
 .reading-area .book-page .page-num {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     opacity: 0.65 !important;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 10px !important;
@@ -471,7 +504,7 @@ body:has(.reading-area) .progress-fill {
     position: absolute;
     font-family: 'Press Start 2P', monospace;
     font-size: 10px;
-    color: #c25a44;
+    color: var(--mc-terra);
     z-index: 2;
     letter-spacing: 0;
 }
@@ -480,7 +513,7 @@ body:has(.reading-area) .progress-fill {
 
 /* 页码信息：主行像素刊头字体，副行 Zpix 柔化 */
 .reading-area .page-indicator {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     margin-top: 14px !important;
     text-align: center;
 }
@@ -506,11 +539,11 @@ body:has(.reading-area) .progress-fill {
     cursor: pointer;
     user-select: none;
     text-decoration: none !important;
-    background: #3b2e1e !important;
-    color: #f3e9cf !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-ink) !important;
+    color: var(--mc-paper) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 4px 4px 0 #d4b54c !important;
+    box-shadow: 4px 4px 0 var(--mc-mustard) !important;
     font-family: 'Press Start 2P', 'Zpix', monospace !important;
     font-size: 10px !important;
     letter-spacing: 2px !important;
@@ -519,21 +552,21 @@ body:has(.reading-area) .progress-fill {
     transition: transform 0.08s steps(2), box-shadow 0.08s steps(2), background 0.15s !important;
 }
 .reading-area .nav-btn:hover {
-    background: #c25a44 !important;
+    background: var(--mc-terra) !important;
     color: #fffef8 !important;
-    border-color: #3b2e1e !important;
+    border-color: var(--mc-ink) !important;
     transform: translate(-2px, -2px) !important;
-    box-shadow: 6px 6px 0 #d4b54c !important;
+    box-shadow: 6px 6px 0 var(--mc-mustard) !important;
 }
 /* 键盘聚焦态：像素风用 terra 方框描边（默认浏览器圆角 outline 会破风格） */
 .reading-area .nav-btn:focus-visible {
-    outline: 2px solid #c25a44 !important;
+    outline: 2px solid var(--mc-terra) !important;
     outline-offset: 3px !important;
 }
 /* active（鼠标按下 / 键盘 space）：像素下压感 */
 .reading-area .nav-btn:active {
     transform: translate(0, 0) !important;
-    box-shadow: 2px 2px 0 #d4b54c !important;
+    box-shadow: 2px 2px 0 var(--mc-mustard) !important;
 }
 .reading-area .nav-btn.nav-disabled {
     opacity: 0.35 !important;
@@ -575,11 +608,11 @@ body:has(.zine-welcome) .main .block-container,
 body:has(.zine-welcome) [class*="block-container"] {
     padding: 0 !important;
     max-width: 100% !important;
-    background-color: #f3e9cf !important;
+    background-color: var(--mc-paper) !important;
     min-height: unset;
 }
 body:has(.zine-welcome) {
-    background-color: #f3e9cf !important;
+    background-color: var(--mc-paper) !important;
 }
 body:has(.zine-welcome) .handwrite-title {
     display: none !important;
@@ -592,17 +625,17 @@ body:has(.zine-welcome) .handwrite-title {
     font-display: swap;
 }
 
-/* 调色盘：Stardew-ish 暖色 */
+/* 调色盘：alias 到新 mc-* token（spec v1 第 5.1 节） */
 .zine-welcome {
-    --zw-paper: #f3e9cf;
-    --zw-paper-2: #e8dcbc;
-    --zw-ink: #3b2e1e;
-    --zw-ink-soft: #6b5843;
-    --zw-terra: #c25a44;
-    --zw-terra-soft: #e07b5a;
-    --zw-moss: #4a6d4e;
-    --zw-mustard: #d4b54c;
-    --zw-dusty: #7a96b4;
+    --zw-paper: var(--mc-paper);
+    --zw-paper-2: var(--mc-paper-alt);
+    --zw-ink: var(--mc-ink);
+    --zw-ink-soft: var(--mc-ink-soft);
+    --zw-terra: var(--mc-terra);
+    --zw-terra-soft: var(--mc-terra-light);
+    --zw-moss: var(--mc-moss);
+    --zw-mustard: var(--mc-mustard);
+    --zw-dusty: var(--mc-dusty);
 }
 
 @keyframes zw-fade-in {
@@ -1134,11 +1167,11 @@ body:has(.reading-area) section[data-testid="stSidebar"] .sbh .px-ic {
 /* ===== 原生 Streamlit 提示态像素化（alert / toast / spinner） ===== */
 /* st.warning / st.error / st.info / st.success 外框 */
 body:has(.reading-area) [data-testid="stAlert"] {
-    background: #fffaec !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 4px 4px 0 #d4b54c !important;
-    color: #3b2e1e !important;
+    box-shadow: 4px 4px 0 var(--mc-mustard) !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 1px !important;
     padding: 14px 16px !important;
@@ -1146,40 +1179,40 @@ body:has(.reading-area) [data-testid="stAlert"] {
 /* error 态改用 terra 色描边 / 投影，情绪层级清晰但仍然是像素语言 */
 body:has(.reading-area) [data-testid="stAlertContentError"],
 body:has(.reading-area) [data-testid="stAlert"]:has([data-testid="stAlertContentError"]) {
-    border-color: #c25a44 !important;
-    box-shadow: 4px 4px 0 #c25a44 !important;
+    border-color: var(--mc-terra) !important;
+    box-shadow: 4px 4px 0 var(--mc-terra) !important;
 }
 body:has(.reading-area) [data-testid="stAlert"] p,
 body:has(.reading-area) [data-testid="stAlert"] div,
 body:has(.reading-area) [data-testid="stAlert"] span {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: inherit !important;
 }
 /* Toast（toast 可能挂在 body 根，不受 reading-area 作用域限制，不加 :has 前缀） */
 [data-testid="stToast"],
 [data-testid="stToastContainer"] [role="status"] {
-    background: #fffaec !important;
-    border: 2px solid #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    box-shadow: 3px 3px 0 #d4b54c !important;
-    color: #3b2e1e !important;
+    box-shadow: 3px 3px 0 var(--mc-mustard) !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', 'PingFang SC', monospace !important;
     letter-spacing: 1px !important;
 }
 [data-testid="stToast"] * {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: inherit !important;
 }
 /* Spinner：方角 + 深棕骨架（默认是彩色圆环旋转，和像素风冲突） */
 body:has(.reading-area) .stSpinner > div > div,
 body:has(.reading-area) [data-testid="stSpinner"] > div > div {
-    border-color: #3b2e1e #e8dcbc #e8dcbc #e8dcbc !important;
+    border-color: var(--mc-ink) #e8dcbc #e8dcbc #e8dcbc !important;
     border-radius: 0 !important;
     border-width: 3px !important;
 }
 body:has(.reading-area) .stSpinner,
 body:has(.reading-area) [data-testid="stSpinner"] {
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', monospace !important;
 }
 /* ===== /animate: pixel motion ===== */
@@ -1228,8 +1261,8 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     position: absolute;
     width: 10px; height: 10px;
     left: -5px; top: -5px;
-    background: #fffaec;
-    border: 1px solid #d4b54c;
+    background: var(--mc-cream);
+    border: 1px solid var(--mc-mustard);
     image-rendering: pixelated;
     animation: rb-fw-flash 0.35s steps(4) var(--bd, 0s) forwards;
 }
@@ -1245,10 +1278,10 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     position: fixed;
     top: 50%;
     left: 50%;
-    background: #fffaec;
-    border: 3px solid #3b2e1e;
-    box-shadow: 6px 6px 0 #d4b54c;
-    color: #3b2e1e;
+    background: var(--mc-cream);
+    border: 3px solid var(--mc-ink);
+    box-shadow: 6px 6px 0 var(--mc-mustard);
+    color: var(--mc-ink);
     font-family: 'Press Start 2P', 'Zpix', monospace;
     font-size: 13px;
     padding: 18px 32px;
@@ -1284,7 +1317,7 @@ body:has(.reading-area) [data-testid="stSpinner"] {
     text-align: center;
 }
 .zw-dq-text {
-    color: #3b2e1e;
+    color: var(--mc-ink);
     font-family: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
     font-size: 14px;
     line-height: 1.8;
@@ -1298,22 +1331,22 @@ body:has(.reading-area) [data-testid="stSpinner"] {
 }
 /* 笔记 expander 像素风 */
 body:has(.reading-area) [data-testid="stExpander"] {
-    border: 2px solid #3b2e1e !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
-    background: #fffaec !important;
-    box-shadow: 3px 3px 0 #d4b54c !important;
+    background: var(--mc-cream) !important;
+    box-shadow: 3px 3px 0 var(--mc-mustard) !important;
 }
 body:has(.reading-area) [data-testid="stExpander"] summary {
-    background: #fffaec !important;
-    color: #3b2e1e !important;
+    background: var(--mc-cream) !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', monospace !important;
     font-size: 13px !important;
 }
 body:has(.reading-area) [data-testid="stExpander"] textarea {
-    border: 2px solid #3b2e1e !important;
+    border: 2px solid var(--mc-ink) !important;
     border-radius: 0 !important;
     background: #fdf6e0 !important;
-    color: #3b2e1e !important;
+    color: var(--mc-ink) !important;
     font-family: 'Zpix', 'Noto Sans SC', monospace !important;
 }
 
@@ -1359,10 +1392,10 @@ body:has(.rd-focus-flag) .st-key-rd_focus_exit {
     width: auto !important;
 }
 body:has(.rd-focus-flag) .st-key-rd_focus_exit button {
-    background: #fffaec !important;
-    border: 2px solid #3b2e1e !important;
-    color: #3b2e1e !important;
-    box-shadow: 3px 3px 0 #c25a44 !important;
+    background: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
+    color: var(--mc-ink) !important;
+    box-shadow: 3px 3px 0 var(--mc-terra) !important;
     font-family: 'Press Start 2P', 'Zpix', monospace !important;
     font-size: 11px !important;
     letter-spacing: 1.5px !important;
@@ -1370,10 +1403,10 @@ body:has(.rd-focus-flag) .st-key-rd_focus_exit button {
     border-radius: 0 !important;
 }
 body:has(.rd-focus-flag) .st-key-rd_focus_exit button:hover {
-    background: #c25a44 !important;
-    color: #fffaec !important;
+    background: var(--mc-terra) !important;
+    color: var(--mc-cream) !important;
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 #3b2e1e !important;
+    box-shadow: 4px 4px 0 var(--mc-ink) !important;
 }
 /* 键盘翻页提示也隐藏（保持画面纯净，键盘照常可用） */
 body:has(.rd-focus-flag) iframe[title*="components"] {
@@ -2345,13 +2378,13 @@ if has_file:
         # 每个爆炸点：8 方向粒子 + 中心闪光，错开触发时间
         _FW_BURSTS = [
             {"left": "18%", "top": "44vh", "bd": "0.0s",  "sz": "7px",
-             "colors": ["#c25a44", "#d4b54c", "#c25a44", "#fffaec", "#c25a44", "#d4b54c", "#c25a44", "#fffaec"]},
+             "colors": ["var(--mc-terra)", "var(--mc-mustard)", "var(--mc-terra)", "var(--mc-cream)", "var(--mc-terra)", "var(--mc-mustard)", "var(--mc-terra)", "var(--mc-cream)"]},
             {"left": "40%", "top": "32vh", "bd": "0.45s", "sz": "9px",
-             "colors": ["#d4b54c", "#7a96b4", "#d4b54c", "#fffaec", "#d4b54c", "#7a96b4", "#d4b54c", "#fffaec"]},
+             "colors": ["var(--mc-mustard)", "var(--mc-dusty)", "var(--mc-mustard)", "var(--mc-cream)", "var(--mc-mustard)", "var(--mc-dusty)", "var(--mc-mustard)", "var(--mc-cream)"]},
             {"left": "62%", "top": "38vh", "bd": "0.25s", "sz": "8px",
-             "colors": ["#4a6d4e", "#c25a44", "#4a6d4e", "#fffaec", "#4a6d4e", "#c25a44", "#4a6d4e", "#fffaec"]},
+             "colors": ["var(--mc-moss)", "var(--mc-terra)", "var(--mc-moss)", "var(--mc-cream)", "var(--mc-moss)", "var(--mc-terra)", "var(--mc-moss)", "var(--mc-cream)"]},
             {"left": "82%", "top": "44vh", "bd": "0.7s",  "sz": "7px",
-             "colors": ["#7a96b4", "#4a6d4e", "#7a96b4", "#fffaec", "#7a96b4", "#4a6d4e", "#7a96b4", "#fffaec"]},
+             "colors": ["var(--mc-dusty)", "var(--mc-moss)", "var(--mc-dusty)", "var(--mc-cream)", "var(--mc-dusty)", "var(--mc-moss)", "var(--mc-dusty)", "var(--mc-cream)"]},
         ]
         # 8 方向 (dx, dy) 单位 px
         _FW_DIRS = [(0,-65),(46,-46),(65,0),(46,46),(0,65),(-46,46),(-65,0),(-46,-46)]
@@ -2470,7 +2503,7 @@ if has_file:
                 src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font/dist/zpix.ttf') format('truetype');
                 font-display: swap;
               }
-              body { margin: 0; background: #f3e9cf; }
+              body { margin: 0; background: var(--mc-paper); }
               .rb-kbd-wrap {
                 display: flex;
                 justify-content: center;
@@ -2483,33 +2516,33 @@ if has_file:
                 gap: 6px;
                 padding: 4px 12px;
                 border-radius: 0;
-                background: #fffaec;
-                border: 2px solid #3b2e1e;
-                color: #3b2e1e;
+                background: var(--mc-cream);
+                border: 2px solid var(--mc-ink);
+                color: var(--mc-ink);
                 font-size: 11px;
                 font-family: 'Press Start 2P', 'Zpix', monospace;
                 letter-spacing: 1px;
                 user-select: none;
-                box-shadow: 3px 3px 0 #d4b54c;
+                box-shadow: 3px 3px 0 var(--mc-mustard);
               }
               .rb-kbd-hint kbd {
                 display: inline-block;
                 min-width: 18px;
                 padding: 1px 6px;
-                border: 1.5px solid #3b2e1e;
+                border: 1.5px solid var(--mc-ink);
                 border-radius: 0;
                 background: #e8dcbc;
-                color: #3b2e1e;
+                color: var(--mc-ink);
                 font-size: 11px;
                 font-family: 'Press Start 2P', monospace;
                 line-height: 1.4;
                 text-align: center;
-                box-shadow: 1px 1px 0 #3b2e1e;
+                box-shadow: 1px 1px 0 var(--mc-ink);
               }
               .rb-kbd-hint.rb-err {
-                background: #fffaec;
-                border-color: #c25a44;
-                color: #c25a44;
+                background: var(--mc-cream);
+                border-color: var(--mc-terra);
+                color: var(--mc-terra);
               }
             </style>
             <div class="rb-kbd-wrap">
@@ -2678,13 +2711,13 @@ if has_file:
                     position: fixed;
                     display: none;
                     z-index: 99999;
-                    background: #fffaec;
-                    border: 2px solid #3b2e1e;
-                    box-shadow: 4px 4px 0 #c25a44;
+                    background: var(--mc-cream);
+                    border: 2px solid var(--mc-ink);
+                    box-shadow: 4px 4px 0 var(--mc-terra);
                     padding: 14px 16px 14px 14px;
                     font-family: 'Zpix', 'Microsoft YaHei', monospace;
                     font-size: 13px;
-                    color: #3b2e1e;
+                    color: var(--mc-ink);
                     width: 280px;
                     max-height: 360px;
                     overflow-y: auto;
@@ -2693,7 +2726,7 @@ if has_file:
                 #rb-dict-overlay .rb-dict-title {
                     font-family: 'Press Start 2P', monospace;
                     font-size: 12px;
-                    color: #c25a44;
+                    color: var(--mc-terra);
                     margin: 0 0 6px 0;
                     padding-right: 18px;
                     letter-spacing: 1px;
@@ -2702,16 +2735,16 @@ if has_file:
                     position: absolute;
                     top: 6px; right: 8px;
                     background: none; border: none;
-                    color: #3b2e1e;
+                    color: var(--mc-ink);
                     font-size: 18px;
                     cursor: pointer;
                     font-family: 'Press Start 2P', monospace;
                     line-height: 1;
                     padding: 2px 6px;
                 }
-                #rb-dict-overlay .rb-dict-close:hover { color: #c25a44; }
+                #rb-dict-overlay .rb-dict-close:hover { color: var(--mc-terra); }
                 #rb-dict-overlay .rb-dict-pinyin {
-                    color: #4a6d4e;
+                    color: var(--mc-moss);
                     font-size: 11px;
                     margin: 4px 0;
                     font-style: italic;
@@ -2720,10 +2753,10 @@ if has_file:
                 #rb-dict-overlay .rb-dict-link {
                     display: inline-block;
                     margin-top: 10px;
-                    color: #c25a44;
+                    color: var(--mc-terra);
                     text-decoration: none;
                     font-size: 11px;
-                    border-bottom: 1px dashed #c25a44;
+                    border-bottom: 1px dashed var(--mc-terra);
                     padding-bottom: 1px;
                 }
                 #rb-dict-overlay .rb-dict-link:hover { background: #fff2d8; }
@@ -2866,23 +2899,23 @@ if has_file:
                     position: fixed;
                     display: none;
                     z-index: 99998;
-                    background: #fffaec;
-                    border: 2px solid #3b2e1e;
-                    box-shadow: 3px 3px 0 #d4b54c;
+                    background: var(--mc-cream);
+                    border: 2px solid var(--mc-ink);
+                    box-shadow: 3px 3px 0 var(--mc-mustard);
                     padding: 6px 12px;
                     font-family: 'Press Start 2P', 'Zpix', monospace;
                     font-size: 11px;
-                    color: #3b2e1e;
+                    color: var(--mc-ink);
                     cursor: pointer;
                     letter-spacing: 1px;
                     user-select: none;
                     border-radius: 0;
                 }
                 #rb-share-btn:hover {
-                    background: #c25a44;
-                    color: #fffaec;
+                    background: var(--mc-terra);
+                    color: var(--mc-cream);
                     transform: translate(-1px, -1px);
-                    box-shadow: 4px 4px 0 #3b2e1e;
+                    box-shadow: 4px 4px 0 var(--mc-ink);
                 }
                 #rb-share-btn.is-loading { pointer-events: none; opacity: 0.6; }
             `;
@@ -2938,21 +2971,21 @@ if has_file:
                     position: absolute; left: -10000px; top: 0;
                     padding: 8px 32px 32px 8px; background: transparent;
                 `;
-                const cornerStyle = "position:absolute;font-family:'Press Start 2P','Zpix',monospace;color:#c25a44;font-size:14px";
+                const cornerStyle = "position:absolute;font-family:'Press Start 2P','Zpix',monospace;color:var(--mc-terra);font-size:14px";
                 const noStr = String(Math.floor(Math.random() * 999)).padStart(3, '0');
                 wrap.innerHTML = `
-                    <div style="position:relative;width:680px;padding:56px 56px 40px 56px;background:#fffaec;border:5px solid #3b2e1e;box-shadow:14px 14px 0 #c25a44;font-family:'Zpix','Noto Serif SC','PingFang SC','Microsoft YaHei',monospace;color:#3b2e1e;box-sizing:border-box">
+                    <div style="position:relative;width:680px;padding:56px 56px 40px 56px;background:var(--mc-cream);border:5px solid var(--mc-ink);box-shadow:14px 14px 0 var(--mc-terra);font-family:'Zpix','Noto Serif SC','PingFang SC','Microsoft YaHei',monospace;color:var(--mc-ink);box-sizing:border-box">
                         <div style="${cornerStyle};top:10px;left:14px">[+]</div>
                         <div style="${cornerStyle};top:10px;right:14px">[+]</div>
                         <div style="${cornerStyle};bottom:10px;left:14px">[+]</div>
                         <div style="${cornerStyle};bottom:10px;right:14px">[+]</div>
                         <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#8b5e3c;letter-spacing:2px;margin-bottom:24px">VOL.01 · QUOTE · NO.${noStr}</div>
-                        <div style="font-family:Georgia,serif;font-size:64px;color:#d4b54c;line-height:0.5;margin:0 0 -6px -6px">&ldquo;</div>
-                        <div style="font-size:19px;line-height:1.9;letter-spacing:0.5px;padding:0 8px 0 20px;border-left:4px solid #c25a44;white-space:pre-wrap;color:#3b2e1e;min-height:60px">${escapeHtml(quote)}</div>
-                        <div style="font-family:Georgia,serif;font-size:64px;color:#d4b54c;line-height:0.5;text-align:right;margin:-2px -6px 0 0">&rdquo;</div>
+                        <div style="font-family:Georgia,serif;font-size:64px;color:var(--mc-mustard);line-height:0.5;margin:0 0 -6px -6px">&ldquo;</div>
+                        <div style="font-size:19px;line-height:1.9;letter-spacing:0.5px;padding:0 8px 0 20px;border-left:4px solid var(--mc-terra);white-space:pre-wrap;color:var(--mc-ink);min-height:60px">${escapeHtml(quote)}</div>
+                        <div style="font-family:Georgia,serif;font-size:64px;color:var(--mc-mustard);line-height:0.5;text-align:right;margin:-2px -6px 0 0">&rdquo;</div>
                         <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #8b5e3c;display:flex;justify-content:space-between;align-items:baseline;gap:16px">
                             <div style="font-size:14px;color:#8b5e3c;letter-spacing:0.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">——《${escapeHtml(bookTitle)}》</div>
-                            <div style="font-size:10px;color:#4a6d4e;font-family:'Press Start 2P',monospace;letter-spacing:2px;white-space:nowrap">★ VIA 嘟哒 DUDA</div>
+                            <div style="font-size:10px;color:var(--mc-moss);font-family:'Press Start 2P',monospace;letter-spacing:2px;white-space:nowrap">★ VIA 嘟哒 DUDA</div>
                         </div>
                     </div>
                 `;
@@ -3340,79 +3373,79 @@ else:
     st.markdown("""
     <div class="zine-welcome zw-top">
         <div class="zw-sparkles" aria-hidden="true">
-            <span class="sp" style="left:1%;top:18%;width:4px;height:4px;background:#c25a44;animation-delay:0s;animation-duration:2.8s"></span>
-            <span class="sp" style="left:3%;top:42%;width:6px;height:6px;background:#d4b54c;animation-delay:1.1s;animation-duration:3.5s"></span>
-            <span class="sp" style="left:1.5%;top:68%;width:4px;height:4px;background:#4a6d4e;animation-delay:2.2s;animation-duration:2.5s"></span>
-            <span class="sp" style="left:4%;top:85%;width:2px;height:2px;background:#7a96b4;animation-delay:0.5s;animation-duration:4s"></span>
-            <span class="sp" style="left:2.5%;top:30%;width:4px;height:4px;background:#d4b54c;animation-delay:3s;animation-duration:3.2s"></span>
-            <span class="sp" style="left:5%;top:55%;width:2px;height:2px;background:#c25a44;animation-delay:1.7s;animation-duration:4.4s"></span>
-            <span class="sp" style="right:1%;top:25%;width:4px;height:4px;background:#d4b54c;animation-delay:0.7s;animation-duration:3.1s"></span>
-            <span class="sp" style="right:3%;top:58%;width:6px;height:6px;background:#c25a44;animation-delay:1.8s;animation-duration:2.7s"></span>
-            <span class="sp" style="right:1.5%;top:75%;width:4px;height:4px;background:#7a96b4;animation-delay:2.5s;animation-duration:3.8s"></span>
-            <span class="sp" style="right:4%;top:38%;width:2px;height:2px;background:#4a6d4e;animation-delay:0.3s;animation-duration:4.2s"></span>
-            <span class="sp" style="right:2%;top:88%;width:4px;height:4px;background:#d4b54c;animation-delay:3.5s;animation-duration:2.9s"></span>
-            <span class="sp" style="right:5%;top:14%;width:2px;height:2px;background:#c25a44;animation-delay:2.1s;animation-duration:3.6s"></span>
-            <span class="sp" style="left:8%;top:6%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.5s;animation-duration:5s"></span>
-            <span class="sp" style="right:9%;top:94%;width:2px;height:2px;background:#d4b54c;animation-delay:2.8s;animation-duration:4.5s"></span>
-            <span class="sp" style="right:12%;top:4%;width:4px;height:4px;background:#7a96b4;animation-delay:2s;animation-duration:4.1s"></span>
+            <span class="sp" style="left:1%;top:18%;width:4px;height:4px;background:var(--mc-terra);animation-delay:0s;animation-duration:2.8s"></span>
+            <span class="sp" style="left:3%;top:42%;width:6px;height:6px;background:var(--mc-mustard);animation-delay:1.1s;animation-duration:3.5s"></span>
+            <span class="sp" style="left:1.5%;top:68%;width:4px;height:4px;background:var(--mc-moss);animation-delay:2.2s;animation-duration:2.5s"></span>
+            <span class="sp" style="left:4%;top:85%;width:2px;height:2px;background:var(--mc-dusty);animation-delay:0.5s;animation-duration:4s"></span>
+            <span class="sp" style="left:2.5%;top:30%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:3s;animation-duration:3.2s"></span>
+            <span class="sp" style="left:5%;top:55%;width:2px;height:2px;background:var(--mc-terra);animation-delay:1.7s;animation-duration:4.4s"></span>
+            <span class="sp" style="right:1%;top:25%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:0.7s;animation-duration:3.1s"></span>
+            <span class="sp" style="right:3%;top:58%;width:6px;height:6px;background:var(--mc-terra);animation-delay:1.8s;animation-duration:2.7s"></span>
+            <span class="sp" style="right:1.5%;top:75%;width:4px;height:4px;background:var(--mc-dusty);animation-delay:2.5s;animation-duration:3.8s"></span>
+            <span class="sp" style="right:4%;top:38%;width:2px;height:2px;background:var(--mc-moss);animation-delay:0.3s;animation-duration:4.2s"></span>
+            <span class="sp" style="right:2%;top:88%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:3.5s;animation-duration:2.9s"></span>
+            <span class="sp" style="right:5%;top:14%;width:2px;height:2px;background:var(--mc-terra);animation-delay:2.1s;animation-duration:3.6s"></span>
+            <span class="sp" style="left:8%;top:6%;width:2px;height:2px;background:var(--mc-moss);animation-delay:1.5s;animation-duration:5s"></span>
+            <span class="sp" style="right:9%;top:94%;width:2px;height:2px;background:var(--mc-mustard);animation-delay:2.8s;animation-duration:4.5s"></span>
+            <span class="sp" style="right:12%;top:4%;width:4px;height:4px;background:var(--mc-dusty);animation-delay:2s;animation-duration:4.1s"></span>
         </div>
         <!-- 左侧像素书架 -->
         <div class="zw-shelf" style="position:absolute;left:8px;bottom:24px;z-index:2;pointer-events:none" aria-hidden="true">
           <svg width="52" height="122" viewBox="0 0 52 122" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;shape-rendering:crispEdges;display:block">
-            <rect x="0" y="112" width="52" height="2" fill="#3b2e1e"/>
-            <rect x="1" y="68" width="8" height="44" fill="#c25a44"/>
+            <rect x="0" y="112" width="52" height="2" fill="#2E1D12"/>
+            <rect x="1" y="68" width="8" height="44" fill="#B96A4A"/>
             <rect x="1" y="68" width="8" height="1" fill="#7d2e21"/>
             <rect x="1" y="111" width="8" height="1" fill="#7d2e21"/>
-            <rect x="2" y="75" width="5" height="1" fill="#f3e9cf" opacity="0.7"/>
-            <rect x="10" y="54" width="8" height="58" fill="#d4b54c"/>
+            <rect x="2" y="75" width="5" height="1" fill="#F6E7C8" opacity="0.7"/>
+            <rect x="10" y="54" width="8" height="58" fill="#D7A441"/>
             <rect x="10" y="54" width="8" height="1" fill="#8a7420"/>
             <rect x="10" y="111" width="8" height="1" fill="#8a7420"/>
-            <rect x="11" y="62" width="5" height="1" fill="#3b2e1e" opacity="0.35"/>
-            <rect x="11" y="66" width="4" height="1" fill="#3b2e1e" opacity="0.35"/>
+            <rect x="11" y="62" width="5" height="1" fill="#2E1D12" opacity="0.35"/>
+            <rect x="11" y="66" width="4" height="1" fill="#2E1D12" opacity="0.35"/>
             <g class="zw-book-pull">
-              <rect x="19" y="72" width="7" height="40" fill="#4a6d4e"/>
+              <rect x="19" y="72" width="7" height="40" fill="#6E8B5B"/>
               <rect x="19" y="72" width="7" height="1" fill="#2d4130"/>
               <rect x="19" y="111" width="7" height="1" fill="#2d4130"/>
-              <rect x="20" y="79" width="4" height="1" fill="#f3e9cf" opacity="0.5"/>
+              <rect x="20" y="79" width="4" height="1" fill="#F6E7C8" opacity="0.5"/>
             </g>
             <rect x="27" y="63" width="8" height="49" fill="#7a96b4"/>
             <rect x="27" y="63" width="8" height="1" fill="#4a6878"/>
             <rect x="27" y="111" width="8" height="1" fill="#4a6878"/>
-            <rect x="36" y="76" width="5" height="36" fill="#3b2e1e"/>
+            <rect x="36" y="76" width="5" height="36" fill="#2E1D12"/>
             <rect x="36" y="76" width="5" height="1" fill="#1a1209"/>
             <rect x="36" y="111" width="5" height="1" fill="#1a1209"/>
-            <rect x="37" y="83" width="3" height="1" fill="#f3e9cf" opacity="0.3"/>
+            <rect x="37" y="83" width="3" height="1" fill="#F6E7C8" opacity="0.3"/>
             <rect x="42" y="70" width="9" height="42" fill="#e07b5a"/>
-            <rect x="42" y="70" width="9" height="1" fill="#c25a44"/>
-            <rect x="42" y="111" width="9" height="1" fill="#c25a44"/>
+            <rect x="42" y="70" width="9" height="1" fill="#B96A4A"/>
+            <rect x="42" y="111" width="9" height="1" fill="#B96A4A"/>
           </svg>
         </div>
         <!-- 左侧像素星星群 -->
         <div class="zw-stars" style="position:absolute;left:6px;top:10%;z-index:2;pointer-events:none" aria-hidden="true">
           <svg width="24" height="26" viewBox="0 0 24 26" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y=  "8" width="1" height="5" fill="#d4b54c"/>
-            <rect x="1" y="10" width="5" height="1" fill="#d4b54c"/>
-            <rect x="16" y="2" width="1" height="5" fill="#d4b54c"/>
-            <rect x="14" y="4" width="5" height="1" fill="#d4b54c"/>
+            <rect x="3" y=  "8" width="1" height="5" fill="#D7A441"/>
+            <rect x="1" y="10" width="5" height="1" fill="#D7A441"/>
+            <rect x="16" y="2" width="1" height="5" fill="#D7A441"/>
+            <rect x="14" y="4" width="5" height="1" fill="#D7A441"/>
             <rect x="18" y="13" width="1" height="3" fill="#7a96b4"/>
             <rect x="17" y="14" width="3" height="1" fill="#7a96b4"/>
-            <rect x="7" y="1" width="1" height="3" fill="#c25a44" opacity="0.7"/>
-            <rect x="6" y="2" width="3" height="1" fill="#c25a44" opacity="0.7"/>
-            <rect x="0" y="18" width="2" height="2" fill="#d4b54c" opacity="0.5"/>
-            <rect x="11" y="9" width="2" height="2" fill="#4a6d4e" opacity="0.6"/>
+            <rect x="7" y="1" width="1" height="3" fill="#B96A4A" opacity="0.7"/>
+            <rect x="6" y="2" width="3" height="1" fill="#B96A4A" opacity="0.7"/>
+            <rect x="0" y="18" width="2" height="2" fill="#D7A441" opacity="0.5"/>
+            <rect x="11" y="9" width="2" height="2" fill="#6E8B5B" opacity="0.6"/>
             <rect x="9" y="20" width="2" height="2" fill="#7a96b4" opacity="0.5"/>
-            <rect x="21" y="20" width="2" height="2" fill="#d4b54c" opacity="0.4"/>
+            <rect x="21" y="20" width="2" height="2" fill="#D7A441" opacity="0.4"/>
           </svg>
         </div>
         <!-- 左侧像素蘑菇 -->
         <div class="zw-mushroom" style="position:absolute;left:6px;top:46%;z-index:2;pointer-events:none" aria-hidden="true">
           <svg width="24" height="22" viewBox="0 0 12 11" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y="0" width="6" height="1" fill="#c25a44"/>
-            <rect x="1" y="1" width="10" height="1" fill="#c25a44"/>
-            <rect x="0" y="2" width="12" height="3" fill="#c25a44"/>
-            <rect x="1" y="2" width="2" height="1" fill="#f3e9cf"/>
-            <rect x="9" y="2" width="2" height="1" fill="#f3e9cf"/>
-            <rect x="5" y="3" width="2" height="1" fill="#f3e9cf" opacity="0.7"/>
+            <rect x="3" y="0" width="6" height="1" fill="#B96A4A"/>
+            <rect x="1" y="1" width="10" height="1" fill="#B96A4A"/>
+            <rect x="0" y="2" width="12" height="3" fill="#B96A4A"/>
+            <rect x="1" y="2" width="2" height="1" fill="#F6E7C8"/>
+            <rect x="9" y="2" width="2" height="1" fill="#F6E7C8"/>
+            <rect x="5" y="3" width="2" height="1" fill="#F6E7C8" opacity="0.7"/>
             <rect x="1" y="5" width="10" height="1" fill="#8b3f2a"/>
             <rect x="3" y="6" width="6" height="1" fill="#f0e6cc"/>
             <rect x="4" y="7" width="4" height="3" fill="#e8d8b0"/>
@@ -3422,7 +3455,7 @@ else:
         <!-- 右侧像素火把 -->
         <div class="zw-torch" style="position:absolute;right:8px;top:18%;z-index:2;pointer-events:none" aria-hidden="true">
           <svg width="24" height="48" viewBox="0 0 24 48" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="0" y="20" width="24" height="3" fill="#3b2e1e"/>
+            <rect x="0" y="20" width="24" height="3" fill="#2E1D12"/>
             <rect x="9" y="23" width="6" height="20" fill="#6b4226"/>
             <rect x="9" y="23" width="6" height="1" fill="#4a2d16"/>
             <rect x="6" y="14" width="12" height="8" fill="#8b5e3c"/>
@@ -3506,42 +3539,42 @@ else:
             <div class="zw-art">
                 <svg id="zw-cat-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                     <!-- 书 1 底部 陶土红 -->
-                    <rect x="6" y="50" width="52" height="8" fill="#c25a44"/>
+                    <rect x="6" y="50" width="52" height="8" fill="#B96A4A"/>
                     <rect x="6" y="50" width="52" height="1" fill="#7d2e21"/>
                     <rect x="6" y="57" width="52" height="1" fill="#7d2e21"/>
-                    <rect x="10" y="53" width="16" height="1" fill="#f3e9cf"/>
-                    <rect x="10" y="55" width="12" height="1" fill="#f3e9cf"/>
+                    <rect x="10" y="53" width="16" height="1" fill="#F6E7C8"/>
+                    <rect x="10" y="55" width="12" height="1" fill="#F6E7C8"/>
                     <!-- 书 2 中间 苔绿 -->
-                    <rect x="10" y="42" width="44" height="8" fill="#4a6d4e"/>
+                    <rect x="10" y="42" width="44" height="8" fill="#6E8B5B"/>
                     <rect x="10" y="42" width="44" height="1" fill="#2d4130"/>
                     <rect x="10" y="49" width="44" height="1" fill="#2d4130"/>
-                    <rect x="14" y="45" width="14" height="1" fill="#f3e9cf"/>
+                    <rect x="14" y="45" width="14" height="1" fill="#F6E7C8"/>
                     <!-- 书 3 顶部 芥黄 -->
-                    <rect x="14" y="34" width="36" height="8" fill="#d4b54c"/>
+                    <rect x="14" y="34" width="36" height="8" fill="#D7A441"/>
                     <rect x="14" y="34" width="36" height="1" fill="#8a7420"/>
                     <rect x="14" y="41" width="36" height="1" fill="#8a7420"/>
-                    <rect x="18" y="37" width="10" height="1" fill="#3b2e1e"/>
+                    <rect x="18" y="37" width="10" height="1" fill="#2E1D12"/>
                     <!-- 白猫 curled 在书顶 -->
                     <!-- 耳朵（描边 + 白填充 + 粉内耳） -->
-                    <rect x="15" y="19" width="6" height="1" fill="#3b2e1e"/>
-                    <rect x="21" y="19" width="6" height="1" fill="#3b2e1e"/>
-                    <rect x="15" y="20" width="1" height="4" fill="#3b2e1e"/>
-                    <rect x="20" y="20" width="1" height="4" fill="#3b2e1e"/>
-                    <rect x="21" y="20" width="1" height="4" fill="#3b2e1e"/>
-                    <rect x="26" y="20" width="1" height="4" fill="#3b2e1e"/>
+                    <rect x="15" y="19" width="6" height="1" fill="#2E1D12"/>
+                    <rect x="21" y="19" width="6" height="1" fill="#2E1D12"/>
+                    <rect x="15" y="20" width="1" height="4" fill="#2E1D12"/>
+                    <rect x="20" y="20" width="1" height="4" fill="#2E1D12"/>
+                    <rect x="21" y="20" width="1" height="4" fill="#2E1D12"/>
+                    <rect x="26" y="20" width="1" height="4" fill="#2E1D12"/>
                     <rect x="16" y="20" width="4" height="4" fill="#fffef8"/>
                     <rect x="22" y="20" width="4" height="4" fill="#fffef8"/>
                     <rect x="17" y="22" width="2" height="2" fill="#e07b5a"/>
                     <rect x="23" y="22" width="2" height="2" fill="#e07b5a"/>
                     <!-- 头身描边 -->
-                    <rect x="13" y="24" width="30" height="1" fill="#3b2e1e"/>
-                    <rect x="11" y="26" width="34" height="1" fill="#3b2e1e"/>
-                    <rect x="11" y="31" width="34" height="1" fill="#3b2e1e"/>
-                    <rect x="13" y="33" width="30" height="1" fill="#3b2e1e"/>
-                    <rect x="11" y="27" width="1" height="4" fill="#3b2e1e"/>
-                    <rect x="44" y="27" width="1" height="4" fill="#3b2e1e"/>
-                    <rect x="13" y="25" width="1" height="8" fill="#3b2e1e"/>
-                    <rect x="42" y="25" width="1" height="8" fill="#3b2e1e"/>
+                    <rect x="13" y="24" width="30" height="1" fill="#2E1D12"/>
+                    <rect x="11" y="26" width="34" height="1" fill="#2E1D12"/>
+                    <rect x="11" y="31" width="34" height="1" fill="#2E1D12"/>
+                    <rect x="13" y="33" width="30" height="1" fill="#2E1D12"/>
+                    <rect x="11" y="27" width="1" height="4" fill="#2E1D12"/>
+                    <rect x="44" y="27" width="1" height="4" fill="#2E1D12"/>
+                    <rect x="13" y="25" width="1" height="8" fill="#2E1D12"/>
+                    <rect x="42" y="25" width="1" height="8" fill="#2E1D12"/>
                     <!-- 身体（白填充） -->
                     <rect x="14" y="24" width="28" height="10" fill="#fffef8"/>
                     <rect x="12" y="26" width="32" height="6" fill="#fffef8"/>
@@ -3549,32 +3582,32 @@ else:
                     <rect x="14" y="32" width="28" height="1" fill="#e5dcc0"/>
                     <!-- 闭眼（黑色短横线） -->
                     <g id="zw-eyes-closed">
-                        <rect x="17" y="28" width="3" height="1" fill="#3b2e1e"/>
-                        <rect x="22" y="28" width="3" height="1" fill="#3b2e1e"/>
+                        <rect x="17" y="28" width="3" height="1" fill="#2E1D12"/>
+                        <rect x="22" y="28" width="3" height="1" fill="#2E1D12"/>
                     </g>
                     <!-- 睁眼（点击后短暂显示） -->
                     <g id="zw-eyes-open" style="display:none">
-                        <rect x="17" y="27" width="3" height="3" fill="#3b2e1e"/>
+                        <rect x="17" y="27" width="3" height="3" fill="#2E1D12"/>
                         <rect x="18" y="28" width="1" height="1" fill="#fffef8"/>
-                        <rect x="22" y="27" width="3" height="3" fill="#3b2e1e"/>
+                        <rect x="22" y="27" width="3" height="3" fill="#2E1D12"/>
                         <rect x="23" y="28" width="1" height="1" fill="#fffef8"/>
                     </g>
                     <!-- 鼻 -->
-                    <rect x="20" y="30" width="2" height="1" fill="#c25a44"/>
+                    <rect x="20" y="30" width="2" height="1" fill="#B96A4A"/>
                     <!-- 嘴 -->
-                    <rect x="19" y="31" width="1" height="1" fill="#3b2e1e"/>
-                    <rect x="22" y="31" width="1" height="1" fill="#3b2e1e"/>
+                    <rect x="19" y="31" width="1" height="1" fill="#2E1D12"/>
+                    <rect x="22" y="31" width="1" height="1" fill="#2E1D12"/>
                     <!-- 腮红 -->
                     <rect x="15" y="29" width="1" height="1" fill="#e07b5a" opacity="0.5"/>
                     <rect x="26" y="29" width="1" height="1" fill="#e07b5a" opacity="0.5"/>
                     <!-- 尾巴（描边 + 白填充） -->
-                    <rect x="40" y="21" width="2" height="1" fill="#3b2e1e"/>
-                    <rect x="39" y="22" width="1" height="6" fill="#3b2e1e"/>
-                    <rect x="42" y="22" width="1" height="6" fill="#3b2e1e"/>
+                    <rect x="40" y="21" width="2" height="1" fill="#2E1D12"/>
+                    <rect x="39" y="22" width="1" height="6" fill="#2E1D12"/>
+                    <rect x="42" y="22" width="1" height="6" fill="#2E1D12"/>
                     <rect x="40" y="22" width="2" height="6" fill="#fffef8"/>
-                    <rect x="42" y="19" width="3" height="1" fill="#3b2e1e"/>
-                    <rect x="42" y="20" width="1" height="2" fill="#3b2e1e"/>
-                    <rect x="44" y="20" width="1" height="2" fill="#3b2e1e"/>
+                    <rect x="42" y="19" width="3" height="1" fill="#2E1D12"/>
+                    <rect x="42" y="20" width="1" height="2" fill="#2E1D12"/>
+                    <rect x="44" y="20" width="1" height="2" fill="#2E1D12"/>
                     <rect x="43" y="20" width="1" height="2" fill="#fffef8"/>
                     <!-- Z 泡泡 -->
                     <rect x="30" y="12" width="3" height="1" fill="#7a96b4"/>
@@ -3613,29 +3646,29 @@ else:
     st.markdown("""
     <div class="zine-welcome zw-bottom">
         <div class="zw-sparkles" aria-hidden="true">
-            <span class="sp" style="left:1.5%;top:28%;width:4px;height:4px;background:#d4b54c;animation-delay:0.4s;animation-duration:3.2s"></span>
-            <span class="sp" style="left:3.5%;top:62%;width:6px;height:6px;background:#4a6d4e;animation-delay:1.6s;animation-duration:2.8s"></span>
-            <span class="sp" style="left:2%;top:82%;width:2px;height:2px;background:#c25a44;animation-delay:2.8s;animation-duration:4s"></span>
-            <span class="sp" style="left:5%;top:45%;width:2px;height:2px;background:#7a96b4;animation-delay:3.4s;animation-duration:3.7s"></span>
-            <span class="sp" style="right:1.5%;top:20%;width:4px;height:4px;background:#c25a44;animation-delay:1s;animation-duration:3.5s"></span>
-            <span class="sp" style="right:3%;top:52%;width:6px;height:6px;background:#7a96b4;animation-delay:2.2s;animation-duration:2.6s"></span>
-            <span class="sp" style="right:2%;top:76%;width:2px;height:2px;background:#d4b54c;animation-delay:0.6s;animation-duration:4.3s"></span>
-            <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:#4a6d4e;animation-delay:1.9s;animation-duration:3.1s"></span>
-            <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:#4a6d4e;animation-delay:1.8s;animation-duration:5s"></span>
-            <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:#c25a44;animation-delay:3.2s;animation-duration:3.8s"></span>
+            <span class="sp" style="left:1.5%;top:28%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:0.4s;animation-duration:3.2s"></span>
+            <span class="sp" style="left:3.5%;top:62%;width:6px;height:6px;background:var(--mc-moss);animation-delay:1.6s;animation-duration:2.8s"></span>
+            <span class="sp" style="left:2%;top:82%;width:2px;height:2px;background:var(--mc-terra);animation-delay:2.8s;animation-duration:4s"></span>
+            <span class="sp" style="left:5%;top:45%;width:2px;height:2px;background:var(--mc-dusty);animation-delay:3.4s;animation-duration:3.7s"></span>
+            <span class="sp" style="right:1.5%;top:20%;width:4px;height:4px;background:var(--mc-terra);animation-delay:1s;animation-duration:3.5s"></span>
+            <span class="sp" style="right:3%;top:52%;width:6px;height:6px;background:var(--mc-dusty);animation-delay:2.2s;animation-duration:2.6s"></span>
+            <span class="sp" style="right:2%;top:76%;width:2px;height:2px;background:var(--mc-mustard);animation-delay:0.6s;animation-duration:4.3s"></span>
+            <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:var(--mc-moss);animation-delay:1.9s;animation-duration:3.1s"></span>
+            <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:var(--mc-moss);animation-delay:1.8s;animation-duration:5s"></span>
+            <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:var(--mc-terra);animation-delay:3.2s;animation-duration:3.8s"></span>
         </div>
         <!-- 左侧像素盆栽 -->
         <div class="zw-plant" style="position:absolute;left:6px;top:24%;z-index:2;pointer-events:none" aria-hidden="true">
           <svg width="20" height="28" viewBox="0 0 10 14" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y="0" width="4" height="1" fill="#4a6d4e"/>
+            <rect x="3" y="0" width="4" height="1" fill="#6E8B5B"/>
             <rect x="2" y="1" width="6" height="2" fill="#5a8060"/>
-            <rect x="0" y="3" width="4" height="2" fill="#4a6d4e"/>
+            <rect x="0" y="3" width="4" height="2" fill="#6E8B5B"/>
             <rect x="6" y="3" width="4" height="2" fill="#5a8060"/>
             <rect x="1" y="4" width="2" height="1" fill="#3a5a3e"/>
             <rect x="7" y="4" width="2" height="1" fill="#3a5a3e"/>
             <rect x="4" y="3" width="2" height="2" fill="#6b4226"/>
             <rect x="1" y="5" width="8" height="1" fill="#d46a4a"/>
-            <rect x="2" y="6" width="6" height="5" fill="#c25a44"/>
+            <rect x="2" y="6" width="6" height="5" fill="#B96A4A"/>
             <rect x="3" y="6" width="4" height="1" fill="#d46a4a"/>
             <rect x="3" y="11" width="4" height="1" fill="#8b3f2a"/>
             <rect x="4" y="12" width="2" height="2" fill="#8b3f2a"/>
