@@ -700,21 +700,26 @@ st.markdown("""
     letter-spacing: 0.5px;
 }
 
-/* 书架卡：4 封面 grid */
+/* 书架卡：4 封面 grid（auto-fill 固定小列，防止 item 被拉伸） */
 .mc-lib-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 88px));
+    gap: 10px;
     margin-bottom: 6px;
+    padding-top: 2px;
+    justify-content: start;
 }
 .mc-lib-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    max-width: 100px;
+    min-width: 0;
 }
 .mc-lib-cover {
     width: 100%;
+    max-width: 88px;
     aspect-ratio: 3 / 4;
     border: 2px solid var(--mc-ink);
     box-shadow: 2px 2px 0 var(--mc-wood-mid);
@@ -722,23 +727,31 @@ st.markdown("""
     align-items: center;
     justify-content: center;
     font-family: 'Zpix', 'Noto Serif SC', serif;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--mc-cream);
     text-align: center;
-    padding: 6px 4px;
+    padding: 4px 3px;
     line-height: 1.3;
     overflow: hidden;
-    word-break: break-all;
+    word-break: break-word;
 }
 .mc-lib-name {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--mc-ink);
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    max-width: 88px;
     font-family: 'Zpix', sans-serif;
+}
+.mc-lib-progress-wrap {
+    width: 100%;
+    max-width: 88px;
+}
+.mc-lib-percent {
+    max-width: 88px;
 }
 .mc-lib-progress-wrap {
     width: 100%;
