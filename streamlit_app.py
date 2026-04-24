@@ -634,7 +634,10 @@ body:has(.reading-area) .progress-fill {
 .st-key-prev_page, .st-key-next_page {
     display: none !important;
 }
-div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] .st-key-prev_page) {
+/* 隐藏这两个按钮所在的 stHorizontalBlock（收敛掉空行高度）。
+   注意：用 > 直接子选择器限定层级，否则外层嵌套 columns 会被误命中（阶段 2 踩过坑）。
+   实际 Streamlit DOM: stHorizontalBlock > stColumn > stVerticalBlock > stElementContainer.st-key-prev_page */
+div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"].st-key-prev_page) {
     display: none !important;
 }
 
