@@ -306,11 +306,14 @@ st.markdown("""
     gap: 12px;
     font-family: 'Zpix', 'Noto Sans SC', sans-serif;
     color: var(--mc-ink);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    min-width: 0;
 }
 .mc-topbar-book-icon {
     display: inline-flex;
     align-items: center;
+    flex-shrink: 0;
 }
 .mc-topbar-book-icon .px-ic {
     width: 22px;
@@ -321,25 +324,38 @@ st.markdown("""
     font-size: 15px;
     color: var(--mc-ink);
     letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 360px;
+    flex-shrink: 1;
 }
 .mc-topbar-author {
     color: var(--mc-gray-brown);
     font-size: 13px;
+    flex-shrink: 0;
 }
 .mc-topbar-sep {
     color: var(--mc-gray-brown);
     font-size: 13px;
+    flex-shrink: 0;
 }
 .mc-topbar-chapter {
     font-size: 13px;
     color: var(--mc-ink);
     letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+    flex-shrink: 1;
 }
 .mc-topbar-progress {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-left: auto;
+    flex-shrink: 0;
 }
 .mc-topbar-progress-label {
     font-size: 12px;
@@ -2762,6 +2778,14 @@ if has_file:
             if "." in st.session_state.file_name
             else st.session_state.file_name
         )
+        # 清理常见后缀（Z-Library / Anna's Archive 等下载源标签）
+        import re as _re_clean
+        _tb_book_title = _re_clean.sub(
+            r"\s*[（(](?:Z[\-－]?Library|Anna'?s\s*Archive|libgen|annas[-_]archive)[)）]\s*",
+            "",
+            _tb_book_title,
+            flags=_re_clean.IGNORECASE,
+        ).strip()
 
         # 顶部状态条：info(左) + 5 popover/button(右)
         _tb_info, _tb_search, _tb_theme, _tb_font, _tb_bm, _tb_avatar = st.columns(
@@ -2784,11 +2808,11 @@ if has_file:
                 unsafe_allow_html=True,
             )
         with _tb_search:
-            with st.popover("🔍", use_container_width=True, help="全书搜索（阶段 10 实装）"):
+            with st.popover("🔍", use_container_width=True, help="全书搜索（阶段 10 实装）", key="tb_search"):
                 st.markdown("**🔍 全书搜索**")
                 st.info("🚧 搜索功能开发中，阶段 10 上线。")
         with _tb_theme:
-            with st.popover("☀", use_container_width=True, help="配色主题"):
+            with st.popover("☀", use_container_width=True, help="配色主题", key="tb_theme"):
                 st.markdown("**☀ 配色主题**")
                 _tb_theme_keys = list(READING_THEMES.keys())
                 _tb_theme_pick = st.radio(
@@ -2803,7 +2827,7 @@ if has_file:
                     st.session_state.reading_theme = _tb_theme_pick
                     st.rerun()
         with _tb_font:
-            with st.popover("Aa", use_container_width=True, help="字号与字体"):
+            with st.popover("Aa", use_container_width=True, help="字号与字体", key="tb_font"):
                 st.markdown("**Aa 字号与字体**")
                 _tb_fs = st.slider(
                     "字号",
@@ -2838,7 +2862,7 @@ if has_file:
                 st.toast("[+] 已添加书签" if _tb_added else "此位置已有书签")
                 st.rerun()
         with _tb_avatar:
-            with st.popover("👤", use_container_width=True, help="账号与偏好"):
+            with st.popover("👤", use_container_width=True, help="账号与偏好", key="tb_avatar"):
                 st.markdown("**👤 我**")
                 st.caption("当前书库：本地浏览器")
                 if st.button(
@@ -3119,7 +3143,7 @@ if has_file:
 
             with _ctrl_page:
                 _pg_label = f"{left_num}" + (f"-{right_num}" if right_num else "") + f" / {total_pages}"
-                with st.popover(_pg_label, use_container_width=True, help="跳转页码 / 进度"):
+                with st.popover(_pg_label, use_container_width=True, help="跳转页码 / 进度", key="rd_page"):
                     st.markdown(f"**📄 本章 · 第 {_pg_label}**")
                     st.caption(f"全书 {overall:.1f}% · {_time_left}")
                     _rd_jp = st.number_input(
@@ -3153,7 +3177,7 @@ if has_file:
 
             with _ctrl_note:
                 _nf_ver = st.session_state.get("_note_form_ver", 0)
-                with st.popover("✏", use_container_width=True, help="添加摘录/笔记"):
+                with st.popover("✏", use_container_width=True, help="添加摘录/笔记", key="rd_note"):
                     st.markdown("**✏️ 添加摘录 / 笔记**")
                     _passage_in = st.text_area(
                         "摘录片段（可选）",
@@ -3193,7 +3217,7 @@ if has_file:
                             st.warning("请至少填写摘录或想法其中一项。")
 
             with _ctrl_toc:
-                with st.popover("📋 目录", use_container_width=True, help="章节目录"):
+                with st.popover("📋 目录", use_container_width=True, help="章节目录", key="rd_toc"):
                     st.markdown("**📋 章节目录**")
                     st.selectbox(
                         "选择章节",
