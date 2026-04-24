@@ -283,6 +283,124 @@ st.markdown("""
     margin-bottom: 20px;
 }
 
+/* ==========================================================================
+   阶段 4 顶部状态条（.mc-topbar-*）
+   —— spec v1 §9 模块 B：横向木质工具条 + 书信息 + 进度 + 5 icon popover
+   ========================================================================== */
+
+/* 整条状态条的 st.columns 所在行：统一背景为浅木色 */
+[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .mc-topbar-info) {
+    background: var(--mc-paper);
+    border: 2px solid var(--mc-ink);
+    box-shadow: 3px 3px 0 var(--mc-wood-mid);
+    padding: 8px 12px !important;
+    margin: 0 0 14px 0 !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* 左侧信息区（HTML） */
+.mc-topbar-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
+    color: var(--mc-ink);
+    flex-wrap: wrap;
+}
+.mc-topbar-book-icon {
+    display: inline-flex;
+    align-items: center;
+}
+.mc-topbar-book-icon .px-ic {
+    width: 22px;
+    height: 22px;
+}
+.mc-topbar-title {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--mc-ink);
+    letter-spacing: 0.5px;
+}
+.mc-topbar-author {
+    color: var(--mc-gray-brown);
+    font-size: 13px;
+}
+.mc-topbar-sep {
+    color: var(--mc-gray-brown);
+    font-size: 13px;
+}
+.mc-topbar-chapter {
+    font-size: 13px;
+    color: var(--mc-ink);
+    letter-spacing: 0.5px;
+}
+.mc-topbar-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+.mc-topbar-progress-label {
+    font-size: 12px;
+    color: var(--mc-ink-soft);
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+.mc-topbar-progress-bar {
+    width: 140px;
+    height: 8px;
+    background: var(--mc-paper-alt);
+    border: 1px solid var(--mc-wood-brown);
+}
+.mc-topbar-progress-fill {
+    height: 100%;
+    background: var(--mc-mustard);
+    transition: width 0.3s ease;
+}
+
+/* 右侧 5 个 popover / button —— 用 st-key-tb_* 定位 */
+[class*="st-key-tb_"] {
+    margin: 0 !important;
+}
+[class*="st-key-tb_"] > button,
+[class*="st-key-tb_"] [data-testid="stPopoverButton"] {
+    background: transparent !important;
+    color: var(--mc-ink) !important;
+    border: 2px solid var(--mc-ink) !important;
+    box-shadow: 2px 2px 0 var(--mc-wood-mid) !important;
+    border-radius: 0 !important;
+    font-family: 'Press Start 2P', 'Zpix', monospace !important;
+    font-size: 14px !important;
+    padding: 6px 10px !important;
+    min-height: 38px !important;
+    width: 100% !important;
+    transition: background 0.15s ease !important;
+}
+[class*="st-key-tb_"] > button:hover,
+[class*="st-key-tb_"] [data-testid="stPopoverButton"]:hover {
+    background: var(--mc-cream) !important;
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
+}
+[class*="st-key-tb_"] > button p,
+[class*="st-key-tb_"] [data-testid="stPopoverButton"] p {
+    margin: 0 !important;
+    color: var(--mc-ink) !important;
+    font-size: 14px !important;
+}
+/* 用户头像 popover：特殊背景色 */
+.st-key-tb_avatar > button,
+.st-key-tb_avatar [data-testid="stPopoverButton"] {
+    background: var(--mc-wood-light) !important;
+    color: var(--mc-cream) !important;
+}
+.st-key-tb_avatar > button p,
+.st-key-tb_avatar [data-testid="stPopoverButton"] p {
+    color: var(--mc-cream) !important;
+}
+
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
@@ -2369,39 +2487,8 @@ if has_file:
             st.session_state[page_key] = jump_page - 1
             st.rerun()
 
-        # --- 侧边栏：书签 ---
-        st.sidebar.divider()
-        st.sidebar.markdown(
-            f'<strong class="sbh">{PX_ICON["pin"]}书签</strong>',
-            unsafe_allow_html=True,
-        )
-        if st.sidebar.button("加入当前位置", key="bm_add", use_container_width=True):
-            added = _add_bookmark(book_key, chapter_idx, current_page)
-            st.toast("[+] 已添加书签" if added else "此位置已有书签")
-            st.rerun()
-
-        _bms = _load_bookmarks().get(book_key, [])
-        if not _bms:
-            st.sidebar.caption("点「加入当前位置」收藏你想回来的页面")
-        else:
-            for _i, _b in enumerate(_bms):
-                _ch = int(_b.get("chapter_idx", 0))
-                _pg = int(_b.get("page", 0))
-                _ts = _b.get("ts", "")
-                _ch_title = chapter_titles[_ch] if 0 <= _ch < len(chapter_titles) else f"章节 {_ch+1}"
-                _short = _ch_title if len(_ch_title) <= 10 else _ch_title[:10] + "…"
-                _label = f"{_short} · 第{_pg+1}页"
-                if _ts:
-                    _label += f"　{_ts}"
-                _bc1, _bc2 = st.sidebar.columns([6, 1])
-                with _bc1:
-                    if st.button(_label, key=f"bm_go_{_i}", use_container_width=True):
-                        st.session_state._pending_jump = {"chapter": _ch, "page": _pg}
-                        st.rerun()
-                with _bc2:
-                    if st.button("✕", key=f"bm_del_{_i}", help="删除此书签"):
-                        _remove_bookmark(book_key, _i)
-                        st.rerun()
+        # 阶段 4：书签迁移到顶部状态条 🔖 按钮（加入）。
+        # 书签列表 UI 按用户决定暂不展示（设计图没有），代码保留（_add_bookmark / _load_bookmarks）供阶段 10 的"摘录与笔记"子页调用。
 
         # --- 侧边栏：笔记 ---
         st.sidebar.divider()
@@ -2476,12 +2563,102 @@ if has_file:
             )
 
         # ============================================================
-        # --- 阅读界面（阶段 2 四区骨架占位；后续阶段 3/4/7 会逐格填充）---
+        # --- 阅读界面（阶段 4：顶部状态条 + 三列骨架）---
         # ============================================================
-        st.markdown(
-            '<div class="mc-zone-placeholder mc-topbar-slot">TOPBAR · 阶段 4 填充</div>',
-            unsafe_allow_html=True,
+        # 计算 topbar 需要的信息
+        _tb_progress_pct = int(((current_page + 1) / total_pages if total_pages > 0 else 1) * 100)
+        _tb_chapter_title = chapter_titles[chapter_idx] if 0 <= chapter_idx < len(chapter_titles) else ""
+        _tb_book_title = (
+            st.session_state.file_name.rsplit(".", 1)[0]
+            if "." in st.session_state.file_name
+            else st.session_state.file_name
         )
+
+        # 顶部状态条：info(左) + 5 popover/button(右)
+        _tb_info, _tb_search, _tb_theme, _tb_font, _tb_bm, _tb_avatar = st.columns(
+            [60, 8, 8, 8, 8, 8], gap="small"
+        )
+        with _tb_info:
+            st.markdown(
+                f'''<div class="mc-topbar-info">
+                    <span class="mc-topbar-book-icon">{PX_ICON["read"]}</span>
+                    <span class="mc-topbar-title">《{html.escape(_tb_book_title)}》</span>
+                    <span class="mc-topbar-sep">·</span>
+                    <span class="mc-topbar-chapter">{html.escape(_tb_chapter_title)}</span>
+                    <div class="mc-topbar-progress">
+                        <span class="mc-topbar-progress-label">{_tb_progress_pct}%</span>
+                        <div class="mc-topbar-progress-bar">
+                            <div class="mc-topbar-progress-fill" style="width:{_tb_progress_pct}%"></div>
+                        </div>
+                    </div>
+                </div>''',
+                unsafe_allow_html=True,
+            )
+        with _tb_search:
+            with st.popover("🔍", use_container_width=True, help="全书搜索（阶段 10 实装）"):
+                st.markdown("**🔍 全书搜索**")
+                st.info("🚧 搜索功能开发中，阶段 10 上线。")
+        with _tb_theme:
+            with st.popover("☀", use_container_width=True, help="配色主题"):
+                st.markdown("**☀ 配色主题**")
+                _tb_theme_keys = list(READING_THEMES.keys())
+                _tb_theme_pick = st.radio(
+                    "主题",
+                    _tb_theme_keys,
+                    index=_tb_theme_keys.index(st.session_state.get("reading_theme", "奶油"))
+                    if st.session_state.get("reading_theme", "奶油") in _tb_theme_keys else 0,
+                    key="tb_theme_radio",
+                    label_visibility="collapsed",
+                )
+                if _tb_theme_pick != st.session_state.get("reading_theme"):
+                    st.session_state.reading_theme = _tb_theme_pick
+                    st.rerun()
+        with _tb_font:
+            with st.popover("Aa", use_container_width=True, help="字号与字体"):
+                st.markdown("**Aa 字号与字体**")
+                _tb_fs = st.slider(
+                    "字号",
+                    14, 28, st.session_state.get("font_size", 18), step=2,
+                    key="tb_fs_slider",
+                )
+                if _tb_fs != st.session_state.get("font_size", 18):
+                    st.session_state.font_size = _tb_fs
+                    st.rerun()
+                _tb_font_keys = list({
+                    "默认": 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+                    "宋体": '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", "PingFang SC", serif',
+                    "楷体": '"Kaiti SC", "STKaiti", "KaiTi", "BiauKai", serif',
+                    "仿宋": '"FangSong", "STFangsong", "FangSong_GB2312", "Noto Serif SC", serif',
+                    "黑体": '"Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif',
+                    "隶书": '"LiSu", "STLiti", "Noto Serif SC", serif',
+                    "圆体": '"Yuanti SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
+                }.keys())
+                _tb_ff = st.selectbox(
+                    "字体",
+                    _tb_font_keys,
+                    index=_tb_font_keys.index(st.session_state.get("font_family_name", "默认"))
+                    if st.session_state.get("font_family_name", "默认") in _tb_font_keys else 0,
+                    key="tb_ff_select",
+                )
+                if _tb_ff != st.session_state.get("font_family_name", "默认"):
+                    st.session_state.font_family_name = _tb_ff
+                    st.rerun()
+        with _tb_bm:
+            if st.button("🔖", key="tb_bm_add", help="加入当前位置为书签", use_container_width=True):
+                _tb_added = _add_bookmark(book_key, chapter_idx, current_page)
+                st.toast("[+] 已添加书签" if _tb_added else "此位置已有书签")
+                st.rerun()
+        with _tb_avatar:
+            with st.popover("👤", use_container_width=True, help="账号与偏好"):
+                st.markdown("**👤 我**")
+                st.caption("当前书库：本地浏览器")
+                if st.button(
+                    ("▶ 进入专注模式" if not st.session_state.get("focus_mode") else "✕ 退出专注"),
+                    key="tb_focus_toggle",
+                    use_container_width=True,
+                ):
+                    st.session_state.focus_mode = not st.session_state.get("focus_mode", False)
+                    st.rerun()
         # 当前激活的左侧导航项（默认 reading）
         if "_active_nav" not in st.session_state:
             st.session_state._active_nav = "reading"
@@ -3463,10 +3640,10 @@ if has_file:
             </script>
             """, height=0)
 
-        # 侧边栏：阅读设置
+        # 侧边栏：阅读记录（字号/字体/主题/专注/书签 已迁到顶部状态条；阶段 7 会把阅读时长也搬到底部统计卡）
         st.sidebar.divider()
         st.sidebar.markdown(
-            f'<strong class="sbh">{PX_ICON["palette"]}阅读设置</strong>',
+            f'<strong class="sbh">{PX_ICON["clock"]}阅读记录</strong>',
             unsafe_allow_html=True,
         )
 
@@ -3477,60 +3654,8 @@ if has_file:
             st.sidebar.caption(f"📚 你和这本书相处了 {_format_duration(_rt_book)}")
         elif _rt_book > 0:
             st.sidebar.caption(f"📚 刚开始读这本书（{_rt_book} 秒）")
-
-        # 专注模式：一键隐藏所有 UI，只剩书页
-        if st.sidebar.button(
-            "▶ 进入专注模式",
-            key="rd_focus_enter",
-            use_container_width=True,
-            help="隐藏侧栏/进度条/导航/聊天。键盘 ← → 仍可翻页。",
-        ):
-            st.session_state.focus_mode = True
-            st.rerun()
-
-        # 字体大小
-        if "font_size" not in st.session_state:
-            st.session_state.font_size = 18
-        font_size = st.sidebar.slider("字体大小", 14, 28, st.session_state.font_size, step=2)
-        if font_size != st.session_state.font_size:
-            st.session_state.font_size = font_size
-            st.rerun()
-
-        # 字体 (基于系统自带中文字体，跨平台自动回退)
-        _font_options = {
-            "默认": 'system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
-            "宋体": '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", "PingFang SC", serif',
-            "楷体": '"Kaiti SC", "STKaiti", "KaiTi", "BiauKai", serif',
-            "仿宋": '"FangSong", "STFangsong", "FangSong_GB2312", "Noto Serif SC", serif',
-            "黑体": '"Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif',
-            "隶书": '"LiSu", "STLiti", "Noto Serif SC", serif',
-            "圆体": '"Yuanti SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
-        }
-        if "font_family_name" not in st.session_state:
-            st.session_state.font_family_name = "默认"
-        _font_keys = list(_font_options.keys())
-        _ff = st.sidebar.selectbox(
-            "字体",
-            _font_keys,
-            index=_font_keys.index(st.session_state.font_family_name),
-        )
-        if _ff != st.session_state.font_family_name:
-            st.session_state.font_family_name = _ff
-            st.rerun()
-
-        # 配色主题
-        if "reading_theme" not in st.session_state:
-            st.session_state.reading_theme = "奶油"
-        _theme_keys = list(READING_THEMES.keys())
-        _rt_pick = st.sidebar.selectbox(
-            "配色主题",
-            _theme_keys,
-            index=_theme_keys.index(st.session_state.reading_theme)
-            if st.session_state.reading_theme in _theme_keys else 0,
-        )
-        if _rt_pick != st.session_state.reading_theme:
-            st.session_state.reading_theme = _rt_pick
-            st.rerun()
+        else:
+            st.sidebar.caption("📚 还没开始计时")
 
         with _mc_right:
             st.markdown(
