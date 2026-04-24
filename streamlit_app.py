@@ -157,9 +157,10 @@ st.markdown("""
     border: 2px solid var(--mc-ink) !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 360px;
-    height: 58vh;
-    max-height: 58vh;
+    min-height: 340px;
+    /* 视口高度 - 顶部 padding 3.5rem - topbar ~70 - 底卡 30vh - 间距 ~30 */
+    height: calc(60vh - 80px);
+    max-height: calc(60vh - 80px);
     overflow-y: auto;
     display: flex !important;
     flex-direction: column !important;
@@ -552,9 +553,9 @@ st.markdown("""
     box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
     padding: 10px 10px !important;
     margin: 0 !important;
-    min-height: 360px;
-    height: 58vh;
-    max-height: 58vh;
+    min-height: 340px;
+    height: calc(60vh - 80px);
+    max-height: calc(60vh - 80px);
     overflow-y: auto;
 }
 
@@ -676,7 +677,8 @@ st.markdown("""
     border: 2px solid var(--mc-ink) !important;
     box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
     padding: 10px 12px !important;
-    min-height: 160px;
+    min-height: 180px;
+    height: 28vh;
     max-height: 28vh;
     overflow-y: auto;
 }
@@ -1090,10 +1092,11 @@ st.markdown("""
 }
 .book-page {
     flex: 1;
-    padding: 20px 26px;
-    min-height: 280px;
-    height: 44vh;
-    max-height: 44vh;
+    padding: 18px 24px;
+    min-height: 260px;
+    /* 略小于左右两列高度，留控制条空间 */
+    height: calc(60vh - 160px);
+    max-height: calc(60vh - 160px);
     overflow-y: auto;
     line-height: 1.75;
     letter-spacing: 0.3px;
@@ -1185,13 +1188,13 @@ body:has(.reading-area) [data-testid="stToolbar"] {
 body:has(.reading-area) [data-testid="stToolbar"]:hover {
     opacity: 1 !important;
 }
-/* 整体背景奶油色 + 压缩主容器顶部 padding（让主控台一屏放下） */
+/* 整体背景奶油色 + 主容器 padding（顶部留出 Streamlit header 高度） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"],
 body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
 body:has(.reading-area) .main .block-container,
 body:has(.reading-area) [class*="block-container"] {
     background-color: var(--mc-paper) !important;
-    padding-top: 1rem !important;
+    padding-top: 3.5rem !important;
     padding-bottom: 0.5rem !important;
 }
 /* Streamlit 元素之间默认 gap 也压一压 */
