@@ -31,7 +31,21 @@ PX_ICON = {
     "save": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="2" width="12" height="1" fill="#2E1D12"/><rect x="2" y="13" width="12" height="1" fill="#2E1D12"/><rect x="2" y="2" width="1" height="12" fill="#2E1D12"/><rect x="13" y="2" width="1" height="12" fill="#2E1D12"/><rect x="4" y="3" width="7" height="3" fill="#2E1D12"/><rect x="5" y="4" width="2" height="2" fill="#B96A4A"/><rect x="4" y="8" width="8" height="5" fill="#2E1D12"/><rect x="5" y="9" width="6" height="1" fill="#FFF6E8"/><rect x="5" y="11" width="6" height="1" fill="#FFF6E8"/></svg>',
     "robot": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="1" width="2" height="2" fill="#2E1D12"/><rect x="3" y="3" width="10" height="1" fill="#2E1D12"/><rect x="3" y="9" width="10" height="1" fill="#2E1D12"/><rect x="3" y="3" width="1" height="7" fill="#2E1D12"/><rect x="12" y="3" width="1" height="7" fill="#2E1D12"/><rect x="5" y="5" width="2" height="2" fill="#B96A4A"/><rect x="9" y="5" width="2" height="2" fill="#B96A4A"/><rect x="6" y="8" width="4" height="1" fill="#2E1D12"/><rect x="1" y="5" width="2" height="1" fill="#2E1D12"/><rect x="13" y="5" width="2" height="1" fill="#2E1D12"/><rect x="4" y="10" width="2" height="4" fill="#2E1D12"/><rect x="10" y="10" width="2" height="4" fill="#2E1D12"/></svg>',
     "download": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="7" y="2" width="2" height="5" fill="#2E1D12"/><rect x="5" y="7" width="6" height="1" fill="#2E1D12"/><rect x="6" y="8" width="4" height="1" fill="#2E1D12"/><rect x="7" y="9" width="2" height="1" fill="#2E1D12"/><rect x="2" y="12" width="12" height="1" fill="#2E1D12"/><rect x="2" y="12" width="1" height="2" fill="#2E1D12"/><rect x="13" y="12" width="1" height="2" fill="#2E1D12"/></svg>',
+    "shelf": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="3" width="2" height="9" fill="#B96A4A"/><rect x="5" y="2" width="2" height="10" fill="#6E8B5B"/><rect x="8" y="4" width="2" height="8" fill="#A86A33"/><rect x="11" y="3" width="2" height="9" fill="#D7A441"/><rect x="1" y="12" width="14" height="1" fill="#2E1D12"/><rect x="1" y="13" width="1" height="2" fill="#2E1D12"/><rect x="14" y="13" width="1" height="2" fill="#2E1D12"/></svg>',
+    "chart": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="10" width="2" height="4" fill="#B96A4A"/><rect x="6" y="7" width="2" height="7" fill="#6E8B5B"/><rect x="10" y="4" width="2" height="10" fill="#D7A441"/><rect x="1" y="14" width="13" height="1" fill="#2E1D12"/></svg>',
 }
+
+# 左侧导航菜单（spec v1 §9 模块 A；key → Chinese label + emoji icon，阶段 8 会换像素 SVG）
+NAV_ITEMS = [
+    ("shelf",    "书架",      "📚"),
+    ("reading",  "正在阅读",  "📖"),
+    ("upload",   "上传书籍",  "📤"),
+    ("notes",    "摘录笔记",  "✏️"),
+    ("ai",       "AI 助读",   "🤖"),
+    ("settings", "阅读设置",  "⚙"),
+    ("stats",    "阅读统计",  "📊"),
+]
+NAV_LABELS = {k: label for k, label, _ in NAV_ITEMS}
 
 # 阅读页配色主题（bg = 纸底，fg = 墨色）
 READING_THEMES = {
@@ -121,6 +135,152 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* ==========================================================================
+   阶段 3 左侧导航区（.mc-nav-*）
+   —— 对照 DESIGN_SPEC §9 模块 A：深木棕立柜 + 品牌 + 7 菜单 + 底部装饰
+   ========================================================================== */
+
+/* 整列背景：找到含 .mc-nav-brand 的 stColumn，应用深木棕底 */
+[data-testid="stColumn"]:has(.mc-nav-brand) {
+    background: var(--mc-wood-deep) !important;
+    border: 2px solid var(--mc-ink) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 640px;
+    display: flex !important;
+    flex-direction: column !important;
+}
+[data-testid="stColumn"]:has(.mc-nav-brand) > div {
+    padding: 0 !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 品牌区 */
+.mc-nav-brand {
+    padding: 22px 14px 18px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--mc-wood-mid);
+    background: linear-gradient(180deg, rgba(107, 64, 36, 0.5) 0%, transparent 100%);
+}
+.mc-nav-brand-title {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 28px;
+    color: var(--mc-cream);
+    letter-spacing: 6px;
+    margin: 0 0 8px 0;
+    text-shadow: 3px 3px 0 var(--mc-wood-mid);
+    line-height: 1.2;
+}
+.mc-nav-brand-subtitle {
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
+    font-size: 11px;
+    color: var(--mc-cream);
+    opacity: 0.78;
+    letter-spacing: 2px;
+    margin: 0;
+}
+.mc-nav-brand-figure {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+}
+.mc-nav-brand-figure svg {
+    image-rendering: pixelated;
+    shape-rendering: crispEdges;
+}
+
+/* 7 菜单项样式：通过 st-key-nav_* 定位 Streamlit button */
+[class*="st-key-nav_"] {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+[class*="st-key-nav_"] button {
+    background: transparent !important;
+    color: var(--mc-cream) !important;
+    border: 0 !important;
+    border-left: 3px solid transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-family: 'Zpix', 'Noto Sans SC', monospace !important;
+    font-size: 15px !important;
+    letter-spacing: 3px !important;
+    padding: 14px 16px !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    transition: background 0.15s ease, border-left-color 0.15s ease !important;
+    width: 100% !important;
+}
+[class*="st-key-nav_"] button p {
+    margin: 0 !important;
+    color: var(--mc-cream) !important;
+    font-size: 15px !important;
+    letter-spacing: 3px !important;
+}
+[class*="st-key-nav_"] button:hover {
+    background: rgba(168, 106, 51, 0.28) !important;
+    transform: none !important;
+    border-left-color: var(--mc-wood-light) !important;
+}
+[class*="st-key-nav_"] button:focus-visible {
+    outline: 2px solid var(--mc-mustard) !important;
+    outline-offset: -4px !important;
+}
+[class*="st-key-nav_"] button .px-ic {
+    margin-right: 10px;
+    vertical-align: -3px;
+}
+/* 菜单区 wrapper：让它占据中段空间 */
+.mc-nav-menu-wrap {
+    flex: 1;
+    padding: 6px 0 0 0;
+}
+
+/* 底部装饰 */
+.mc-nav-decor {
+    padding: 18px 14px 22px 14px;
+    text-align: center;
+    border-top: 1px solid var(--mc-wood-mid);
+    background: linear-gradient(0deg, rgba(107, 64, 36, 0.6) 0%, transparent 100%);
+}
+.mc-nav-decor svg {
+    image-rendering: pixelated;
+    shape-rendering: crispEdges;
+}
+
+/* 中央列的"即将上线"占位（非 reading 视图） */
+.mc-soon-placeholder {
+    padding: 80px 30px;
+    text-align: center;
+    background: var(--mc-cream);
+    border: 3px dashed var(--mc-gray-brown);
+    margin: 40px 20px;
+    border-radius: 4px;
+    color: var(--mc-ink);
+}
+.mc-soon-placeholder h2 {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 20px;
+    color: var(--mc-wood-light);
+    margin: 0 0 20px 0;
+    letter-spacing: 2px;
+}
+.mc-soon-placeholder p {
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    color: var(--mc-ink-soft);
+    line-height: 1.8;
+    margin: 6px 0;
+    letter-spacing: 1px;
+}
+.mc-soon-placeholder .mc-soon-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
 }
 
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
@@ -2322,13 +2482,106 @@ if has_file:
             '<div class="mc-zone-placeholder mc-topbar-slot">TOPBAR · 阶段 4 填充</div>',
             unsafe_allow_html=True,
         )
+        # 当前激活的左侧导航项（默认 reading）
+        if "_active_nav" not in st.session_state:
+            st.session_state._active_nav = "reading"
+        _active_nav = st.session_state._active_nav
+
         _mc_nav, _mc_center, _mc_right = st.columns([16, 56, 28], gap="small")
         with _mc_nav:
-            st.markdown(
-                '<div class="mc-zone-placeholder mc-nav-slot">LEFT NAV<br>阶段 3 填充</div>',
-                unsafe_allow_html=True,
-            )
+            # 品牌区：嘟哒 Logo + 副标 + 读书角色 + 小花盆
+            st.markdown("""
+            <div class="mc-nav-brand">
+                <h1 class="mc-nav-brand-title">嘟哒</h1>
+                <p class="mc-nav-brand-subtitle">我的阅读伙伴</p>
+                <div class="mc-nav-brand-figure" aria-hidden="true">
+                    <svg width="44" height="44" viewBox="0 0 22 22">
+                        <rect x="5" y="1" width="12" height="6" fill="#4A2D1A"/>
+                        <rect x="6" y="3" width="10" height="6" fill="#E5C9A3"/>
+                        <rect x="5" y="7" width="2" height="2" fill="#4A2D1A"/>
+                        <rect x="15" y="7" width="2" height="2" fill="#4A2D1A"/>
+                        <rect x="8" y="5" width="2" height="1" fill="#2E1D12"/>
+                        <rect x="12" y="5" width="2" height="1" fill="#2E1D12"/>
+                        <rect x="7" y="7" width="1" height="1" fill="#E8A08F"/>
+                        <rect x="14" y="7" width="1" height="1" fill="#E8A08F"/>
+                        <rect x="10" y="7" width="2" height="1" fill="#B96A4A"/>
+                        <rect x="9" y="9" width="4" height="1" fill="#E5C9A3"/>
+                        <rect x="5" y="10" width="12" height="7" fill="#6E8B5B"/>
+                        <rect x="3" y="11" width="2" height="5" fill="#6E8B5B"/>
+                        <rect x="17" y="11" width="2" height="5" fill="#6E8B5B"/>
+                        <rect x="4" y="14" width="2" height="2" fill="#E5C9A3"/>
+                        <rect x="16" y="14" width="2" height="2" fill="#E5C9A3"/>
+                        <rect x="6" y="14" width="10" height="4" fill="#B96A4A"/>
+                        <rect x="7" y="15" width="8" height="2" fill="#F6E7C8"/>
+                        <rect x="2" y="19" width="18" height="3" fill="#8B5E3C"/>
+                        <rect x="1" y="20" width="20" height="2" fill="#6B4024"/>
+                    </svg>
+                    <svg width="28" height="36" viewBox="0 0 14 18">
+                        <rect x="5" y="1" width="4" height="1" fill="#D7A441"/>
+                        <rect x="4" y="2" width="6" height="2" fill="#D7A441"/>
+                        <rect x="5" y="4" width="4" height="1" fill="#D7A441"/>
+                        <rect x="6" y="2" width="2" height="2" fill="#B96A4A"/>
+                        <rect x="6" y="5" width="2" height="6" fill="#6E8B5B"/>
+                        <rect x="3" y="8" width="3" height="1" fill="#6E8B5B"/>
+                        <rect x="8" y="9" width="3" height="1" fill="#6E8B5B"/>
+                        <rect x="2" y="11" width="10" height="1" fill="#D7A441"/>
+                        <rect x="2" y="12" width="10" height="4" fill="#B96A4A"/>
+                        <rect x="3" y="16" width="8" height="1" fill="#8B3F2A"/>
+                    </svg>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # 7 菜单项：点击 → 切 _active_nav → rerun
+            for _nav_key, _nav_label, _nav_emoji in NAV_ITEMS:
+                if st.button(
+                    f"{_nav_emoji}  {_nav_label}",
+                    key=f"nav_{_nav_key}",
+                    use_container_width=True,
+                ):
+                    st.session_state._active_nav = _nav_key
+                    st.rerun()
+
+            # 底部装饰：像素台灯 + 小书堆（阶段 8 会再精细化）
+            st.markdown("""
+            <div class="mc-nav-decor" aria-hidden="true">
+                <svg width="40" height="48" viewBox="0 0 16 20">
+                    <rect x="2" y="2" width="12" height="2" fill="#2E1D12"/>
+                    <rect x="3" y="4" width="10" height="4" fill="#D7A441"/>
+                    <rect x="4" y="5" width="8" height="2" fill="#F2C66D"/>
+                    <rect x="7" y="8" width="2" height="8" fill="#6B4024"/>
+                    <rect x="4" y="16" width="8" height="2" fill="#3B2416"/>
+                </svg>
+                <svg width="40" height="22" viewBox="0 0 16 10" style="margin-top:8px">
+                    <rect x="2" y="3" width="12" height="2" fill="#6E8B5B"/>
+                    <rect x="1" y="5" width="14" height="2" fill="#B96A4A"/>
+                    <rect x="2" y="7" width="12" height="1" fill="#8B3F2A"/>
+                </svg>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # 动态注入：当前激活菜单的高亮样式
+            st.markdown(f"""
+            <style>
+            .st-key-nav_{_active_nav} button {{
+                background: var(--mc-wood-light) !important;
+                border-left-color: var(--mc-mustard) !important;
+                font-weight: 700 !important;
+            }}
+            .st-key-nav_{_active_nav} button p {{
+                font-weight: 700 !important;
+            }}
+            </style>
+            """, unsafe_allow_html=True)
         with _mc_center:
+
+            # 当用户切到非"正在阅读"的导航项时给个提示（视图切换留给阶段 10）
+            if _active_nav != "reading":
+                _nav_label_now = NAV_LABELS.get(_active_nav, _active_nav)
+                st.warning(
+                    f"🚧 「{_nav_label_now}」功能即将上线。当前视图仍为「正在阅读」。"
+                    "点左栏「正在阅读」即可回到这里。"
+                )
 
             # 专注模式：flag + 浮动退出按钮（CSS 会把它固定到右上角）
             if "focus_mode" not in st.session_state:
