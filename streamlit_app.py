@@ -79,6 +79,44 @@ st.markdown("""
     --mc-wood-brown: #8B5E3C;
 }
 
+/* ==========================================================================
+   阶段 2 四区骨架占位（mc-zone-placeholder）
+   —— 本阶段仅验证 CSS Grid × Streamlit st.columns 布局可行
+   —— 后续阶段 3/4/7 会逐一替换这些占位
+   ========================================================================== */
+.mc-zone-placeholder {
+    border: 2px dashed var(--mc-terra);
+    background: rgba(185, 106, 74, 0.08);
+    color: var(--mc-gray-brown);
+    text-align: center;
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 18px 12px;
+    margin: 6px 0;
+    line-height: 1.8;
+    user-select: none;
+}
+.mc-topbar-slot {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+}
+.mc-nav-slot {
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mc-bottom-slot {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
@@ -2268,887 +2306,900 @@ if has_file:
                 f"📌 {len(_export_bookmarks)} · ✏️ {len(_export_notes)} · 💭 {len(_export_messages)}"
             )
 
-        # --- 阅读界面 ---
-
-        # 专注模式：flag + 浮动退出按钮（CSS 会把它固定到右上角）
-        if "focus_mode" not in st.session_state:
-            st.session_state.focus_mode = False
-        if st.session_state.focus_mode:
-            st.markdown('<div class="rd-focus-flag"></div>', unsafe_allow_html=True)
-            if st.button("✕ 退出专注", key="rd_focus_exit"):
-                st.session_state.focus_mode = False
-                st.rerun()
-
-        # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX · 时钟）
-        # 时钟并入 rd-topbar 右段，替掉原装饰 "PIXEL EDITION"；
-        # 原 top_col1/top_col2（章节名重复 + 时间）整行删除
-        from datetime import timezone, timedelta
-        now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
-        _ch_title_safe = html.escape(chapter_titles[chapter_idx])
-        _topbar_html = (
-            '<div class="rd-topbar">'
-            '<span>VOL.01 <span class="dot">■</span> EST.2026</span>'
-            f'<span class="rd-mid">{_ch_title_safe}</span>'
-            f'<span>CH.{chapter_idx + 1:02d}/{len(chapters):02d} '
-            '<span class="dot">■</span> '
-            f'<span class="rd-clock">{PX_ICON["clock"]}{now}</span>'
-            '</span>'
-            '</div>'
-        )
-        st.markdown(_topbar_html, unsafe_allow_html=True)
-
-        # 阅读时长追踪：用 data-key 给 JS 传递 book_key
+        # ============================================================
+        # --- 阅读界面（阶段 2 四区骨架占位；后续阶段 3/4/7 会逐格填充）---
+        # ============================================================
         st.markdown(
-            f'<div class="rd-book-key" data-key="{html.escape(book_key)}" style="display:none"></div>',
+            '<div class="mc-zone-placeholder mc-topbar-slot">TOPBAR · 阶段 4 填充</div>',
             unsafe_allow_html=True,
         )
+        _mc_nav, _mc_center, _mc_right = st.columns([16, 56, 28], gap="small")
+        with _mc_nav:
+            st.markdown(
+                '<div class="mc-zone-placeholder mc-nav-slot">LEFT NAV<br>阶段 3 填充</div>',
+                unsafe_allow_html=True,
+            )
+        with _mc_center:
 
-        # 进度条
-        progress = (current_page + 1) / total_pages if total_pages > 0 else 1
-        st.markdown(f"""
-        <div class="progress-container">
-            <div class="progress-fill" style="width: {progress * 100:.1f}%"></div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # 像素风主题：根据用户选择的配色
-        fs = st.session_state.get("font_size", 18)
-        _rt = READING_THEMES.get(st.session_state.get("reading_theme", "奶油"), READING_THEMES["奶油"])
-        theme_css = f"background: {_rt['bg']}; color: {_rt['fg']};"
-        # 字体族（基于 session_state，默认系统字体）
-        # 用单引号包裹字体名，以便安全嵌入 style="..." 属性
-        _font_stacks = {
-            "默认": "system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
-            "宋体": "'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'SimSun', 'PingFang SC', serif",
-            "楷体": "'Kaiti SC', 'STKaiti', 'KaiTi', 'BiauKai', serif",
-            "仿宋": "'FangSong', 'STFangsong', 'FangSong_GB2312', 'Noto Serif SC', serif",
-            "黑体": "'Source Han Sans SC', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif",
-            "隶书": "'LiSu', 'STLiti', 'Noto Serif SC', serif",
-            "圆体": "'Yuanti SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
-        }
-        ff_css = _font_stacks.get(st.session_state.get("font_family_name", "默认"), _font_stacks["默认"])
-
-        # 双页展示：当前页 = 左页，下一页 = 右页
-        left_idx  = current_page
-        right_idx = current_page + 1 if current_page + 1 < total_pages else None
-
-        left_num = left_idx + 1
-        right_num = right_idx + 1 if right_idx is not None else ""
-
-        left_html  = _to_html(pages[left_idx])
-        right_html = (_to_html(pages[right_idx]) if right_idx is not None
-                      else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>')
-
-        # 页码指示 & 总进度
-        chapter_page_counts = [len(split_into_pages(ch["text"])) for ch in chapters]
-        total_all_pages = sum(chapter_page_counts)
-        read_pages = sum(chapter_page_counts[:chapter_idx]) + current_page + 1
-        overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
-
-        prev_disabled = current_page <= 0
-        next_disabled = current_page >= total_pages - 1
-        prev_cls = "nav-btn nav-prev" + (" nav-disabled" if prev_disabled else "")
-        next_cls = "nav-btn nav-next" + (" nav-disabled" if next_disabled else "")
-
-        # 本章剩余阅读时间估算（未读页字数 / 300 字每分钟）
-        _remaining_chars = sum(len(p) for p in pages[current_page + 2:])
-        if _remaining_chars <= 0:
-            _time_left = "本章即将读完"
-        else:
-            _mins = max(1, round(_remaining_chars / 300))
-            _time_left = f"本章约剩 {_mins} 分钟"
-
-        # page-indicator 拆两行：主行像素刊头字体，副行柔化
-        _pg_range_label = (
-            f"PAGE {left_num}"
-            + (f"-{right_num}" if right_num else "")
-            + f" / {total_pages}"
-        )
-        _pg_main = f'<div class="pg-main">{_pg_range_label}</div>'
-        _pg_sub = (
-            f'<div class="pg-sub">全书 {overall:.1f}% · {_time_left}</div>'
-        )
-        page_range = _pg_main + _pg_sub
-
-        # 章节已读标记：到达最后一页时加入集合
-        if next_disabled:
-            st.session_state.read_chapters.add((book_key, chapter_idx))
-
-        # 章末庆祝：4 个像素烟花爆炸点 + 中央横幅
-        # 每个爆炸点：8 方向粒子 + 中心闪光，错开触发时间
-        _FW_BURSTS = [
-            {"left": "18%", "top": "44vh", "bd": "0.0s",  "sz": "7px",
-             "colors": ["var(--mc-terra)", "var(--mc-mustard)", "var(--mc-terra)", "var(--mc-cream)", "var(--mc-terra)", "var(--mc-mustard)", "var(--mc-terra)", "var(--mc-cream)"]},
-            {"left": "40%", "top": "32vh", "bd": "0.45s", "sz": "9px",
-             "colors": ["var(--mc-mustard)", "var(--mc-dusty)", "var(--mc-mustard)", "var(--mc-cream)", "var(--mc-mustard)", "var(--mc-dusty)", "var(--mc-mustard)", "var(--mc-cream)"]},
-            {"left": "62%", "top": "38vh", "bd": "0.25s", "sz": "8px",
-             "colors": ["var(--mc-moss)", "var(--mc-terra)", "var(--mc-moss)", "var(--mc-cream)", "var(--mc-moss)", "var(--mc-terra)", "var(--mc-moss)", "var(--mc-cream)"]},
-            {"left": "82%", "top": "44vh", "bd": "0.7s",  "sz": "7px",
-             "colors": ["var(--mc-dusty)", "var(--mc-moss)", "var(--mc-dusty)", "var(--mc-cream)", "var(--mc-dusty)", "var(--mc-moss)", "var(--mc-dusty)", "var(--mc-cream)"]},
-        ]
-        # 8 方向 (dx, dy) 单位 px
-        _FW_DIRS = [(0,-65),(46,-46),(65,0),(46,46),(0,65),(-46,46),(-65,0),(-46,-46)]
-        _celebrate_html = ""
-        if next_disabled:
-            _bursts_html = ""
-            for _b in _FW_BURSTS:
-                _particles = "".join(
-                    f'<div class="rb-fw-p" style="background:{_b["colors"][_i]};--dx:{_dx}px;--dy:{_dy}px;--sz:{_b["sz"]};--bd:{_b["bd"]}"></div>'
-                    for _i, (_dx, _dy) in enumerate(_FW_DIRS)
+            # 专注模式：flag + 浮动退出按钮（CSS 会把它固定到右上角）
+            if "focus_mode" not in st.session_state:
+                st.session_state.focus_mode = False
+            if st.session_state.focus_mode:
+                st.markdown('<div class="rd-focus-flag"></div>', unsafe_allow_html=True)
+                if st.button("✕ 退出专注", key="rd_focus_exit"):
+                    st.session_state.focus_mode = False
+                    st.rerun()
+    
+            # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX · 时钟）
+            # 时钟并入 rd-topbar 右段，替掉原装饰 "PIXEL EDITION"；
+            # 原 top_col1/top_col2（章节名重复 + 时间）整行删除
+            from datetime import timezone, timedelta
+            now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
+            _ch_title_safe = html.escape(chapter_titles[chapter_idx])
+            _topbar_html = (
+                '<div class="rd-topbar">'
+                '<span>VOL.01 <span class="dot">■</span> EST.2026</span>'
+                f'<span class="rd-mid">{_ch_title_safe}</span>'
+                f'<span>CH.{chapter_idx + 1:02d}/{len(chapters):02d} '
+                '<span class="dot">■</span> '
+                f'<span class="rd-clock">{PX_ICON["clock"]}{now}</span>'
+                '</span>'
+                '</div>'
+            )
+            st.markdown(_topbar_html, unsafe_allow_html=True)
+    
+            # 阅读时长追踪：用 data-key 给 JS 传递 book_key
+            st.markdown(
+                f'<div class="rd-book-key" data-key="{html.escape(book_key)}" style="display:none"></div>',
+                unsafe_allow_html=True,
+            )
+    
+            # 进度条
+            progress = (current_page + 1) / total_pages if total_pages > 0 else 1
+            st.markdown(f"""
+            <div class="progress-container">
+                <div class="progress-fill" style="width: {progress * 100:.1f}%"></div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+            # 像素风主题：根据用户选择的配色
+            fs = st.session_state.get("font_size", 18)
+            _rt = READING_THEMES.get(st.session_state.get("reading_theme", "奶油"), READING_THEMES["奶油"])
+            theme_css = f"background: {_rt['bg']}; color: {_rt['fg']};"
+            # 字体族（基于 session_state，默认系统字体）
+            # 用单引号包裹字体名，以便安全嵌入 style="..." 属性
+            _font_stacks = {
+                "默认": "system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
+                "宋体": "'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'SimSun', 'PingFang SC', serif",
+                "楷体": "'Kaiti SC', 'STKaiti', 'KaiTi', 'BiauKai', serif",
+                "仿宋": "'FangSong', 'STFangsong', 'FangSong_GB2312', 'Noto Serif SC', serif",
+                "黑体": "'Source Han Sans SC', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif",
+                "隶书": "'LiSu', 'STLiti', 'Noto Serif SC', serif",
+                "圆体": "'Yuanti SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif",
+            }
+            ff_css = _font_stacks.get(st.session_state.get("font_family_name", "默认"), _font_stacks["默认"])
+    
+            # 双页展示：当前页 = 左页，下一页 = 右页
+            left_idx  = current_page
+            right_idx = current_page + 1 if current_page + 1 < total_pages else None
+    
+            left_num = left_idx + 1
+            right_num = right_idx + 1 if right_idx is not None else ""
+    
+            left_html  = _to_html(pages[left_idx])
+            right_html = (_to_html(pages[right_idx]) if right_idx is not None
+                          else '<p style="opacity:0.3; text-align:center; text-indent:0;">— 本章完 —</p>')
+    
+            # 页码指示 & 总进度
+            chapter_page_counts = [len(split_into_pages(ch["text"])) for ch in chapters]
+            total_all_pages = sum(chapter_page_counts)
+            read_pages = sum(chapter_page_counts[:chapter_idx]) + current_page + 1
+            overall = read_pages / total_all_pages * 100 if total_all_pages > 0 else 0
+    
+            prev_disabled = current_page <= 0
+            next_disabled = current_page >= total_pages - 1
+            prev_cls = "nav-btn nav-prev" + (" nav-disabled" if prev_disabled else "")
+            next_cls = "nav-btn nav-next" + (" nav-disabled" if next_disabled else "")
+    
+            # 本章剩余阅读时间估算（未读页字数 / 300 字每分钟）
+            _remaining_chars = sum(len(p) for p in pages[current_page + 2:])
+            if _remaining_chars <= 0:
+                _time_left = "本章即将读完"
+            else:
+                _mins = max(1, round(_remaining_chars / 300))
+                _time_left = f"本章约剩 {_mins} 分钟"
+    
+            # page-indicator 拆两行：主行像素刊头字体，副行柔化
+            _pg_range_label = (
+                f"PAGE {left_num}"
+                + (f"-{right_num}" if right_num else "")
+                + f" / {total_pages}"
+            )
+            _pg_main = f'<div class="pg-main">{_pg_range_label}</div>'
+            _pg_sub = (
+                f'<div class="pg-sub">全书 {overall:.1f}% · {_time_left}</div>'
+            )
+            page_range = _pg_main + _pg_sub
+    
+            # 章节已读标记：到达最后一页时加入集合
+            if next_disabled:
+                st.session_state.read_chapters.add((book_key, chapter_idx))
+    
+            # 章末庆祝：4 个像素烟花爆炸点 + 中央横幅
+            # 每个爆炸点：8 方向粒子 + 中心闪光，错开触发时间
+            _FW_BURSTS = [
+                {"left": "18%", "top": "44vh", "bd": "0.0s",  "sz": "7px",
+                 "colors": ["var(--mc-terra)", "var(--mc-mustard)", "var(--mc-terra)", "var(--mc-cream)", "var(--mc-terra)", "var(--mc-mustard)", "var(--mc-terra)", "var(--mc-cream)"]},
+                {"left": "40%", "top": "32vh", "bd": "0.45s", "sz": "9px",
+                 "colors": ["var(--mc-mustard)", "var(--mc-dusty)", "var(--mc-mustard)", "var(--mc-cream)", "var(--mc-mustard)", "var(--mc-dusty)", "var(--mc-mustard)", "var(--mc-cream)"]},
+                {"left": "62%", "top": "38vh", "bd": "0.25s", "sz": "8px",
+                 "colors": ["var(--mc-moss)", "var(--mc-terra)", "var(--mc-moss)", "var(--mc-cream)", "var(--mc-moss)", "var(--mc-terra)", "var(--mc-moss)", "var(--mc-cream)"]},
+                {"left": "82%", "top": "44vh", "bd": "0.7s",  "sz": "7px",
+                 "colors": ["var(--mc-dusty)", "var(--mc-moss)", "var(--mc-dusty)", "var(--mc-cream)", "var(--mc-dusty)", "var(--mc-moss)", "var(--mc-dusty)", "var(--mc-cream)"]},
+            ]
+            # 8 方向 (dx, dy) 单位 px
+            _FW_DIRS = [(0,-65),(46,-46),(65,0),(46,46),(0,65),(-46,46),(-65,0),(-46,-46)]
+            _celebrate_html = ""
+            if next_disabled:
+                _bursts_html = ""
+                for _b in _FW_BURSTS:
+                    _particles = "".join(
+                        f'<div class="rb-fw-p" style="background:{_b["colors"][_i]};--dx:{_dx}px;--dy:{_dy}px;--sz:{_b["sz"]};--bd:{_b["bd"]}"></div>'
+                        for _i, (_dx, _dy) in enumerate(_FW_DIRS)
+                    )
+                    _flash = f'<div class="rb-fw-flash" style="--bd:{_b["bd"]}"></div>'
+                    _bursts_html += f'<div class="rb-firework" style="left:{_b["left"]};top:{_b["top"]}">{_flash}{_particles}</div>'
+                _celebrate_html = _bursts_html + '<div class="rb-banner">★ 本章读完 ★</div>'
+    
+            # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
+            reading_html = f'''
+            <div class="reading-area">
+                <div class="book-spread" data-page="{current_page}" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
+                    <div class="book-page book-page-left">
+                        {left_html}
+                        <div class="page-num">{left_num}</div>
+                    </div>
+                    <div class="book-page book-page-right">
+                        {right_html}
+                        <div class="page-num">{right_num}</div>
+                    </div>
+                </div>
+                <div class="page-indicator">{page_range}</div>
+                <div class="nav-row">
+                    <button type="button" class="{prev_cls}">← 上一页</button>
+                    <button type="button" class="{next_cls}">下一页 →</button>
+                </div>
+                {_celebrate_html}
+            </div>
+            '''
+            st.markdown(reading_html, unsafe_allow_html=True)
+    
+            # 持久化阅读进度
+            _save_progress(book_key, chapter_idx, current_page)
+    
+            # --- 笔记：当前页提示 + 添加入口 ---
+            _page_notes = [
+                n for n in st.session_state.get("notes", [])
+                if int(n.get("chapter_idx", -1)) == chapter_idx
+                and int(n.get("page", -1)) == current_page
+            ]
+            if _page_notes:
+                for _pn in _page_notes:
+                    _pn_passage = _pn.get("passage", "")
+                    _pn_note = _pn.get("note", "")
+                    _pn_ts = _pn.get("ts", "")
+                    _note_md = f"**{_pn_ts}**　"
+                    if _pn_passage:
+                        _note_md += f"「{_pn_passage}」  \n"
+                    if _pn_note:
+                        _note_md += _pn_note
+                    st.info(_note_md)
+    
+            _nf_ver = st.session_state.get("_note_form_ver", 0)
+            with st.expander("✏ 添加笔记"):
+                _passage_in = st.text_area(
+                    "摘录片段（可选）",
+                    placeholder="粘贴你想记录的原文片段……",
+                    key=f"note_passage_{chapter_idx}_{current_page}_{_nf_ver}",
+                    height=80,
                 )
-                _flash = f'<div class="rb-fw-flash" style="--bd:{_b["bd"]}"></div>'
-                _bursts_html += f'<div class="rb-firework" style="left:{_b["left"]};top:{_b["top"]}">{_flash}{_particles}</div>'
-            _celebrate_html = _bursts_html + '<div class="rb-banner">★ 本章读完 ★</div>'
-
-        # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
-        reading_html = f'''
-        <div class="reading-area">
-            <div class="book-spread" data-page="{current_page}" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
-                <div class="book-page book-page-left">
-                    {left_html}
-                    <div class="page-num">{left_num}</div>
-                </div>
-                <div class="book-page book-page-right">
-                    {right_html}
-                    <div class="page-num">{right_num}</div>
-                </div>
-            </div>
-            <div class="page-indicator">{page_range}</div>
-            <div class="nav-row">
-                <button type="button" class="{prev_cls}">← 上一页</button>
-                <button type="button" class="{next_cls}">下一页 →</button>
-            </div>
-            {_celebrate_html}
-        </div>
-        '''
-        st.markdown(reading_html, unsafe_allow_html=True)
-
-        # 持久化阅读进度
-        _save_progress(book_key, chapter_idx, current_page)
-
-        # --- 笔记：当前页提示 + 添加入口 ---
-        _page_notes = [
-            n for n in st.session_state.get("notes", [])
-            if int(n.get("chapter_idx", -1)) == chapter_idx
-            and int(n.get("page", -1)) == current_page
-        ]
-        if _page_notes:
-            for _pn in _page_notes:
-                _pn_passage = _pn.get("passage", "")
-                _pn_note = _pn.get("note", "")
-                _pn_ts = _pn.get("ts", "")
-                _note_md = f"**{_pn_ts}**　"
-                if _pn_passage:
-                    _note_md += f"「{_pn_passage}」  \n"
-                if _pn_note:
-                    _note_md += _pn_note
-                st.info(_note_md)
-
-        _nf_ver = st.session_state.get("_note_form_ver", 0)
-        with st.expander("✏ 添加笔记"):
-            _passage_in = st.text_area(
-                "摘录片段（可选）",
-                placeholder="粘贴你想记录的原文片段……",
-                key=f"note_passage_{chapter_idx}_{current_page}_{_nf_ver}",
-                height=80,
-            )
-            _note_in = st.text_area(
-                "你的想法",
-                placeholder="写下你的感想、疑问或联想……",
-                key=f"note_text_{chapter_idx}_{current_page}_{_nf_ver}",
-                height=80,
-            )
-            if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}_{_nf_ver}"):
-                if _note_in.strip() or _passage_in.strip():
-                    from datetime import timezone, timedelta
-                    import uuid as _uuid
-                    _new_note = {
-                        "id": str(_uuid.uuid4())[:8],
-                        "chapter_idx": int(chapter_idx),
-                        "page": int(current_page),
-                        "passage": _passage_in.strip(),
-                        "note": _note_in.strip(),
-                        "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
-                    }
-                    _cur_notes = list(st.session_state.get("notes", []))
-                    _cur_notes.append(_new_note)
-                    st.session_state.notes = _cur_notes
-                    _save_book_notes(book_key, _cur_notes)
-                    st.session_state._note_form_ver = _nf_ver + 1
-                    st.toast("[+] 笔记已保存")
-                    st.rerun()
-                else:
-                    st.warning("请至少填写摘录或想法其中一项。")
-
-        # 隐藏的 Streamlit 按钮：真正处理翻页逻辑（HTML 按钮通过 JS 点击它们）
-        hcol1, hcol2 = st.columns(2)
-        with hcol1:
-            if st.button("prev", key="prev_page"):
-                if current_page > 0:
-                    st.session_state[page_key] = max(0, current_page - 2)
-                    st.rerun()
-        with hcol2:
-            if st.button("next", key="next_page"):
-                if current_page < total_pages - 1:
-                    st.session_state[page_key] = min(total_pages - 1, current_page + 2)
-                    st.rerun()
-
-        # 键盘 ← / → 翻页（点击 HTML 导航链接来触发翻页）
-        components.html(
-            """
-            <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-            <style>
-              @font-face {
-                font-family: 'Zpix';
-                src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font/dist/zpix.ttf') format('truetype');
-                font-display: swap;
-              }
-              body { margin: 0; background: var(--mc-paper); }
-              .rb-kbd-wrap {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 4px 0;
-              }
-              .rb-kbd-hint {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 4px 12px;
-                border-radius: 0;
-                background: var(--mc-cream);
-                border: 2px solid var(--mc-ink);
-                color: var(--mc-ink);
-                font-size: 11px;
-                font-family: 'Press Start 2P', 'Zpix', monospace;
-                letter-spacing: 1px;
-                user-select: none;
-                box-shadow: 3px 3px 0 var(--mc-mustard);
-              }
-              .rb-kbd-hint kbd {
-                display: inline-block;
-                min-width: 18px;
-                padding: 1px 6px;
-                border: 1.5px solid var(--mc-ink);
-                border-radius: 0;
-                background: #e8dcbc;
-                color: var(--mc-ink);
-                font-size: 11px;
-                font-family: 'Press Start 2P', monospace;
-                line-height: 1.4;
-                text-align: center;
-                box-shadow: 1px 1px 0 var(--mc-ink);
-              }
-              .rb-kbd-hint.rb-err {
-                background: var(--mc-cream);
-                border-color: var(--mc-terra);
-                color: var(--mc-terra);
-              }
-            </style>
-            <div class="rb-kbd-wrap">
-              <div id="rb-kbd-status" class="rb-kbd-hint">加载中…</div>
-            </div>
-            <script>
-            (function() {
-                const s = document.getElementById('rb-kbd-status');
-                function setReady() {
-                    if (s) {
-                        s.classList.remove('rb-err');
-                        s.innerHTML = '<kbd>←</kbd> 键盘翻页已启动 <kbd>→</kbd>';
-                    }
-                }
-                function setErr(msg) {
-                    if (s) { s.classList.add('rb-err'); s.innerText = '⚠ 键盘翻页不可用: ' + msg; }
-                }
-                function setMsg(txt, c) {
-                    if (c === '#4caf50') { setReady(); return; }
-                    if (c === '#f44336') { setErr(txt); return; }
-                    if (s) s.innerText = txt;
-                }
-                try {
-                    const p = window.parent;
-                    // 移除之前 iframe 留下的 handler（iframe 被重新挂载时旧闭包会失效）
-                    if (p._rb_kbd_handler) {
-                        try { p.document.removeEventListener('keydown', p._rb_kbd_handler, true); } catch (_) {}
-                        try { p.removeEventListener('keydown', p._rb_kbd_handler, true); } catch (_) {}
-                    }
-                    if (p._rb_click_handler) {
-                        try { p.document.removeEventListener('click', p._rb_click_handler, true); } catch (_) {}
-                    }
-                    function isTextEditing(el) {
-                        if (!el) return false;
-                        if (el.isContentEditable) return true;
-                        const tag = el.tagName;
-                        if (tag === 'TEXTAREA') return true;
-                        if (tag === 'INPUT') {
-                            if (el.readOnly || el.disabled) return false;
-                            // 忽略 selectbox/combobox 内的搜索输入框
-                            if (el.closest && (el.closest('[role="combobox"]') || el.closest('[data-baseweb="select"]'))) return false;
-                            const blocked = ['button','submit','reset','checkbox','radio','file','range','color'];
-                            if (blocked.indexOf(el.type) !== -1) return false;
-                            return true;
+                _note_in = st.text_area(
+                    "你的想法",
+                    placeholder="写下你的感想、疑问或联想……",
+                    key=f"note_text_{chapter_idx}_{current_page}_{_nf_ver}",
+                    height=80,
+                )
+                if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}_{_nf_ver}"):
+                    if _note_in.strip() or _passage_in.strip():
+                        from datetime import timezone, timedelta
+                        import uuid as _uuid
+                        _new_note = {
+                            "id": str(_uuid.uuid4())[:8],
+                            "chapter_idx": int(chapter_idx),
+                            "page": int(current_page),
+                            "passage": _passage_in.strip(),
+                            "note": _note_in.strip(),
+                            "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
                         }
-                        return false;
-                    }
-                    function clickHiddenBtn(action) {
-                        const sel = action === 'prev'
-                            ? '.st-key-prev_page button'
-                            : '.st-key-next_page button';
-                        const btn = p.document.querySelector(sel);
-                        if (btn && !btn.disabled) btn.click();
-                    }
-                    function flipAndNavigate(action) {
-                        const spread = p.document.querySelector('.book-spread');
-                        if (spread) {
-                            // Inline style: hides old content immediately, cleared when
-                            // Streamlit creates a fresh .book-spread element on rerender
-                            spread.style.opacity = '0';
-                            spread.style.transform = 'perspective(900px) rotateY(-5deg) scaleX(0.98)';
-                        }
-                        clickHiddenBtn(action);
-                    }
-                    function handler(e) {
-                        if (e.ctrlKey || e.metaKey || e.altKey) return;
-                        if (isTextEditing(e.target)) return;
-                        let action = null;
-                        if (e.key === 'ArrowLeft') action = 'prev';
-                        else if (e.key === 'ArrowRight') action = 'next';
-                        if (!action) return;
-                        const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
-                        if (!visEl || visEl.classList.contains('nav-disabled')) return;
-                        e.preventDefault();
-                        try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
-                        flipAndNavigate(action);
-                    }
-                    // 绑定并把 handler 引用存到 parent，下次 iframe 挂载时可以清掉
-                    p._rb_kbd_handler = handler;
-                    p.document.addEventListener('keydown', handler, true);
-                    p.addEventListener('keydown', handler, true);
-                    // 点击委托：HTML 导航按钮 → flip-out → 隐藏 st.button
-                    const clickHandler = function(e) {
-                        const btn = e.target.closest && e.target.closest('.nav-btn');
-                        if (!btn) return;
-                        e.preventDefault();
-                        if (btn.classList.contains('nav-disabled')) return;
-                        const action = btn.classList.contains('nav-prev') ? 'prev' : 'next';
-                        flipAndNavigate(action);
-                    };
-                    p._rb_click_handler = clickHandler;
-                    p.document.addEventListener('click', clickHandler, true);
-
-                    // ── MutationObserver: 监听 data-page 变化，重启 flip-in 动画 ──
-                    let _animLastPage = null;
-                    function triggerFlipIn() {
-                        const spread = p.document.querySelector('.book-spread');
-                        if (!spread) return;
-                        const pg = spread.getAttribute('data-page');
-                        if (pg === _animLastPage) return;
-                        _animLastPage = pg;
-                        spread.classList.remove('rb-anim-in');
-                        void spread.offsetWidth; // force reflow to reset animation
-                        spread.classList.add('rb-anim-in');
-                    }
-                    if (p._rb_mo) { try { p._rb_mo.disconnect(); } catch(_) {} }
-                    const _moRoot = p.document.querySelector('.reading-area') || p.document.body;
-                    const _mo = new MutationObserver(triggerFlipIn);
-                    _mo.observe(_moRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-page'] });
-                    p._rb_mo = _mo;
-                    triggerFlipIn(); // 首次挂载时立刻播放
-
-                    // ── 移动端 swipe 翻页 ──
-                    if (p._rb_touch_start) {
-                        try { p.document.removeEventListener('touchstart', p._rb_touch_start); } catch(_) {}
-                        try { p.document.removeEventListener('touchend',   p._rb_touch_end);   } catch(_) {}
-                    }
-                    let _tx0 = null, _ty0 = null;
-                    p._rb_touch_start = function(e) {
-                        _tx0 = e.touches[0].clientX;
-                        _ty0 = e.touches[0].clientY;
-                    };
-                    p._rb_touch_end = function(e) {
-                        if (_tx0 === null) return;
-                        const dx = e.changedTouches[0].clientX - _tx0;
-                        const dy = e.changedTouches[0].clientY - _ty0;
-                        _tx0 = null; _ty0 = null;
-                        // 水平滑动幅度 > 50px，且水平分量 > 垂直（防止上下滚动误触）
-                        if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
-                        const action = dx < 0 ? 'next' : 'prev';
-                        const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
-                        if (!visEl || visEl.classList.contains('nav-disabled')) return;
-                        flipAndNavigate(action);
-                    };
-                    p.document.addEventListener('touchstart', p._rb_touch_start, { passive: true });
-                    p.document.addEventListener('touchend',   p._rb_touch_end,   { passive: true });
-
-                    setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
-                    // Shake hint pill once per session
-                    if (!sessionStorage.getItem('rb_hint_shaken')) {
-                        setTimeout(function() {
-                            s.classList.add('rb-shake');
-                            s.addEventListener('animationend', function() {
-                                s.classList.remove('rb-shake');
-                            }, { once: true });
-                            sessionStorage.setItem('rb_hint_shaken', '1');
-                        }, 600);
-                    }
-                } catch (err) {
-                    setMsg('⌨ 键盘翻页不可用: ' + (err && err.message || err), '#f44336');
-                }
-            })();
-            </script>
-            """,
-            height=36,
-        )
-
-        # 双击词语查词典：悬浮小窗（萌典 API 优先 + 百度回退）
-        components.html("""
-        <script>
-        (function() {
-            const p = window.parent;
-            const pd = p.document;
-            const STYLE_CONTENT = `
-                #rb-dict-overlay {
-                    position: fixed;
-                    display: none;
-                    z-index: 99999;
+                        _cur_notes = list(st.session_state.get("notes", []))
+                        _cur_notes.append(_new_note)
+                        st.session_state.notes = _cur_notes
+                        _save_book_notes(book_key, _cur_notes)
+                        st.session_state._note_form_ver = _nf_ver + 1
+                        st.toast("[+] 笔记已保存")
+                        st.rerun()
+                    else:
+                        st.warning("请至少填写摘录或想法其中一项。")
+    
+            # 隐藏的 Streamlit 按钮：真正处理翻页逻辑（HTML 按钮通过 JS 点击它们）
+            hcol1, hcol2 = st.columns(2)
+            with hcol1:
+                if st.button("prev", key="prev_page"):
+                    if current_page > 0:
+                        st.session_state[page_key] = max(0, current_page - 2)
+                        st.rerun()
+            with hcol2:
+                if st.button("next", key="next_page"):
+                    if current_page < total_pages - 1:
+                        st.session_state[page_key] = min(total_pages - 1, current_page + 2)
+                        st.rerun()
+    
+            # 键盘 ← / → 翻页（点击 HTML 导航链接来触发翻页）
+            components.html(
+                """
+                <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+                <style>
+                  @font-face {
+                    font-family: 'Zpix';
+                    src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font/dist/zpix.ttf') format('truetype');
+                    font-display: swap;
+                  }
+                  body { margin: 0; background: var(--mc-paper); }
+                  .rb-kbd-wrap {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 4px 0;
+                  }
+                  .rb-kbd-hint {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 4px 12px;
+                    border-radius: 0;
                     background: var(--mc-cream);
                     border: 2px solid var(--mc-ink);
-                    box-shadow: 4px 4px 0 var(--mc-terra);
-                    padding: 14px 16px 14px 14px;
-                    font-family: 'Zpix', 'Microsoft YaHei', monospace;
-                    font-size: 13px;
                     color: var(--mc-ink);
-                    width: 280px;
-                    max-height: 360px;
-                    overflow-y: auto;
-                    line-height: 1.65;
-                }
-                #rb-dict-overlay .rb-dict-title {
-                    font-family: 'Press Start 2P', monospace;
-                    font-size: 12px;
-                    color: var(--mc-terra);
-                    margin: 0 0 6px 0;
-                    padding-right: 18px;
-                    letter-spacing: 1px;
-                }
-                #rb-dict-overlay .rb-dict-close {
-                    position: absolute;
-                    top: 6px; right: 8px;
-                    background: none; border: none;
-                    color: var(--mc-ink);
-                    font-size: 18px;
-                    cursor: pointer;
-                    font-family: 'Press Start 2P', monospace;
-                    line-height: 1;
-                    padding: 2px 6px;
-                }
-                #rb-dict-overlay .rb-dict-close:hover { color: var(--mc-terra); }
-                #rb-dict-overlay .rb-dict-pinyin {
-                    color: var(--mc-moss);
                     font-size: 11px;
-                    margin: 4px 0;
-                    font-style: italic;
-                }
-                #rb-dict-overlay .rb-dict-def { margin: 5px 0; }
-                #rb-dict-overlay .rb-dict-link {
-                    display: inline-block;
-                    margin-top: 10px;
-                    color: var(--mc-terra);
-                    text-decoration: none;
-                    font-size: 11px;
-                    border-bottom: 1px dashed var(--mc-terra);
-                    padding-bottom: 1px;
-                }
-                #rb-dict-overlay .rb-dict-link:hover { background: #fff2d8; }
-                #rb-dict-overlay .rb-dict-loading { color: #8b5e3c; font-style: italic; }
-            `;
-
-            function escapeHtml(s) {
-                return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            }
-            function ensureStyles() {
-                if (pd.getElementById('rb-dict-overlay-style')) return;
-                const s = pd.createElement('style');
-                s.id = 'rb-dict-overlay-style';
-                s.textContent = STYLE_CONTENT;
-                pd.head.appendChild(s);
-            }
-            function ensureOverlay() {
-                let ov = pd.getElementById('rb-dict-overlay');
-                if (ov) return ov;
-                ensureStyles();
-                ov = pd.createElement('div');
-                ov.id = 'rb-dict-overlay';
-                pd.body.appendChild(ov);
-                return ov;
-            }
-            function closeOverlay() {
-                const ov = pd.getElementById('rb-dict-overlay');
-                if (ov) ov.style.display = 'none';
-            }
-            function positionOverlay(ov, x, y) {
-                const vw = p.innerWidth;
-                const vh = p.innerHeight;
-                const ow = 300;
-                const oh = 240;
-                let left = x + 12;
-                let top = y + 16;
-                if (left + ow > vw - 10) left = vw - ow - 10;
-                if (top + oh > vh - 10) top = y - oh - 10;
-                if (top < 10) top = 10;
-                ov.style.left = Math.max(10, left) + 'px';
-                ov.style.top = top + 'px';
-            }
-            async function showDefinition(word, x, y) {
-                const ov = ensureOverlay();
-                positionOverlay(ov, x, y);
-                const baiduUrl = 'https://dict.baidu.com/s?wd=' + encodeURIComponent(word);
-                ov.innerHTML = `
-                    <button class="rb-dict-close" aria-label="关闭">×</button>
-                    <div class="rb-dict-title">「${escapeHtml(word)}」</div>
-                    <div class="rb-dict-loading">查询中…</div>
-                `;
-                ov.style.display = 'block';
-                ov.querySelector('.rb-dict-close').onclick = closeOverlay;
-
-                const hasCJK = /[\\u4e00-\\u9fff]/.test(word);
-                if (!hasCJK) {
-                    renderNotFound(ov, word, baiduUrl, '外部词典可能有释义');
-                    return;
-                }
-                try {
-                    const res = await fetch('https://www.moedict.tw/uni/' + encodeURIComponent(word) + '.json');
-                    if (!res.ok) { renderNotFound(ov, word, baiduUrl); return; }
-                    const data = await res.json();
-                    renderDefinition(ov, word, data, baiduUrl);
-                } catch (err) {
-                    renderNotFound(ov, word, baiduUrl);
-                }
-            }
-            function renderDefinition(ov, word, data, baiduUrl) {
-                if (!data || !data.heteronyms || !data.heteronyms.length) {
-                    renderNotFound(ov, word, baiduUrl);
-                    return;
-                }
-                let html = `<button class="rb-dict-close" aria-label="关闭">×</button>
-                            <div class="rb-dict-title">「${escapeHtml(word)}」</div>`;
-                let hasDef = false;
-                data.heteronyms.slice(0, 3).forEach(h => {
-                    if (h.pinyin) html += `<div class="rb-dict-pinyin">${escapeHtml(h.pinyin)}</div>`;
-                    if (h.definitions) {
-                        h.definitions.slice(0, 4).forEach((d, i) => {
-                            const defText = (d.def || '').trim();
-                            if (!defText) return;
-                            html += `<div class="rb-dict-def">${i + 1}. ${escapeHtml(defText)}</div>`;
-                            hasDef = true;
-                        });
-                    }
-                });
-                if (!hasDef) { renderNotFound(ov, word, baiduUrl); return; }
-                html += `<a class="rb-dict-link" href="${baiduUrl}" target="_blank" rel="noopener">查百度词典 →</a>`;
-                ov.innerHTML = html;
-                ov.querySelector('.rb-dict-close').onclick = closeOverlay;
-            }
-            function renderNotFound(ov, word, baiduUrl, hint) {
-                ov.innerHTML = `
-                    <button class="rb-dict-close" aria-label="关闭">×</button>
-                    <div class="rb-dict-title">「${escapeHtml(word)}」</div>
-                    <div class="rb-dict-def">${hint || '萌典未收录此词。'}</div>
-                    <a class="rb-dict-link" href="${baiduUrl}" target="_blank" rel="noopener">查百度词典 →</a>
-                `;
-                ov.querySelector('.rb-dict-close').onclick = closeOverlay;
-            }
-            function attach() {
-                if (pd._rb_dict_bound) return;
-                pd._rb_dict_bound = true;
-                pd.addEventListener('dblclick', function(e) {
-                    const inRead = e.target && e.target.closest && e.target.closest('.book-page');
-                    if (!inRead) return;
-                    const selObj = p.getSelection ? p.getSelection() : null;
-                    const sel = (selObj && selObj.toString() || '').trim();
-                    if (!sel || sel.length > 15) return;
-                    showDefinition(sel, e.clientX, e.clientY);
-                });
-                pd.addEventListener('mousedown', function(e) {
-                    const ov = pd.getElementById('rb-dict-overlay');
-                    if (!ov || ov.style.display === 'none') return;
-                    if (!ov.contains(e.target)) closeOverlay();
-                });
-                pd.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') closeOverlay();
-                });
-            }
-            function boot() {
-                if (!pd || !pd.body) { setTimeout(boot, 200); return; }
-                ensureOverlay();
-                attach();
-            }
-            boot();
-        })();
-        </script>
-        """, height=0)
-
-        # 选中文本 → 浮动"📷 分享"按钮 → 生成像素风引用卡片 PNG
-        components.html("""
-        <script>
-        (function() {
-            const p = window.parent;
-            const pd = p.document;
-            const STYLE = `
-                #rb-share-btn {
-                    position: fixed;
-                    display: none;
-                    z-index: 99998;
-                    background: var(--mc-cream);
-                    border: 2px solid var(--mc-ink);
-                    box-shadow: 3px 3px 0 var(--mc-mustard);
-                    padding: 6px 12px;
                     font-family: 'Press Start 2P', 'Zpix', monospace;
-                    font-size: 11px;
-                    color: var(--mc-ink);
-                    cursor: pointer;
                     letter-spacing: 1px;
                     user-select: none;
+                    box-shadow: 3px 3px 0 var(--mc-mustard);
+                  }
+                  .rb-kbd-hint kbd {
+                    display: inline-block;
+                    min-width: 18px;
+                    padding: 1px 6px;
+                    border: 1.5px solid var(--mc-ink);
                     border-radius: 0;
+                    background: #e8dcbc;
+                    color: var(--mc-ink);
+                    font-size: 11px;
+                    font-family: 'Press Start 2P', monospace;
+                    line-height: 1.4;
+                    text-align: center;
+                    box-shadow: 1px 1px 0 var(--mc-ink);
+                  }
+                  .rb-kbd-hint.rb-err {
+                    background: var(--mc-cream);
+                    border-color: var(--mc-terra);
+                    color: var(--mc-terra);
+                  }
+                </style>
+                <div class="rb-kbd-wrap">
+                  <div id="rb-kbd-status" class="rb-kbd-hint">加载中…</div>
+                </div>
+                <script>
+                (function() {
+                    const s = document.getElementById('rb-kbd-status');
+                    function setReady() {
+                        if (s) {
+                            s.classList.remove('rb-err');
+                            s.innerHTML = '<kbd>←</kbd> 键盘翻页已启动 <kbd>→</kbd>';
+                        }
+                    }
+                    function setErr(msg) {
+                        if (s) { s.classList.add('rb-err'); s.innerText = '⚠ 键盘翻页不可用: ' + msg; }
+                    }
+                    function setMsg(txt, c) {
+                        if (c === '#4caf50') { setReady(); return; }
+                        if (c === '#f44336') { setErr(txt); return; }
+                        if (s) s.innerText = txt;
+                    }
+                    try {
+                        const p = window.parent;
+                        // 移除之前 iframe 留下的 handler（iframe 被重新挂载时旧闭包会失效）
+                        if (p._rb_kbd_handler) {
+                            try { p.document.removeEventListener('keydown', p._rb_kbd_handler, true); } catch (_) {}
+                            try { p.removeEventListener('keydown', p._rb_kbd_handler, true); } catch (_) {}
+                        }
+                        if (p._rb_click_handler) {
+                            try { p.document.removeEventListener('click', p._rb_click_handler, true); } catch (_) {}
+                        }
+                        function isTextEditing(el) {
+                            if (!el) return false;
+                            if (el.isContentEditable) return true;
+                            const tag = el.tagName;
+                            if (tag === 'TEXTAREA') return true;
+                            if (tag === 'INPUT') {
+                                if (el.readOnly || el.disabled) return false;
+                                // 忽略 selectbox/combobox 内的搜索输入框
+                                if (el.closest && (el.closest('[role="combobox"]') || el.closest('[data-baseweb="select"]'))) return false;
+                                const blocked = ['button','submit','reset','checkbox','radio','file','range','color'];
+                                if (blocked.indexOf(el.type) !== -1) return false;
+                                return true;
+                            }
+                            return false;
+                        }
+                        function clickHiddenBtn(action) {
+                            const sel = action === 'prev'
+                                ? '.st-key-prev_page button'
+                                : '.st-key-next_page button';
+                            const btn = p.document.querySelector(sel);
+                            if (btn && !btn.disabled) btn.click();
+                        }
+                        function flipAndNavigate(action) {
+                            const spread = p.document.querySelector('.book-spread');
+                            if (spread) {
+                                // Inline style: hides old content immediately, cleared when
+                                // Streamlit creates a fresh .book-spread element on rerender
+                                spread.style.opacity = '0';
+                                spread.style.transform = 'perspective(900px) rotateY(-5deg) scaleX(0.98)';
+                            }
+                            clickHiddenBtn(action);
+                        }
+                        function handler(e) {
+                            if (e.ctrlKey || e.metaKey || e.altKey) return;
+                            if (isTextEditing(e.target)) return;
+                            let action = null;
+                            if (e.key === 'ArrowLeft') action = 'prev';
+                            else if (e.key === 'ArrowRight') action = 'next';
+                            if (!action) return;
+                            const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
+                            if (!visEl || visEl.classList.contains('nav-disabled')) return;
+                            e.preventDefault();
+                            try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
+                            flipAndNavigate(action);
+                        }
+                        // 绑定并把 handler 引用存到 parent，下次 iframe 挂载时可以清掉
+                        p._rb_kbd_handler = handler;
+                        p.document.addEventListener('keydown', handler, true);
+                        p.addEventListener('keydown', handler, true);
+                        // 点击委托：HTML 导航按钮 → flip-out → 隐藏 st.button
+                        const clickHandler = function(e) {
+                            const btn = e.target.closest && e.target.closest('.nav-btn');
+                            if (!btn) return;
+                            e.preventDefault();
+                            if (btn.classList.contains('nav-disabled')) return;
+                            const action = btn.classList.contains('nav-prev') ? 'prev' : 'next';
+                            flipAndNavigate(action);
+                        };
+                        p._rb_click_handler = clickHandler;
+                        p.document.addEventListener('click', clickHandler, true);
+    
+                        // ── MutationObserver: 监听 data-page 变化，重启 flip-in 动画 ──
+                        let _animLastPage = null;
+                        function triggerFlipIn() {
+                            const spread = p.document.querySelector('.book-spread');
+                            if (!spread) return;
+                            const pg = spread.getAttribute('data-page');
+                            if (pg === _animLastPage) return;
+                            _animLastPage = pg;
+                            spread.classList.remove('rb-anim-in');
+                            void spread.offsetWidth; // force reflow to reset animation
+                            spread.classList.add('rb-anim-in');
+                        }
+                        if (p._rb_mo) { try { p._rb_mo.disconnect(); } catch(_) {} }
+                        const _moRoot = p.document.querySelector('.reading-area') || p.document.body;
+                        const _mo = new MutationObserver(triggerFlipIn);
+                        _mo.observe(_moRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-page'] });
+                        p._rb_mo = _mo;
+                        triggerFlipIn(); // 首次挂载时立刻播放
+    
+                        // ── 移动端 swipe 翻页 ──
+                        if (p._rb_touch_start) {
+                            try { p.document.removeEventListener('touchstart', p._rb_touch_start); } catch(_) {}
+                            try { p.document.removeEventListener('touchend',   p._rb_touch_end);   } catch(_) {}
+                        }
+                        let _tx0 = null, _ty0 = null;
+                        p._rb_touch_start = function(e) {
+                            _tx0 = e.touches[0].clientX;
+                            _ty0 = e.touches[0].clientY;
+                        };
+                        p._rb_touch_end = function(e) {
+                            if (_tx0 === null) return;
+                            const dx = e.changedTouches[0].clientX - _tx0;
+                            const dy = e.changedTouches[0].clientY - _ty0;
+                            _tx0 = null; _ty0 = null;
+                            // 水平滑动幅度 > 50px，且水平分量 > 垂直（防止上下滚动误触）
+                            if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+                            const action = dx < 0 ? 'next' : 'prev';
+                            const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
+                            if (!visEl || visEl.classList.contains('nav-disabled')) return;
+                            flipAndNavigate(action);
+                        };
+                        p.document.addEventListener('touchstart', p._rb_touch_start, { passive: true });
+                        p.document.addEventListener('touchend',   p._rb_touch_end,   { passive: true });
+    
+                        setMsg('⌨ 键盘翻页已启用（← / →）', '#4caf50');
+                        // Shake hint pill once per session
+                        if (!sessionStorage.getItem('rb_hint_shaken')) {
+                            setTimeout(function() {
+                                s.classList.add('rb-shake');
+                                s.addEventListener('animationend', function() {
+                                    s.classList.remove('rb-shake');
+                                }, { once: true });
+                                sessionStorage.setItem('rb_hint_shaken', '1');
+                            }, 600);
+                        }
+                    } catch (err) {
+                        setMsg('⌨ 键盘翻页不可用: ' + (err && err.message || err), '#f44336');
+                    }
+                })();
+                </script>
+                """,
+                height=36,
+            )
+    
+            # 双击词语查词典：悬浮小窗（萌典 API 优先 + 百度回退）
+            components.html("""
+            <script>
+            (function() {
+                const p = window.parent;
+                const pd = p.document;
+                const STYLE_CONTENT = `
+                    #rb-dict-overlay {
+                        position: fixed;
+                        display: none;
+                        z-index: 99999;
+                        background: var(--mc-cream);
+                        border: 2px solid var(--mc-ink);
+                        box-shadow: 4px 4px 0 var(--mc-terra);
+                        padding: 14px 16px 14px 14px;
+                        font-family: 'Zpix', 'Microsoft YaHei', monospace;
+                        font-size: 13px;
+                        color: var(--mc-ink);
+                        width: 280px;
+                        max-height: 360px;
+                        overflow-y: auto;
+                        line-height: 1.65;
+                    }
+                    #rb-dict-overlay .rb-dict-title {
+                        font-family: 'Press Start 2P', monospace;
+                        font-size: 12px;
+                        color: var(--mc-terra);
+                        margin: 0 0 6px 0;
+                        padding-right: 18px;
+                        letter-spacing: 1px;
+                    }
+                    #rb-dict-overlay .rb-dict-close {
+                        position: absolute;
+                        top: 6px; right: 8px;
+                        background: none; border: none;
+                        color: var(--mc-ink);
+                        font-size: 18px;
+                        cursor: pointer;
+                        font-family: 'Press Start 2P', monospace;
+                        line-height: 1;
+                        padding: 2px 6px;
+                    }
+                    #rb-dict-overlay .rb-dict-close:hover { color: var(--mc-terra); }
+                    #rb-dict-overlay .rb-dict-pinyin {
+                        color: var(--mc-moss);
+                        font-size: 11px;
+                        margin: 4px 0;
+                        font-style: italic;
+                    }
+                    #rb-dict-overlay .rb-dict-def { margin: 5px 0; }
+                    #rb-dict-overlay .rb-dict-link {
+                        display: inline-block;
+                        margin-top: 10px;
+                        color: var(--mc-terra);
+                        text-decoration: none;
+                        font-size: 11px;
+                        border-bottom: 1px dashed var(--mc-terra);
+                        padding-bottom: 1px;
+                    }
+                    #rb-dict-overlay .rb-dict-link:hover { background: #fff2d8; }
+                    #rb-dict-overlay .rb-dict-loading { color: #8b5e3c; font-style: italic; }
+                `;
+    
+                function escapeHtml(s) {
+                    return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
                 }
-                #rb-share-btn:hover {
-                    background: var(--mc-terra);
-                    color: var(--mc-cream);
-                    transform: translate(-1px, -1px);
-                    box-shadow: 4px 4px 0 var(--mc-ink);
-                }
-                #rb-share-btn.is-loading { pointer-events: none; opacity: 0.6; }
-            `;
-
-            function escapeHtml(s) {
-                return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            }
-            function ensureStyles() {
-                if (pd.getElementById('rb-share-style')) return;
-                const s = pd.createElement('style');
-                s.id = 'rb-share-style';
-                s.textContent = STYLE;
-                pd.head.appendChild(s);
-            }
-            function ensureButton() {
-                let btn = pd.getElementById('rb-share-btn');
-                if (btn) return btn;
-                ensureStyles();
-                btn = pd.createElement('button');
-                btn.id = 'rb-share-btn';
-                btn.textContent = '📷 分享';
-                btn.type = 'button';
-                pd.body.appendChild(btn);
-                btn.addEventListener('click', onShareClick);
-                btn.addEventListener('mousedown', e => e.stopPropagation());
-                return btn;
-            }
-
-            let pendingQuote = '';
-
-            function getBookTitle() {
-                const el = pd.querySelector('.rd-book-key');
-                if (!el) return '未命名';
-                const key = el.dataset.key || '';
-                const idx = key.lastIndexOf('.');
-                return idx > 0 ? key.substring(0, idx) : key;
-            }
-
-            function loadHtml2Canvas() {
-                return new Promise((resolve, reject) => {
-                    if (p.html2canvas) return resolve(p.html2canvas);
-                    const s = pd.createElement('script');
-                    s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-                    s.onload = () => resolve(p.html2canvas);
-                    s.onerror = () => reject(new Error('html2canvas load failed'));
+                function ensureStyles() {
+                    if (pd.getElementById('rb-dict-overlay-style')) return;
+                    const s = pd.createElement('style');
+                    s.id = 'rb-dict-overlay-style';
+                    s.textContent = STYLE_CONTENT;
                     pd.head.appendChild(s);
-                });
-            }
-
-            function buildCardElement(quote, bookTitle) {
-                const wrap = pd.createElement('div');
-                wrap.style.cssText = `
-                    position: absolute; left: -10000px; top: 0;
-                    padding: 8px 32px 32px 8px; background: transparent;
-                `;
-                const cornerStyle = "position:absolute;font-family:'Press Start 2P','Zpix',monospace;color:var(--mc-terra);font-size:14px";
-                const noStr = String(Math.floor(Math.random() * 999)).padStart(3, '0');
-                wrap.innerHTML = `
-                    <div style="position:relative;width:680px;padding:56px 56px 40px 56px;background:var(--mc-cream);border:5px solid var(--mc-ink);box-shadow:14px 14px 0 var(--mc-terra);font-family:'Zpix','Noto Serif SC','PingFang SC','Microsoft YaHei',monospace;color:var(--mc-ink);box-sizing:border-box">
-                        <div style="${cornerStyle};top:10px;left:14px">[+]</div>
-                        <div style="${cornerStyle};top:10px;right:14px">[+]</div>
-                        <div style="${cornerStyle};bottom:10px;left:14px">[+]</div>
-                        <div style="${cornerStyle};bottom:10px;right:14px">[+]</div>
-                        <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#8b5e3c;letter-spacing:2px;margin-bottom:24px">VOL.01 · QUOTE · NO.${noStr}</div>
-                        <div style="font-family:Georgia,serif;font-size:64px;color:var(--mc-mustard);line-height:0.5;margin:0 0 -6px -6px">&ldquo;</div>
-                        <div style="font-size:19px;line-height:1.9;letter-spacing:0.5px;padding:0 8px 0 20px;border-left:4px solid var(--mc-terra);white-space:pre-wrap;color:var(--mc-ink);min-height:60px">${escapeHtml(quote)}</div>
-                        <div style="font-family:Georgia,serif;font-size:64px;color:var(--mc-mustard);line-height:0.5;text-align:right;margin:-2px -6px 0 0">&rdquo;</div>
-                        <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #8b5e3c;display:flex;justify-content:space-between;align-items:baseline;gap:16px">
-                            <div style="font-size:14px;color:#8b5e3c;letter-spacing:0.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">——《${escapeHtml(bookTitle)}》</div>
-                            <div style="font-size:10px;color:var(--mc-moss);font-family:'Press Start 2P',monospace;letter-spacing:2px;white-space:nowrap">★ VIA 嘟哒 DUDA</div>
-                        </div>
-                    </div>
-                `;
-                return wrap;
-            }
-
-            async function onShareClick(e) {
-                e.stopPropagation();
-                const btn = pd.getElementById('rb-share-btn');
-                if (!pendingQuote || !btn) return;
-                btn.classList.add('is-loading');
-                btn.textContent = '⏳ 生成中…';
-                const quote = pendingQuote;
-                try {
-                    const html2canvas = await loadHtml2Canvas();
-                    const wrap = buildCardElement(quote, getBookTitle());
-                    pd.body.appendChild(wrap);
-                    await new Promise(r => setTimeout(r, 120));
-                    const canvas = await html2canvas(wrap, {
-                        scale: 2,
-                        backgroundColor: null,
-                        logging: false,
-                        useCORS: true,
-                    });
-                    wrap.remove();
-                    canvas.toBlob(blob => {
-                        if (!blob) return;
-                        const url = URL.createObjectURL(blob);
-                        const a = pd.createElement('a');
-                        a.href = url;
-                        a.download = `嘟哒_引用_${Date.now()}.png`;
-                        pd.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                        setTimeout(() => URL.revokeObjectURL(url), 1000);
-                    }, 'image/png');
-                } catch (err) {
-                    console.error('Card generation failed:', err);
-                } finally {
-                    btn.classList.remove('is-loading');
-                    btn.textContent = '📷 分享';
-                    btn.style.display = 'none';
-                    pendingQuote = '';
                 }
-            }
-
-            function attach() {
-                if (pd._rb_share_bound) return;
-                pd._rb_share_bound = true;
-
-                pd.addEventListener('mouseup', function(e) {
-                    if (e.target && e.target.id === 'rb-share-btn') return;
-                    const btn = pd.getElementById('rb-share-btn');
-                    const inRead = e.target && e.target.closest && e.target.closest('.book-page');
-                    const selObj = p.getSelection ? p.getSelection() : null;
-                    const sel = (selObj && selObj.toString() || '').trim();
-                    if (!inRead || !sel || sel.length < 8 || sel.length > 500) {
-                        if (btn) btn.style.display = 'none';
-                        pendingQuote = '';
+                function ensureOverlay() {
+                    let ov = pd.getElementById('rb-dict-overlay');
+                    if (ov) return ov;
+                    ensureStyles();
+                    ov = pd.createElement('div');
+                    ov.id = 'rb-dict-overlay';
+                    pd.body.appendChild(ov);
+                    return ov;
+                }
+                function closeOverlay() {
+                    const ov = pd.getElementById('rb-dict-overlay');
+                    if (ov) ov.style.display = 'none';
+                }
+                function positionOverlay(ov, x, y) {
+                    const vw = p.innerWidth;
+                    const vh = p.innerHeight;
+                    const ow = 300;
+                    const oh = 240;
+                    let left = x + 12;
+                    let top = y + 16;
+                    if (left + ow > vw - 10) left = vw - ow - 10;
+                    if (top + oh > vh - 10) top = y - oh - 10;
+                    if (top < 10) top = 10;
+                    ov.style.left = Math.max(10, left) + 'px';
+                    ov.style.top = top + 'px';
+                }
+                async function showDefinition(word, x, y) {
+                    const ov = ensureOverlay();
+                    positionOverlay(ov, x, y);
+                    const baiduUrl = 'https://dict.baidu.com/s?wd=' + encodeURIComponent(word);
+                    ov.innerHTML = `
+                        <button class="rb-dict-close" aria-label="关闭">×</button>
+                        <div class="rb-dict-title">「${escapeHtml(word)}」</div>
+                        <div class="rb-dict-loading">查询中…</div>
+                    `;
+                    ov.style.display = 'block';
+                    ov.querySelector('.rb-dict-close').onclick = closeOverlay;
+    
+                    const hasCJK = /[\\u4e00-\\u9fff]/.test(word);
+                    if (!hasCJK) {
+                        renderNotFound(ov, word, baiduUrl, '外部词典可能有释义');
                         return;
                     }
-                    // 确认选区在 book-page 内
-                    if (selObj.rangeCount > 0) {
-                        const range = selObj.getRangeAt(0);
-                        const node = range.commonAncestorContainer;
-                        const el = node.nodeType === 1 ? node : node.parentElement;
-                        if (!el || !el.closest('.book-page')) {
+                    try {
+                        const res = await fetch('https://www.moedict.tw/uni/' + encodeURIComponent(word) + '.json');
+                        if (!res.ok) { renderNotFound(ov, word, baiduUrl); return; }
+                        const data = await res.json();
+                        renderDefinition(ov, word, data, baiduUrl);
+                    } catch (err) {
+                        renderNotFound(ov, word, baiduUrl);
+                    }
+                }
+                function renderDefinition(ov, word, data, baiduUrl) {
+                    if (!data || !data.heteronyms || !data.heteronyms.length) {
+                        renderNotFound(ov, word, baiduUrl);
+                        return;
+                    }
+                    let html = `<button class="rb-dict-close" aria-label="关闭">×</button>
+                                <div class="rb-dict-title">「${escapeHtml(word)}」</div>`;
+                    let hasDef = false;
+                    data.heteronyms.slice(0, 3).forEach(h => {
+                        if (h.pinyin) html += `<div class="rb-dict-pinyin">${escapeHtml(h.pinyin)}</div>`;
+                        if (h.definitions) {
+                            h.definitions.slice(0, 4).forEach((d, i) => {
+                                const defText = (d.def || '').trim();
+                                if (!defText) return;
+                                html += `<div class="rb-dict-def">${i + 1}. ${escapeHtml(defText)}</div>`;
+                                hasDef = true;
+                            });
+                        }
+                    });
+                    if (!hasDef) { renderNotFound(ov, word, baiduUrl); return; }
+                    html += `<a class="rb-dict-link" href="${baiduUrl}" target="_blank" rel="noopener">查百度词典 →</a>`;
+                    ov.innerHTML = html;
+                    ov.querySelector('.rb-dict-close').onclick = closeOverlay;
+                }
+                function renderNotFound(ov, word, baiduUrl, hint) {
+                    ov.innerHTML = `
+                        <button class="rb-dict-close" aria-label="关闭">×</button>
+                        <div class="rb-dict-title">「${escapeHtml(word)}」</div>
+                        <div class="rb-dict-def">${hint || '萌典未收录此词。'}</div>
+                        <a class="rb-dict-link" href="${baiduUrl}" target="_blank" rel="noopener">查百度词典 →</a>
+                    `;
+                    ov.querySelector('.rb-dict-close').onclick = closeOverlay;
+                }
+                function attach() {
+                    if (pd._rb_dict_bound) return;
+                    pd._rb_dict_bound = true;
+                    pd.addEventListener('dblclick', function(e) {
+                        const inRead = e.target && e.target.closest && e.target.closest('.book-page');
+                        if (!inRead) return;
+                        const selObj = p.getSelection ? p.getSelection() : null;
+                        const sel = (selObj && selObj.toString() || '').trim();
+                        if (!sel || sel.length > 15) return;
+                        showDefinition(sel, e.clientX, e.clientY);
+                    });
+                    pd.addEventListener('mousedown', function(e) {
+                        const ov = pd.getElementById('rb-dict-overlay');
+                        if (!ov || ov.style.display === 'none') return;
+                        if (!ov.contains(e.target)) closeOverlay();
+                    });
+                    pd.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') closeOverlay();
+                    });
+                }
+                function boot() {
+                    if (!pd || !pd.body) { setTimeout(boot, 200); return; }
+                    ensureOverlay();
+                    attach();
+                }
+                boot();
+            })();
+            </script>
+            """, height=0)
+    
+            # 选中文本 → 浮动"📷 分享"按钮 → 生成像素风引用卡片 PNG
+            components.html("""
+            <script>
+            (function() {
+                const p = window.parent;
+                const pd = p.document;
+                const STYLE = `
+                    #rb-share-btn {
+                        position: fixed;
+                        display: none;
+                        z-index: 99998;
+                        background: var(--mc-cream);
+                        border: 2px solid var(--mc-ink);
+                        box-shadow: 3px 3px 0 var(--mc-mustard);
+                        padding: 6px 12px;
+                        font-family: 'Press Start 2P', 'Zpix', monospace;
+                        font-size: 11px;
+                        color: var(--mc-ink);
+                        cursor: pointer;
+                        letter-spacing: 1px;
+                        user-select: none;
+                        border-radius: 0;
+                    }
+                    #rb-share-btn:hover {
+                        background: var(--mc-terra);
+                        color: var(--mc-cream);
+                        transform: translate(-1px, -1px);
+                        box-shadow: 4px 4px 0 var(--mc-ink);
+                    }
+                    #rb-share-btn.is-loading { pointer-events: none; opacity: 0.6; }
+                `;
+    
+                function escapeHtml(s) {
+                    return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+                }
+                function ensureStyles() {
+                    if (pd.getElementById('rb-share-style')) return;
+                    const s = pd.createElement('style');
+                    s.id = 'rb-share-style';
+                    s.textContent = STYLE;
+                    pd.head.appendChild(s);
+                }
+                function ensureButton() {
+                    let btn = pd.getElementById('rb-share-btn');
+                    if (btn) return btn;
+                    ensureStyles();
+                    btn = pd.createElement('button');
+                    btn.id = 'rb-share-btn';
+                    btn.textContent = '📷 分享';
+                    btn.type = 'button';
+                    pd.body.appendChild(btn);
+                    btn.addEventListener('click', onShareClick);
+                    btn.addEventListener('mousedown', e => e.stopPropagation());
+                    return btn;
+                }
+    
+                let pendingQuote = '';
+    
+                function getBookTitle() {
+                    const el = pd.querySelector('.rd-book-key');
+                    if (!el) return '未命名';
+                    const key = el.dataset.key || '';
+                    const idx = key.lastIndexOf('.');
+                    return idx > 0 ? key.substring(0, idx) : key;
+                }
+    
+                function loadHtml2Canvas() {
+                    return new Promise((resolve, reject) => {
+                        if (p.html2canvas) return resolve(p.html2canvas);
+                        const s = pd.createElement('script');
+                        s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                        s.onload = () => resolve(p.html2canvas);
+                        s.onerror = () => reject(new Error('html2canvas load failed'));
+                        pd.head.appendChild(s);
+                    });
+                }
+    
+                function buildCardElement(quote, bookTitle) {
+                    const wrap = pd.createElement('div');
+                    wrap.style.cssText = `
+                        position: absolute; left: -10000px; top: 0;
+                        padding: 8px 32px 32px 8px; background: transparent;
+                    `;
+                    const cornerStyle = "position:absolute;font-family:'Press Start 2P','Zpix',monospace;color:var(--mc-terra);font-size:14px";
+                    const noStr = String(Math.floor(Math.random() * 999)).padStart(3, '0');
+                    wrap.innerHTML = `
+                        <div style="position:relative;width:680px;padding:56px 56px 40px 56px;background:var(--mc-cream);border:5px solid var(--mc-ink);box-shadow:14px 14px 0 var(--mc-terra);font-family:'Zpix','Noto Serif SC','PingFang SC','Microsoft YaHei',monospace;color:var(--mc-ink);box-sizing:border-box">
+                            <div style="${cornerStyle};top:10px;left:14px">[+]</div>
+                            <div style="${cornerStyle};top:10px;right:14px">[+]</div>
+                            <div style="${cornerStyle};bottom:10px;left:14px">[+]</div>
+                            <div style="${cornerStyle};bottom:10px;right:14px">[+]</div>
+                            <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#8b5e3c;letter-spacing:2px;margin-bottom:24px">VOL.01 · QUOTE · NO.${noStr}</div>
+                            <div style="font-family:Georgia,serif;font-size:64px;color:var(--mc-mustard);line-height:0.5;margin:0 0 -6px -6px">&ldquo;</div>
+                            <div style="font-size:19px;line-height:1.9;letter-spacing:0.5px;padding:0 8px 0 20px;border-left:4px solid var(--mc-terra);white-space:pre-wrap;color:var(--mc-ink);min-height:60px">${escapeHtml(quote)}</div>
+                            <div style="font-family:Georgia,serif;font-size:64px;color:var(--mc-mustard);line-height:0.5;text-align:right;margin:-2px -6px 0 0">&rdquo;</div>
+                            <div style="margin-top:28px;padding-top:18px;border-top:2px dashed #8b5e3c;display:flex;justify-content:space-between;align-items:baseline;gap:16px">
+                                <div style="font-size:14px;color:#8b5e3c;letter-spacing:0.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">——《${escapeHtml(bookTitle)}》</div>
+                                <div style="font-size:10px;color:var(--mc-moss);font-family:'Press Start 2P',monospace;letter-spacing:2px;white-space:nowrap">★ VIA 嘟哒 DUDA</div>
+                            </div>
+                        </div>
+                    `;
+                    return wrap;
+                }
+    
+                async function onShareClick(e) {
+                    e.stopPropagation();
+                    const btn = pd.getElementById('rb-share-btn');
+                    if (!pendingQuote || !btn) return;
+                    btn.classList.add('is-loading');
+                    btn.textContent = '⏳ 生成中…';
+                    const quote = pendingQuote;
+                    try {
+                        const html2canvas = await loadHtml2Canvas();
+                        const wrap = buildCardElement(quote, getBookTitle());
+                        pd.body.appendChild(wrap);
+                        await new Promise(r => setTimeout(r, 120));
+                        const canvas = await html2canvas(wrap, {
+                            scale: 2,
+                            backgroundColor: null,
+                            logging: false,
+                            useCORS: true,
+                        });
+                        wrap.remove();
+                        canvas.toBlob(blob => {
+                            if (!blob) return;
+                            const url = URL.createObjectURL(blob);
+                            const a = pd.createElement('a');
+                            a.href = url;
+                            a.download = `嘟哒_引用_${Date.now()}.png`;
+                            pd.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        }, 'image/png');
+                    } catch (err) {
+                        console.error('Card generation failed:', err);
+                    } finally {
+                        btn.classList.remove('is-loading');
+                        btn.textContent = '📷 分享';
+                        btn.style.display = 'none';
+                        pendingQuote = '';
+                    }
+                }
+    
+                function attach() {
+                    if (pd._rb_share_bound) return;
+                    pd._rb_share_bound = true;
+    
+                    pd.addEventListener('mouseup', function(e) {
+                        if (e.target && e.target.id === 'rb-share-btn') return;
+                        const btn = pd.getElementById('rb-share-btn');
+                        const inRead = e.target && e.target.closest && e.target.closest('.book-page');
+                        const selObj = p.getSelection ? p.getSelection() : null;
+                        const sel = (selObj && selObj.toString() || '').trim();
+                        if (!inRead || !sel || sel.length < 8 || sel.length > 500) {
                             if (btn) btn.style.display = 'none';
                             pendingQuote = '';
                             return;
                         }
-                    }
-                    pendingQuote = sel;
-                    const sb = ensureButton();
-                    const x = Math.min(p.innerWidth - 130, Math.max(10, e.clientX + 12));
-                    const y = Math.min(p.innerHeight - 50, Math.max(10, e.clientY + 14));
-                    sb.style.left = x + 'px';
-                    sb.style.top = y + 'px';
-                    sb.style.display = 'block';
-                });
-
-                pd.addEventListener('mousedown', function(e) {
-                    if (e.target && e.target.id === 'rb-share-btn') return;
-                    const btn = pd.getElementById('rb-share-btn');
-                    if (btn) btn.style.display = 'none';
-                });
-            }
-
-            function boot() {
-                if (!pd || !pd.body) { setTimeout(boot, 200); return; }
-                ensureButton();
-                attach();
-            }
-            boot();
-        })();
-        </script>
-        """, height=0)
-
-        # 阅读时长追踪：后台累计每本书的阅读秒数到 localStorage
-        components.html("""
-        <script>
-        (function() {
-            const p = window.parent;
-            const pd = p.document;
-            const STORAGE_KEY = 'reading_buddy_readtime_v1';
-            const FLUSH_INTERVAL_MS = 15000;  // 每 15s 刷到 localStorage
-            const TICK_INTERVAL_MS = 5000;     // 每 5s 累加
-            const MAX_DELTA_S = 60;            // 单次 delta 封顶（防止系统睡眠误算）
-
-            let accumulated = 0;
-            let lastTick = Date.now();
-            let active = true;
-
-            function getBookKey() {
-                const el = pd.querySelector('.rd-book-key');
-                return el ? el.dataset.key : null;
-            }
-
-            function flush() {
-                const bookKey = getBookKey();
-                if (!bookKey || accumulated <= 0) return;
-                try {
-                    const raw = p.localStorage.getItem(STORAGE_KEY);
-                    let data = {};
-                    if (raw) {
-                        try { data = JSON.parse(raw); } catch(_) { data = {}; }
-                        if (typeof data !== 'object' || data === null) data = {};
-                    }
-                    data[bookKey] = (data[bookKey] || 0) + accumulated;
-                    p.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                    accumulated = 0;
-                } catch (e) { /* silent */ }
-            }
-
-            if (pd._rb_readtime_bound) return;
-            pd._rb_readtime_bound = true;
-
-            setInterval(() => {
-                if (!active) { lastTick = Date.now(); return; }
-                const now = Date.now();
-                const delta = Math.floor((now - lastTick) / 1000);
-                if (delta > 0 && delta <= MAX_DELTA_S) {
-                    accumulated += delta;
+                        // 确认选区在 book-page 内
+                        if (selObj.rangeCount > 0) {
+                            const range = selObj.getRangeAt(0);
+                            const node = range.commonAncestorContainer;
+                            const el = node.nodeType === 1 ? node : node.parentElement;
+                            if (!el || !el.closest('.book-page')) {
+                                if (btn) btn.style.display = 'none';
+                                pendingQuote = '';
+                                return;
+                            }
+                        }
+                        pendingQuote = sel;
+                        const sb = ensureButton();
+                        const x = Math.min(p.innerWidth - 130, Math.max(10, e.clientX + 12));
+                        const y = Math.min(p.innerHeight - 50, Math.max(10, e.clientY + 14));
+                        sb.style.left = x + 'px';
+                        sb.style.top = y + 'px';
+                        sb.style.display = 'block';
+                    });
+    
+                    pd.addEventListener('mousedown', function(e) {
+                        if (e.target && e.target.id === 'rb-share-btn') return;
+                        const btn = pd.getElementById('rb-share-btn');
+                        if (btn) btn.style.display = 'none';
+                    });
                 }
-                lastTick = now;
-            }, TICK_INTERVAL_MS);
-
-            setInterval(flush, FLUSH_INTERVAL_MS);
-
-            pd.addEventListener('visibilitychange', () => {
-                if (pd.hidden) {
-                    active = false;
-                    flush();
-                } else {
-                    active = true;
-                    lastTick = Date.now();
+    
+                function boot() {
+                    if (!pd || !pd.body) { setTimeout(boot, 200); return; }
+                    ensureButton();
+                    attach();
                 }
-            });
-            p.addEventListener('pagehide', flush);
-            p.addEventListener('beforeunload', flush);
-        })();
-        </script>
-        """, height=0)
+                boot();
+            })();
+            </script>
+            """, height=0)
+    
+            # 阅读时长追踪：后台累计每本书的阅读秒数到 localStorage
+            components.html("""
+            <script>
+            (function() {
+                const p = window.parent;
+                const pd = p.document;
+                const STORAGE_KEY = 'reading_buddy_readtime_v1';
+                const FLUSH_INTERVAL_MS = 15000;  // 每 15s 刷到 localStorage
+                const TICK_INTERVAL_MS = 5000;     // 每 5s 累加
+                const MAX_DELTA_S = 60;            // 单次 delta 封顶（防止系统睡眠误算）
+    
+                let accumulated = 0;
+                let lastTick = Date.now();
+                let active = true;
+    
+                function getBookKey() {
+                    const el = pd.querySelector('.rd-book-key');
+                    return el ? el.dataset.key : null;
+                }
+    
+                function flush() {
+                    const bookKey = getBookKey();
+                    if (!bookKey || accumulated <= 0) return;
+                    try {
+                        const raw = p.localStorage.getItem(STORAGE_KEY);
+                        let data = {};
+                        if (raw) {
+                            try { data = JSON.parse(raw); } catch(_) { data = {}; }
+                            if (typeof data !== 'object' || data === null) data = {};
+                        }
+                        data[bookKey] = (data[bookKey] || 0) + accumulated;
+                        p.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                        accumulated = 0;
+                    } catch (e) { /* silent */ }
+                }
+    
+                if (pd._rb_readtime_bound) return;
+                pd._rb_readtime_bound = true;
+    
+                setInterval(() => {
+                    if (!active) { lastTick = Date.now(); return; }
+                    const now = Date.now();
+                    const delta = Math.floor((now - lastTick) / 1000);
+                    if (delta > 0 && delta <= MAX_DELTA_S) {
+                        accumulated += delta;
+                    }
+                    lastTick = now;
+                }, TICK_INTERVAL_MS);
+    
+                setInterval(flush, FLUSH_INTERVAL_MS);
+    
+                pd.addEventListener('visibilitychange', () => {
+                    if (pd.hidden) {
+                        active = false;
+                        flush();
+                    } else {
+                        active = true;
+                        lastTick = Date.now();
+                    }
+                });
+                p.addEventListener('pagehide', flush);
+                p.addEventListener('beforeunload', flush);
+            })();
+            </script>
+            """, height=0)
 
         # 侧边栏：阅读设置
         st.sidebar.divider()
@@ -3219,129 +3270,137 @@ if has_file:
             st.session_state.reading_theme = _rt_pick
             st.rerun()
 
-        # --- 分隔：AI 聊天区域 ---
-        st.divider()
+        with _mc_right:
+
+            # --- 分隔：AI 聊天区域 ---
+            st.divider()
+            st.markdown(
+                f'<h3 class="ai-chat-heading">{PX_ICON["chat"]}与 AI 探讨本章内容</h3>',
+                unsafe_allow_html=True,
+            )
+    
+            # 快捷分析按钮：一键让 AI 做摘要 / 生词 / 讨论问题 / 人物分析
+            st.markdown('<div class="ai-quick-actions-label">⚡ 快捷分析</div>', unsafe_allow_html=True)
+            _qa_c1, _qa_c2, _qa_c3, _qa_c4 = st.columns(4)
+            with _qa_c1:
+                if st.button("📖 本章摘要", key="qa_summary", use_container_width=True):
+                    st.session_state._queued_ai_prompt = "请用简洁清晰的语言总结本章的核心内容、主要事件和关键转折，控制在 6-10 行。"
+                    st.rerun()
+            with _qa_c2:
+                if st.button("📝 生词释义", key="qa_vocab", use_container_width=True):
+                    st.session_state._queued_ai_prompt = "请从本章找出 6-10 个较难理解的生词、成语或关键术语，用 Markdown 表格列出：| 词语 | 释义 | 在本章中的用法 |。"
+                    st.rerun()
+            with _qa_c3:
+                if st.button("💭 讨论问题", key="qa_questions", use_container_width=True):
+                    st.session_state._queued_ai_prompt = "请基于本章内容，生成 3 个值得深入思考的开放式讨论问题，每个问题后附一行简短的思考方向提示。"
+                    st.rerun()
+            with _qa_c4:
+                if st.button("🎭 人物分析", key="qa_characters", use_container_width=True):
+                    st.session_state._queued_ai_prompt = "请分析本章出场的主要人物：他们的身份、言行特点、彼此之间的关系，以及本章中展现出的性格变化或动机。如果本章是非虚构作品没有明显人物，请改为提取本章的核心论点/观点主体。"
+                    st.rerun()
+    
+            # 初始化聊天记录
+            if "messages" not in st.session_state:
+                st.session_state.messages = []
+    
+            # 在屏幕上显示之前的历史聊天记录
+            for m in st.session_state.messages:
+                with st.chat_message(m["role"]):
+                    st.write(m["content"])
+    
+            if not st.session_state.messages:
+                st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。上方 4 个快捷按钮也可以一键让 AI 帮你分析本章。")
+    
+            # 等待用户输入感悟（快捷按钮的 prompt 优先）
+            _queued_prompt = st.session_state.pop("_queued_ai_prompt", None)
+            _chat_prompt = st.chat_input("对这段有什么想法？")
+            prompt = _queued_prompt or _chat_prompt
+            if prompt:
+    
+                # 1. 存入并立刻在屏幕上显示用户发的消息
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                _save_book_messages(book_key, st.session_state.messages)
+                with st.chat_message("user"):
+                    st.write(prompt)
+    
+                # 2. 构造上下文：当前章节全文（长书头尾夹） + 当前 spread 精确位置
+                _full_chapter = chapters[chapter_idx]["text"]
+                _CH_BUDGET = 8000
+                if len(_full_chapter) <= _CH_BUDGET:
+                    _chapter_ctx = _full_chapter
+                else:
+                    _half = _CH_BUDGET // 2
+                    _chapter_ctx = (
+                        _full_chapter[:_half]
+                        + '\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n'
+                        + _full_chapter[-_half:]
+                    )
+                _spread_text = pages[left_idx]
+                if right_idx is not None:
+                    _spread_text += "\n\n" + pages[right_idx]
+    
+                context_msg = (
+                    "你正在陪一位读者读书。以下是当前章节的上下文（长章节仅头尾）：\n"
+                    "========== 章节内容 ==========\n"
+                    f"{_chapter_ctx}\n"
+                    "========== 章节内容结束 ==========\n\n"
+                    f"读者现在正停在第 {left_num} 页"
+                    + (f"-{right_num}" if right_idx is not None else "")
+                    + f"（共 {total_pages} 页），这两页原文：\n"
+                    "---\n"
+                    f"{_spread_text}\n"
+                    "---\n\n"
+                    "最近的对话历史会在 messages 里给你，请结合。\n"
+                    f"读者此刻说：{prompt}"
+                )
+    
+                # 3. 召唤豆包大脑：流式输出
+                with st.chat_message("assistant"):
+                    try:
+                        client = OpenAI(
+                            api_key=st.secrets["ARK_API_KEY"],
+                            base_url="https://ark.cn-beijing.volces.com/api/v3",
+                        )
+                        # 多轮：把最近 8 条历史消息带上，让 AI 有"刚才聊过什么"的记忆
+                        _history = st.session_state.messages[-9:-1]  # 除当前用户消息外的最近 8 条
+                        _api_messages = [
+                            {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"}
+                        ]
+                        _api_messages.extend(_history)
+                        _api_messages.append({"role": "user", "content": context_msg})
+    
+                        stream = client.chat.completions.create(
+                            model=st.secrets["ARK_MODEL_ID"],
+                            messages=_api_messages,
+                            stream=True,
+                        )
+    
+                        def _token_iter():
+                            for chunk in stream:
+                                delta = chunk.choices[0].delta.content if chunk.choices else None
+                                if delta:
+                                    yield delta
+    
+                        response_text = st.write_stream(_token_iter())
+                        if response_text:
+                            st.session_state.messages.append(
+                                {"role": "assistant", "content": response_text}
+                            )
+                            _save_book_messages(book_key, st.session_state.messages)
+    
+                    except Exception as e:
+                        st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
+                        if st.button("重试", key="ai_retry"):
+                            st.session_state.messages.append({"role": "user", "content": prompt})
+                            st.rerun()
+                        with st.expander("详情"):
+                            st.code(str(e))
+
+        # --- BOTTOM 四卡占位（阶段 7 填充）---
         st.markdown(
-            f'<h3 class="ai-chat-heading">{PX_ICON["chat"]}与 AI 探讨本章内容</h3>',
+            '<div class="mc-zone-placeholder mc-bottom-slot">BOTTOM 4 CARDS · 阶段 7 填充</div>',
             unsafe_allow_html=True,
         )
-
-        # 快捷分析按钮：一键让 AI 做摘要 / 生词 / 讨论问题 / 人物分析
-        st.markdown('<div class="ai-quick-actions-label">⚡ 快捷分析</div>', unsafe_allow_html=True)
-        _qa_c1, _qa_c2, _qa_c3, _qa_c4 = st.columns(4)
-        with _qa_c1:
-            if st.button("📖 本章摘要", key="qa_summary", use_container_width=True):
-                st.session_state._queued_ai_prompt = "请用简洁清晰的语言总结本章的核心内容、主要事件和关键转折，控制在 6-10 行。"
-                st.rerun()
-        with _qa_c2:
-            if st.button("📝 生词释义", key="qa_vocab", use_container_width=True):
-                st.session_state._queued_ai_prompt = "请从本章找出 6-10 个较难理解的生词、成语或关键术语，用 Markdown 表格列出：| 词语 | 释义 | 在本章中的用法 |。"
-                st.rerun()
-        with _qa_c3:
-            if st.button("💭 讨论问题", key="qa_questions", use_container_width=True):
-                st.session_state._queued_ai_prompt = "请基于本章内容，生成 3 个值得深入思考的开放式讨论问题，每个问题后附一行简短的思考方向提示。"
-                st.rerun()
-        with _qa_c4:
-            if st.button("🎭 人物分析", key="qa_characters", use_container_width=True):
-                st.session_state._queued_ai_prompt = "请分析本章出场的主要人物：他们的身份、言行特点、彼此之间的关系，以及本章中展现出的性格变化或动机。如果本章是非虚构作品没有明显人物，请改为提取本章的核心论点/观点主体。"
-                st.rerun()
-
-        # 初始化聊天记录
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
-
-        # 在屏幕上显示之前的历史聊天记录
-        for m in st.session_state.messages:
-            with st.chat_message(m["role"]):
-                st.write(m["content"])
-
-        if not st.session_state.messages:
-            st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。上方 4 个快捷按钮也可以一键让 AI 帮你分析本章。")
-
-        # 等待用户输入感悟（快捷按钮的 prompt 优先）
-        _queued_prompt = st.session_state.pop("_queued_ai_prompt", None)
-        _chat_prompt = st.chat_input("对这段有什么想法？")
-        prompt = _queued_prompt or _chat_prompt
-        if prompt:
-
-            # 1. 存入并立刻在屏幕上显示用户发的消息
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            _save_book_messages(book_key, st.session_state.messages)
-            with st.chat_message("user"):
-                st.write(prompt)
-
-            # 2. 构造上下文：当前章节全文（长书头尾夹） + 当前 spread 精确位置
-            _full_chapter = chapters[chapter_idx]["text"]
-            _CH_BUDGET = 8000
-            if len(_full_chapter) <= _CH_BUDGET:
-                _chapter_ctx = _full_chapter
-            else:
-                _half = _CH_BUDGET // 2
-                _chapter_ctx = (
-                    _full_chapter[:_half]
-                    + '\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n'
-                    + _full_chapter[-_half:]
-                )
-            _spread_text = pages[left_idx]
-            if right_idx is not None:
-                _spread_text += "\n\n" + pages[right_idx]
-
-            context_msg = (
-                "你正在陪一位读者读书。以下是当前章节的上下文（长章节仅头尾）：\n"
-                "========== 章节内容 ==========\n"
-                f"{_chapter_ctx}\n"
-                "========== 章节内容结束 ==========\n\n"
-                f"读者现在正停在第 {left_num} 页"
-                + (f"-{right_num}" if right_idx is not None else "")
-                + f"（共 {total_pages} 页），这两页原文：\n"
-                "---\n"
-                f"{_spread_text}\n"
-                "---\n\n"
-                "最近的对话历史会在 messages 里给你，请结合。\n"
-                f"读者此刻说：{prompt}"
-            )
-
-            # 3. 召唤豆包大脑：流式输出
-            with st.chat_message("assistant"):
-                try:
-                    client = OpenAI(
-                        api_key=st.secrets["ARK_API_KEY"],
-                        base_url="https://ark.cn-beijing.volces.com/api/v3",
-                    )
-                    # 多轮：把最近 8 条历史消息带上，让 AI 有"刚才聊过什么"的记忆
-                    _history = st.session_state.messages[-9:-1]  # 除当前用户消息外的最近 8 条
-                    _api_messages = [
-                        {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"}
-                    ]
-                    _api_messages.extend(_history)
-                    _api_messages.append({"role": "user", "content": context_msg})
-
-                    stream = client.chat.completions.create(
-                        model=st.secrets["ARK_MODEL_ID"],
-                        messages=_api_messages,
-                        stream=True,
-                    )
-
-                    def _token_iter():
-                        for chunk in stream:
-                            delta = chunk.choices[0].delta.content if chunk.choices else None
-                            if delta:
-                                yield delta
-
-                    response_text = st.write_stream(_token_iter())
-                    if response_text:
-                        st.session_state.messages.append(
-                            {"role": "assistant", "content": response_text}
-                        )
-                        _save_book_messages(book_key, st.session_state.messages)
-
-                except Exception as e:
-                    st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
-                    if st.button("重试", key="ai_retry"):
-                        st.session_state.messages.append({"role": "user", "content": prompt})
-                        st.rerun()
-                    with st.expander("详情"):
-                        st.code(str(e))
 
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
