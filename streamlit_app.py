@@ -401,6 +401,98 @@ st.markdown("""
     color: var(--mc-cream) !important;
 }
 
+/* ==========================================================================
+   阶段 5 中央阅读器重做（.mc-reader-frame / .mc-reader-ctrl）
+   —— spec v1 §9 模块 C：木质外框 + 双页书本 + 6 按钮控制条
+   ========================================================================== */
+
+/* 木质外框：包住 book-spread */
+.mc-reader-frame {
+    padding: 22px 20px;
+    background: var(--mc-wood-mid);
+    border: 3px solid var(--mc-wood-deep);
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 2px var(--mc-wood-light), 5px 5px 0 var(--mc-wood-deep);
+    position: relative;
+}
+.mc-reader-frame::before, .mc-reader-frame::after {
+    content: "[+]";
+    position: absolute;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--mc-mustard);
+    opacity: 0.8;
+}
+.mc-reader-frame::before { top: 6px; left: 8px; }
+.mc-reader-frame::after  { bottom: 6px; right: 8px; }
+
+/* 6 按钮控制条：st.columns 所在的水平块 */
+[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .st-key-rd_prev) {
+    background: var(--mc-paper);
+    border: 2px solid var(--mc-ink);
+    box-shadow: 3px 3px 0 var(--mc-wood-mid);
+    padding: 10px 14px !important;
+    margin: 14px 0 !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* 控制条按钮 & popover 统一样式 */
+[class*="st-key-rd_"] {
+    margin: 0 !important;
+}
+[class*="st-key-rd_"] > button,
+[class*="st-key-rd_"] [data-testid="stPopoverButton"] {
+    background: var(--mc-cream) !important;
+    color: var(--mc-ink) !important;
+    border: 2px solid var(--mc-ink) !important;
+    box-shadow: 2px 2px 0 var(--mc-wood-mid) !important;
+    border-radius: 0 !important;
+    font-family: 'Zpix', 'Noto Sans SC', sans-serif !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    min-height: 40px !important;
+    width: 100% !important;
+    letter-spacing: 1px !important;
+    transition: background 0.15s ease !important;
+}
+[class*="st-key-rd_"] > button:hover,
+[class*="st-key-rd_"] [data-testid="stPopoverButton"]:hover {
+    background: var(--mc-mustard) !important;
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
+}
+[class*="st-key-rd_"] > button:disabled,
+[class*="st-key-rd_"] > button[disabled] {
+    background: var(--mc-paper-alt) !important;
+    color: var(--mc-gray-brown) !important;
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: 1px 1px 0 var(--mc-wood-brown) !important;
+}
+[class*="st-key-rd_"] > button p,
+[class*="st-key-rd_"] [data-testid="stPopoverButton"] p {
+    margin: 0 !important;
+    color: inherit !important;
+    font-size: 13px !important;
+}
+/* 主翻页按钮（rd_prev / rd_next）：焦糖棕底更突出 */
+.st-key-rd_prev > button,
+.st-key-rd_next > button {
+    background: var(--mc-wood-light) !important;
+    color: var(--mc-cream) !important;
+    font-weight: 700 !important;
+}
+.st-key-rd_prev > button p,
+.st-key-rd_next > button p {
+    color: var(--mc-cream) !important;
+}
+.st-key-rd_prev > button:hover,
+.st-key-rd_next > button:hover {
+    background: var(--mc-terra) !important;
+}
+
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
@@ -908,16 +1000,8 @@ body:has(.reading-area) .progress-fill {
     width: 100%;
     margin-top: 4px;
 }
-/* 隐藏的 Streamlit 按钮（仅用于通过 JS 点击触发 rerun） */
-.st-key-prev_page, .st-key-next_page {
-    display: none !important;
-}
-/* 隐藏这两个按钮所在的 stHorizontalBlock（收敛掉空行高度）。
-   注意：用 > 直接子选择器限定层级，否则外层嵌套 columns 会被误命中（阶段 2 踩过坑）。
-   实际 Streamlit DOM: stHorizontalBlock > stColumn > stVerticalBlock > stElementContainer.st-key-prev_page */
-div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"].st-key-prev_page) {
-    display: none !important;
-}
+/* 阶段 5：旧隐藏翻页按钮（.st-key-prev_page / .st-key-next_page）已移除，
+   改由 .st-key-rd_prev / .st-key-rd_next 控制条按钮直接接管翻页。 */
 
 /* ===== 现代像素风欢迎页 (全屏覆盖) ===== */
 /* 当 .zine-welcome 出现时隐藏 Streamlit 外壳，主内容区铺满 */
@@ -2448,12 +2532,10 @@ if has_file:
             st.session_state.read_chapters = set()
         _rc = st.session_state.read_chapters
 
-        chapter_idx = st.sidebar.selectbox(
-            "选择章节",
-            range(len(chapters)),
-            format_func=lambda x: ("■ " if (book_key, x) in _rc else "  ") + chapter_titles[x],
-            key=sel_key,
-        )
+        # 阶段 5：章节选择从 sidebar 迁到中央控制条的 📋 目录 popover。
+        # 这里仅从 session_state 读当前 chapter_idx；popover 里的 selectbox 会写回同一个 key。
+        _stored_ch = int(st.session_state.get(sel_key, 0))
+        chapter_idx = min(max(_stored_ch, 0), len(chapters) - 1)
         current_text = chapters[chapter_idx]["text"]
 
         # 将当前章节分页
@@ -2475,16 +2557,11 @@ if has_file:
             current_page = 0
             st.session_state.last_chapter = chapter_idx
 
-        # 页码跳转（章节选择器正下方）
-        jump_page = st.sidebar.number_input(
-            "跳到第几页",
-            min_value=1,
-            max_value=total_pages,
-            value=current_page + 1,
-            step=1,
-        )
-        if jump_page - 1 != current_page:
-            st.session_state[page_key] = jump_page - 1
+        # 阶段 5：页码跳转从 sidebar 迁到中央控制条的页码按钮 popover。
+        # 此处只保留兜底校验：防止越界。
+        if current_page >= total_pages:
+            st.session_state[page_key] = max(0, total_pages - 1)
+            current_page = st.session_state[page_key]
             st.rerun()
 
         # 阶段 4：书签迁移到顶部状态条 🔖 按钮（加入）。
@@ -2769,23 +2846,8 @@ if has_file:
                     st.session_state.focus_mode = False
                     st.rerun()
     
-            # D1：顶部杂志刊头带（VOL / 章节名 / CH.XX · 时钟）
-            # 时钟并入 rd-topbar 右段，替掉原装饰 "PIXEL EDITION"；
-            # 原 top_col1/top_col2（章节名重复 + 时间）整行删除
-            from datetime import timezone, timedelta
-            now = datetime.now(timezone(timedelta(hours=8))).strftime("%H:%M")
-            _ch_title_safe = html.escape(chapter_titles[chapter_idx])
-            _topbar_html = (
-                '<div class="rd-topbar">'
-                '<span>VOL.01 <span class="dot">■</span> EST.2026</span>'
-                f'<span class="rd-mid">{_ch_title_safe}</span>'
-                f'<span>CH.{chapter_idx + 1:02d}/{len(chapters):02d} '
-                '<span class="dot">■</span> '
-                f'<span class="rd-clock">{PX_ICON["clock"]}{now}</span>'
-                '</span>'
-                '</div>'
-            )
-            st.markdown(_topbar_html, unsafe_allow_html=True)
+            # 阶段 5：旧 rd-topbar 被新的顶部状态条取代（阶段 4），此处不再渲染。
+            from datetime import timezone, timedelta  # noqa: F401 — 其他逻辑仍需要
     
             # 阅读时长追踪：用 data-key 给 JS 传递 book_key
             st.markdown(
@@ -2837,8 +2899,6 @@ if has_file:
     
             prev_disabled = current_page <= 0
             next_disabled = current_page >= total_pages - 1
-            prev_cls = "nav-btn nav-prev" + (" nav-disabled" if prev_disabled else "")
-            next_cls = "nav-btn nav-next" + (" nav-disabled" if next_disabled else "")
     
             # 本章剩余阅读时间估算（未读页字数 / 300 字每分钟）
             _remaining_chars = sum(len(p) for p in pages[current_page + 2:])
@@ -2890,23 +2950,20 @@ if has_file:
                     _bursts_html += f'<div class="rb-firework" style="left:{_b["left"]};top:{_b["top"]}">{_flash}{_particles}</div>'
                 _celebrate_html = _bursts_html + '<div class="rb-banner">★ 本章读完 ★</div>'
     
-            # book-spread + page-indicator + nav-row 在同一个容器内，保证三者宽度严格一致
+            # 阶段 5：book-spread 外套 mc-reader-frame；page-indicator/nav-row 迁到下方控制条
             reading_html = f'''
             <div class="reading-area">
-                <div class="book-spread" data-page="{current_page}" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
-                    <div class="book-page book-page-left">
-                        {left_html}
-                        <div class="page-num">{left_num}</div>
+                <div class="mc-reader-frame">
+                    <div class="book-spread" data-page="{current_page}" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
+                        <div class="book-page book-page-left">
+                            {left_html}
+                            <div class="page-num">{left_num}</div>
+                        </div>
+                        <div class="book-page book-page-right">
+                            {right_html}
+                            <div class="page-num">{right_num}</div>
+                        </div>
                     </div>
-                    <div class="book-page book-page-right">
-                        {right_html}
-                        <div class="page-num">{right_num}</div>
-                    </div>
-                </div>
-                <div class="page-indicator">{page_range}</div>
-                <div class="nav-row">
-                    <button type="button" class="{prev_cls}">← 上一页</button>
-                    <button type="button" class="{next_cls}">下一页 →</button>
                 </div>
                 {_celebrate_html}
             </div>
@@ -2934,54 +2991,105 @@ if has_file:
                         _note_md += _pn_note
                     st.info(_note_md)
     
-            _nf_ver = st.session_state.get("_note_form_ver", 0)
-            with st.expander("✏ 添加笔记"):
-                _passage_in = st.text_area(
-                    "摘录片段（可选）",
-                    placeholder="粘贴你想记录的原文片段……",
-                    key=f"note_passage_{chapter_idx}_{current_page}_{_nf_ver}",
-                    height=80,
-                )
-                _note_in = st.text_area(
-                    "你的想法",
-                    placeholder="写下你的感想、疑问或联想……",
-                    key=f"note_text_{chapter_idx}_{current_page}_{_nf_ver}",
-                    height=80,
-                )
-                if st.button("保存笔记", key=f"note_save_{chapter_idx}_{current_page}_{_nf_ver}"):
-                    if _note_in.strip() or _passage_in.strip():
-                        from datetime import timezone, timedelta
-                        import uuid as _uuid
-                        _new_note = {
-                            "id": str(_uuid.uuid4())[:8],
-                            "chapter_idx": int(chapter_idx),
-                            "page": int(current_page),
-                            "passage": _passage_in.strip(),
-                            "note": _note_in.strip(),
-                            "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
-                        }
-                        _cur_notes = list(st.session_state.get("notes", []))
-                        _cur_notes.append(_new_note)
-                        st.session_state.notes = _cur_notes
-                        _save_book_notes(book_key, _cur_notes)
-                        st.session_state._note_form_ver = _nf_ver + 1
-                        st.toast("[+] 笔记已保存")
-                        st.rerun()
-                    else:
-                        st.warning("请至少填写摘录或想法其中一项。")
-    
-            # 隐藏的 Streamlit 按钮：真正处理翻页逻辑（HTML 按钮通过 JS 点击它们）
-            hcol1, hcol2 = st.columns(2)
-            with hcol1:
-                if st.button("prev", key="prev_page"):
-                    if current_page > 0:
-                        st.session_state[page_key] = max(0, current_page - 2)
-                        st.rerun()
-            with hcol2:
-                if st.button("next", key="next_page"):
-                    if current_page < total_pages - 1:
-                        st.session_state[page_key] = min(total_pages - 1, current_page + 2)
-                        st.rerun()
+            # 阶段 5：6 按钮控制条（替代 HTML nav-row + page-indicator + 旧 expander）
+            _ctrl_prev, _ctrl_page, _ctrl_next, _ctrl_bm, _ctrl_note, _ctrl_toc = st.columns(
+                [2, 2, 2, 1.2, 1.2, 1.6], gap="small"
+            )
+            with _ctrl_prev:
+                if st.button(
+                    "← 上一页",
+                    key="rd_prev",
+                    disabled=prev_disabled,
+                    use_container_width=True,
+                ):
+                    st.session_state[page_key] = max(0, current_page - 2)
+                    st.rerun()
+
+            with _ctrl_page:
+                _pg_label = f"{left_num}" + (f"-{right_num}" if right_num else "") + f" / {total_pages}"
+                with st.popover(_pg_label, use_container_width=True, help="跳转页码 / 进度"):
+                    st.markdown(f"**📄 本章 · 第 {_pg_label}**")
+                    st.caption(f"全书 {overall:.1f}% · {_time_left}")
+                    _rd_jp = st.number_input(
+                        "跳到第几页",
+                        min_value=1,
+                        max_value=total_pages,
+                        value=current_page + 1,
+                        step=1,
+                        key=f"rd_ctrl_jumpto_{chapter_idx}",
+                    )
+                    if st.button("跳转", key=f"rd_ctrl_jump_btn_{chapter_idx}", use_container_width=True):
+                        if _rd_jp - 1 != current_page:
+                            st.session_state[page_key] = _rd_jp - 1
+                            st.rerun()
+
+            with _ctrl_next:
+                if st.button(
+                    "下一页 →",
+                    key="rd_next",
+                    disabled=next_disabled,
+                    use_container_width=True,
+                ):
+                    st.session_state[page_key] = min(total_pages - 1, current_page + 2)
+                    st.rerun()
+
+            with _ctrl_bm:
+                if st.button("🔖", key="rd_bm", help="加入当前位置为书签", use_container_width=True):
+                    _added_bm = _add_bookmark(book_key, chapter_idx, current_page)
+                    st.toast("[+] 已添加书签" if _added_bm else "此位置已有书签")
+                    st.rerun()
+
+            with _ctrl_note:
+                _nf_ver = st.session_state.get("_note_form_ver", 0)
+                with st.popover("✏", use_container_width=True, help="添加摘录/笔记"):
+                    st.markdown("**✏️ 添加摘录 / 笔记**")
+                    _passage_in = st.text_area(
+                        "摘录片段（可选）",
+                        placeholder="粘贴你想记录的原文片段……",
+                        key=f"note_passage_{chapter_idx}_{current_page}_{_nf_ver}",
+                        height=80,
+                    )
+                    _note_in = st.text_area(
+                        "你的想法",
+                        placeholder="写下你的感想、疑问或联想……",
+                        key=f"note_text_{chapter_idx}_{current_page}_{_nf_ver}",
+                        height=80,
+                    )
+                    if st.button(
+                        "保存笔记",
+                        key=f"note_save_{chapter_idx}_{current_page}_{_nf_ver}",
+                        use_container_width=True,
+                    ):
+                        if _note_in.strip() or _passage_in.strip():
+                            import uuid as _uuid
+                            _new_note = {
+                                "id": str(_uuid.uuid4())[:8],
+                                "chapter_idx": int(chapter_idx),
+                                "page": int(current_page),
+                                "passage": _passage_in.strip(),
+                                "note": _note_in.strip(),
+                                "ts": datetime.now(timezone(timedelta(hours=8))).strftime("%m-%d %H:%M"),
+                            }
+                            _cur_notes = list(st.session_state.get("notes", []))
+                            _cur_notes.append(_new_note)
+                            st.session_state.notes = _cur_notes
+                            _save_book_notes(book_key, _cur_notes)
+                            st.session_state._note_form_ver = _nf_ver + 1
+                            st.toast("[+] 笔记已保存")
+                            st.rerun()
+                        else:
+                            st.warning("请至少填写摘录或想法其中一项。")
+
+            with _ctrl_toc:
+                with st.popover("📋 目录", use_container_width=True, help="章节目录"):
+                    st.markdown("**📋 章节目录**")
+                    st.selectbox(
+                        "选择章节",
+                        range(len(chapters)),
+                        format_func=lambda x: ("✓ " if (book_key, x) in _rc else "　") + chapter_titles[x],
+                        key=sel_key,
+                        label_visibility="collapsed",
+                    )
     
             # 键盘 ← / → 翻页（点击 HTML 导航链接来触发翻页）
             components.html(
@@ -3080,22 +3188,22 @@ if has_file:
                             }
                             return false;
                         }
-                        function clickHiddenBtn(action) {
+                        // 阶段 5：控制条的 st.button (rd_prev / rd_next) 直接接管翻页。
+                        function getNavBtn(action) {
                             const sel = action === 'prev'
-                                ? '.st-key-prev_page button'
-                                : '.st-key-next_page button';
-                            const btn = p.document.querySelector(sel);
-                            if (btn && !btn.disabled) btn.click();
+                                ? '.st-key-rd_prev button'
+                                : '.st-key-rd_next button';
+                            return p.document.querySelector(sel);
                         }
                         function flipAndNavigate(action) {
+                            const btn = getNavBtn(action);
+                            if (!btn || btn.disabled) return;
                             const spread = p.document.querySelector('.book-spread');
                             if (spread) {
-                                // Inline style: hides old content immediately, cleared when
-                                // Streamlit creates a fresh .book-spread element on rerender
                                 spread.style.opacity = '0';
                                 spread.style.transform = 'perspective(900px) rotateY(-5deg) scaleX(0.98)';
                             }
-                            clickHiddenBtn(action);
+                            btn.click();
                         }
                         function handler(e) {
                             if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -3104,27 +3212,15 @@ if has_file:
                             if (e.key === 'ArrowLeft') action = 'prev';
                             else if (e.key === 'ArrowRight') action = 'next';
                             if (!action) return;
-                            const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
-                            if (!visEl || visEl.classList.contains('nav-disabled')) return;
+                            const btn = getNavBtn(action);
+                            if (!btn || btn.disabled) return;
                             e.preventDefault();
                             try { if (e.target && e.target.blur) e.target.blur(); } catch (_) {}
                             flipAndNavigate(action);
                         }
-                        // 绑定并把 handler 引用存到 parent，下次 iframe 挂载时可以清掉
                         p._rb_kbd_handler = handler;
                         p.document.addEventListener('keydown', handler, true);
                         p.addEventListener('keydown', handler, true);
-                        // 点击委托：HTML 导航按钮 → flip-out → 隐藏 st.button
-                        const clickHandler = function(e) {
-                            const btn = e.target.closest && e.target.closest('.nav-btn');
-                            if (!btn) return;
-                            e.preventDefault();
-                            if (btn.classList.contains('nav-disabled')) return;
-                            const action = btn.classList.contains('nav-prev') ? 'prev' : 'next';
-                            flipAndNavigate(action);
-                        };
-                        p._rb_click_handler = clickHandler;
-                        p.document.addEventListener('click', clickHandler, true);
     
                         // ── MutationObserver: 监听 data-page 变化，重启 flip-in 动画 ──
                         let _animLastPage = null;
@@ -3163,8 +3259,6 @@ if has_file:
                             // 水平滑动幅度 > 50px，且水平分量 > 垂直（防止上下滚动误触）
                             if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
                             const action = dx < 0 ? 'next' : 'prev';
-                            const visEl = p.document.querySelector(action === 'prev' ? '.nav-prev' : '.nav-next');
-                            if (!visEl || visEl.classList.contains('nav-disabled')) return;
                             flipAndNavigate(action);
                         };
                         p.document.addEventListener('touchstart', p._rb_touch_start, { passive: true });
