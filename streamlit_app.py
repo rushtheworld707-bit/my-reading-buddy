@@ -621,6 +621,244 @@ st.markdown("""
     transform: translate(-1px, -1px) !important;
 }
 
+/* ==========================================================================
+   阶段 7 底部四卡（.mc-card-*）
+   —— spec v1 §9 模块 E：书架 / 摘录与笔记 / 上传 / 统计
+   ========================================================================== */
+
+/* 4 卡所在的水平块：整体框 */
+[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .mc-card-library),
+[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .mc-card-upload) {
+    margin-top: 18px !important;
+    gap: 12px !important;
+}
+
+/* 每张卡列：奶油底 + 木框 */
+[data-testid="stColumn"]:has(.mc-card-library),
+[data-testid="stColumn"]:has(.mc-card-notes),
+[data-testid="stColumn"]:has(.mc-card-upload),
+[data-testid="stColumn"]:has(.mc-card-stats) {
+    background: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
+    box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
+    padding: 14px 14px !important;
+    min-height: 240px;
+}
+
+/* 卡片标题 */
+.mc-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px dashed var(--mc-wood-brown);
+}
+.mc-card-title-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 13px;
+    color: var(--mc-ink);
+    letter-spacing: 1.5px;
+}
+.mc-card-title-left .px-ic { width: 16px; height: 16px; }
+.mc-card-viewall {
+    font-family: 'Zpix', sans-serif;
+    font-size: 11px;
+    color: var(--mc-wood-light);
+    cursor: default;
+    letter-spacing: 0.5px;
+}
+
+/* 书架卡：4 封面 grid */
+.mc-lib-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.mc-lib-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.mc-lib-cover {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border: 2px solid var(--mc-ink);
+    box-shadow: 2px 2px 0 var(--mc-wood-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Zpix', 'Noto Serif SC', serif;
+    font-size: 11px;
+    color: var(--mc-cream);
+    text-align: center;
+    padding: 6px 4px;
+    line-height: 1.3;
+    overflow: hidden;
+    word-break: break-all;
+}
+.mc-lib-name {
+    font-size: 11px;
+    color: var(--mc-ink);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    font-family: 'Zpix', sans-serif;
+}
+.mc-lib-progress-wrap {
+    width: 100%;
+    height: 4px;
+    background: var(--mc-paper-alt);
+    border: 1px solid var(--mc-wood-brown);
+}
+.mc-lib-progress-fill {
+    height: 100%;
+    background: var(--mc-mustard);
+}
+.mc-lib-percent {
+    font-size: 10px;
+    color: var(--mc-gray-brown);
+    font-family: 'Press Start 2P', monospace;
+}
+.mc-lib-empty {
+    text-align: center;
+    padding: 30px 10px;
+    color: var(--mc-gray-brown);
+    font-family: 'Zpix', sans-serif;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* 摘录笔记卡 */
+.mc-notes-quote {
+    background: var(--mc-paper);
+    border-left: 3px solid var(--mc-terra);
+    padding: 10px 12px;
+    font-family: 'Zpix', 'Noto Serif SC', serif;
+    font-size: 12px;
+    color: var(--mc-ink);
+    line-height: 1.8;
+    margin-bottom: 8px;
+    position: relative;
+}
+.mc-notes-quote::before {
+    content: "\201C";
+    position: absolute;
+    top: -2px;
+    left: 6px;
+    font-size: 20px;
+    color: var(--mc-wood-light);
+    font-family: Georgia, serif;
+}
+.mc-notes-meta {
+    font-size: 11px;
+    color: var(--mc-gray-brown);
+    margin-bottom: 10px;
+    font-family: 'Zpix', sans-serif;
+}
+.mc-notes-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-family: 'Zpix', sans-serif;
+    font-size: 12px;
+    color: var(--mc-ink);
+    line-height: 1.7;
+    margin-bottom: 6px;
+}
+.mc-notes-body-label {
+    color: var(--mc-wood-light);
+    flex-shrink: 0;
+}
+.mc-notes-date {
+    font-size: 11px;
+    color: var(--mc-gray-brown);
+    text-align: right;
+    font-family: 'Press Start 2P', monospace;
+    margin-top: auto;
+}
+
+/* 上传卡（file_uploader 包在内） */
+.mc-card-upload .mc-upload-hint {
+    font-family: 'Zpix', sans-serif;
+    font-size: 11px;
+    color: var(--mc-gray-brown);
+    text-align: center;
+    margin-bottom: 8px;
+}
+[data-testid="stColumn"]:has(.mc-card-upload) [data-testid="stFileUploader"] {
+    background: transparent !important;
+}
+[data-testid="stColumn"]:has(.mc-card-upload) [data-testid="stFileUploader"] section {
+    background: var(--mc-paper) !important;
+    border: 2px dashed var(--mc-wood-light) !important;
+    border-radius: 0 !important;
+    padding: 16px 10px !important;
+    min-height: 90px !important;
+}
+[data-testid="stColumn"]:has(.mc-card-upload) [data-testid="stFileUploader"] button {
+    background: var(--mc-wood-light) !important;
+    color: var(--mc-cream) !important;
+    border: 2px solid var(--mc-ink) !important;
+    box-shadow: 2px 2px 0 var(--mc-wood-mid) !important;
+    border-radius: 0 !important;
+    font-family: 'Zpix', sans-serif !important;
+    font-size: 12px !important;
+}
+
+/* 统计卡：3 行 */
+.mc-stats-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px;
+    border-bottom: 1px dotted var(--mc-wood-brown);
+}
+.mc-stats-row:last-child { border-bottom: none; }
+.mc-stats-icon {
+    font-size: 18px;
+    margin-right: 6px;
+}
+.mc-stats-label {
+    flex: 1;
+    font-family: 'Zpix', sans-serif;
+    font-size: 12px;
+    color: var(--mc-ink);
+}
+.mc-stats-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--mc-wood-light);
+    letter-spacing: 1px;
+}
+.mc-stats-delta {
+    font-family: 'Zpix', sans-serif;
+    font-size: 10px;
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    white-space: nowrap;
+}
+.mc-stats-delta.up {
+    color: var(--mc-moss);
+    background: rgba(110, 139, 91, 0.15);
+}
+.mc-stats-delta.down {
+    color: var(--mc-terra);
+    background: rgba(185, 106, 74, 0.15);
+}
+.mc-stats-delta.flat {
+    color: var(--mc-gray-brown);
+    background: rgba(142, 115, 91, 0.1);
+}
+
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
@@ -2391,6 +2629,8 @@ _LS_BOOKMARKS_KEY = "reading_buddy_bookmarks_v1"
 _LS_MESSAGES_KEY = "reading_buddy_messages_v1"
 _LS_NOTES_KEY = "reading_buddy_notes_v1"
 _LS_READTIME_KEY = "reading_buddy_readtime_v1"
+_LS_LIBRARY_KEY = "reading_buddy_library_v1"       # 书库元数据（不存文件内容）
+_LS_DAILYSTREAK_KEY = "reading_buddy_dailystreak_v1"  # 连续阅读天数 + 每日会话记录
 
 
 def _get_ls():
@@ -2535,6 +2775,119 @@ def _format_duration(seconds):
     return f"{hours} 小时 {minutes} 分钟"
 
 
+def _load_library():
+    """读取书库元数据 {book_key: {title, chapter_count, uploaded_at, last_opened_at, cover_color}}。"""
+    return _ls_read_dict(_LS_LIBRARY_KEY)
+
+
+def _save_library(data):
+    _ls_write_dict(_LS_LIBRARY_KEY, data)
+
+
+def _pick_cover_color(book_key):
+    """根据书名哈希确定性地选一个封面色（6 个主色轮转）。"""
+    _palette = ["#B96A4A", "#6E8B5B", "#A86A33", "#D7A441", "#7a96b4", "#8B5E3C"]
+    return _palette[abs(hash(book_key)) % len(_palette)]
+
+
+def _record_book_in_library(book_key, chapter_count):
+    """把当前打开的书记入书库（元数据），顺便更新 last_opened_at。"""
+    _lib = _load_library()
+    _now_iso = datetime.now().isoformat(timespec="seconds")
+    _title = book_key.rsplit(".", 1)[0] if "." in book_key else book_key
+    # 清掉常见下载源后缀
+    import re as _re_lib
+    _title = _re_lib.sub(
+        r"\s*[（(](?:Z[\-－]?Library|Anna'?s\s*Archive|libgen|annas[-_]archive)[)）]\s*",
+        "",
+        _title,
+        flags=_re_lib.IGNORECASE,
+    ).strip()
+    _existing = _lib.get(book_key, {})
+    _lib[book_key] = {
+        "title": _existing.get("title") or _title,
+        "chapter_count": int(chapter_count),
+        "uploaded_at": _existing.get("uploaded_at") or _now_iso,
+        "last_opened_at": _now_iso,
+        "cover_color": _existing.get("cover_color") or _pick_cover_color(book_key),
+    }
+    _save_library(_lib)
+
+
+def _load_daily_streak():
+    """{last_date, current_streak, longest_streak, history: {YYYY-MM-DD: session_count}}。"""
+    return _ls_read_dict(_LS_DAILYSTREAK_KEY)
+
+
+def _record_daily_session(book_key):
+    """当用户打开一本书时调用；每本书每天只记一次。更新 streak + history。"""
+    import datetime as _dt_dse
+    _data = _load_daily_streak()
+    _today = _dt_dse.date.today().isoformat()
+    _session_tag = f"{_today}:{book_key}"
+    _history = _data.get("history", {})
+    _last_session = _data.get("_last_session_tag")
+    if _last_session == _session_tag:
+        return  # 今天已经为这本书记过了
+    # 增加今日会话计数
+    _history[_today] = int(_history.get(_today, 0)) + 1
+    _data["history"] = _history
+    _data["_last_session_tag"] = _session_tag
+
+    # 更新 streak
+    _last_date_str = _data.get("last_date")
+    if _last_date_str != _today:
+        if _last_date_str:
+            try:
+                _prev = _dt_dse.date.fromisoformat(_last_date_str)
+                _gap = (_dt_dse.date.today() - _prev).days
+                if _gap == 1:
+                    _data["current_streak"] = int(_data.get("current_streak", 0)) + 1
+                elif _gap > 1:
+                    _data["current_streak"] = 1
+            except Exception:
+                _data["current_streak"] = 1
+        else:
+            _data["current_streak"] = 1
+        _data["last_date"] = _today
+        _data["longest_streak"] = max(int(_data.get("longest_streak", 0)), int(_data["current_streak"]))
+    _ls_write_dict(_LS_DAILYSTREAK_KEY, _data)
+
+
+def _compute_reading_stats():
+    """返回 dashboard 所需的四项数据 + 与上周 delta。"""
+    import datetime as _dt_st
+    _times = _load_reading_times()
+    _total_sec = int(sum(int(v or 0) for v in _times.values()))
+    _books_read = int(sum(1 for v in _times.values() if int(v or 0) >= 60))
+    _streak_data = _load_daily_streak()
+    _streak = int(_streak_data.get("current_streak", 0))
+
+    # 与上周对比：用 history 里的日期计数
+    _history = _streak_data.get("history", {})
+    _today_date = _dt_st.date.today()
+    _this_week_start = _today_date - _dt_st.timedelta(days=_today_date.weekday())
+    _last_week_start = _this_week_start - _dt_st.timedelta(days=7)
+    _this_week_days = sum(
+        1 for k in _history
+        if _this_week_start <= _dt_st.date.fromisoformat(k) <= _today_date
+    )
+    _last_week_days = sum(
+        1 for k in _history
+        if _last_week_start <= _dt_st.date.fromisoformat(k) < _this_week_start
+    )
+    _weekly_delta_days = _this_week_days - _last_week_days
+
+    return {
+        "total_hours": _total_sec // 3600,
+        "total_minutes": (_total_sec % 3600) // 60,
+        "total_seconds": _total_sec,
+        "books_read": _books_read,
+        "streak": _streak,
+        "weekly_delta_days": _weekly_delta_days,
+    }
+
+
 def _build_export_markdown(book_name, messages, notes, bookmarks, chapter_titles):
     """把当前书的书签/笔记/AI 对话打包成一份 markdown 文本。"""
     from datetime import timezone, timedelta
@@ -2645,6 +2998,9 @@ if has_file:
             # 笔记按书隔离：hydrate 到 session_state
             st.session_state.notes = _load_all_notes().get(book_key, [])
             st.session_state.loaded_book = book_key
+            # 阶段 7：入书库 + 每日会话记录（每切一本书只跑一次）
+            _record_book_in_library(book_key, len(chapters))
+            _record_daily_session(book_key)
 
         # 书签跳转：在 selectbox 渲染之前应用 pending 状态
         if "_pending_jump" in st.session_state:
@@ -4024,11 +4380,166 @@ if has_file:
                         with st.expander("详情"):
                             st.code(str(e))
 
-        # --- BOTTOM 四卡占位（阶段 7 填充）---
-        st.markdown(
-            '<div class="mc-zone-placeholder mc-bottom-slot">BOTTOM 4 CARDS · 阶段 7 填充</div>',
-            unsafe_allow_html=True,
-        )
+        # --- 阶段 7 底部四卡 ---
+        _c_lib, _c_notes, _c_upload, _c_stats = st.columns([30, 24, 22, 24], gap="small")
+
+        # 卡 1：我的书架
+        with _c_lib:
+            st.markdown(
+                f'<div class="mc-card-library"></div>'
+                f'<div class="mc-card-title">'
+                f'<span class="mc-card-title-left">{PX_ICON["shelf"]} 我的书架</span>'
+                f'<span class="mc-card-viewall">查看全部 ›</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            _lib_all = _load_library()
+            # 按最后打开时间降序，取最近 4 本
+            _recent = sorted(
+                _lib_all.items(),
+                key=lambda kv: kv[1].get("last_opened_at", ""),
+                reverse=True,
+            )[:4]
+            if not _recent:
+                st.markdown(
+                    '<div class="mc-lib-empty">还没有书～<br>右边上传你的第一本书</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                _read_times = _load_reading_times()
+                _progress_store = _load_progress()
+                _lib_html = '<div class="mc-lib-grid">'
+                for _bk, _bm in _recent:
+                    _cover = _bm.get("cover_color", "#8B5E3C")
+                    _title_disp = _bm.get("title", _bk)
+                    _title_short = _title_disp[:8] + "…" if len(_title_disp) > 8 else _title_disp
+                    # 进度百分比：从 _LS_PROGRESS_KEY 或根据章节数估算
+                    _prog = _progress_store.get(_bk, {})
+                    _pct = 0
+                    if _bm.get("chapter_count"):
+                        _pct = int(
+                            (int(_prog.get("chapter_idx", 0)) + 1) / max(1, int(_bm["chapter_count"])) * 100
+                        )
+                        _pct = min(max(_pct, 0), 100)
+                    _lib_html += (
+                        f'<div class="mc-lib-item">'
+                        f'<div class="mc-lib-cover" style="background:{_cover}">{html.escape(_title_short)}</div>'
+                        f'<div class="mc-lib-name">{html.escape(_title_disp)}</div>'
+                        f'<div class="mc-lib-progress-wrap"><div class="mc-lib-progress-fill" style="width:{_pct}%"></div></div>'
+                        f'<div class="mc-lib-percent">{_pct}%</div>'
+                        f'</div>'
+                    )
+                _lib_html += '</div>'
+                st.markdown(_lib_html, unsafe_allow_html=True)
+
+        # 卡 2：摘录与笔记
+        with _c_notes:
+            st.markdown(
+                f'<div class="mc-card-notes"></div>'
+                f'<div class="mc-card-title">'
+                f'<span class="mc-card-title-left">{PX_ICON["save"]} 摘录与笔记</span>'
+                f'<span class="mc-card-viewall">查看全部 ›</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            _latest_notes = st.session_state.get("notes", [])
+            if not _latest_notes:
+                st.markdown(
+                    '<div class="mc-lib-empty">暂无摘录<br>去阅读并保存第一条摘录</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                _latest_n = _latest_notes[-1]
+                _np_text = (_latest_n.get("passage") or "").strip()
+                _nt_text = (_latest_n.get("note") or "").strip()
+                _n_ch = int(_latest_n.get("chapter_idx", 0))
+                _n_pg = int(_latest_n.get("page", 0)) + 1
+                _n_title = chapter_titles[_n_ch] if 0 <= _n_ch < len(chapter_titles) else f"章节 {_n_ch+1}"
+                _n_date = _latest_n.get("ts", "")
+                _book_disp = _tb_book_title
+                _notes_html = ""
+                if _np_text:
+                    _notes_html += (
+                        f'<div class="mc-notes-quote">'
+                        f'{html.escape(_np_text[:90] + ("…" if len(_np_text) > 90 else ""))}'
+                        f'</div>'
+                        f'<div class="mc-notes-meta">——《{html.escape(_book_disp)}》 · {html.escape(_n_title)} · 第 {_n_pg} 页</div>'
+                    )
+                if _nt_text:
+                    _notes_html += (
+                        f'<div class="mc-notes-body">'
+                        f'<span class="mc-notes-body-label">✏ 我的笔记：</span>'
+                        f'<span>{html.escape(_nt_text[:60] + ("…" if len(_nt_text) > 60 else ""))}</span>'
+                        f'</div>'
+                    )
+                if _n_date:
+                    _notes_html += f'<div class="mc-notes-date">{html.escape(_n_date)}</div>'
+                st.markdown(_notes_html, unsafe_allow_html=True)
+
+        # 卡 3：上传书籍
+        with _c_upload:
+            st.markdown(
+                f'<div class="mc-card-upload"></div>'
+                f'<div class="mc-card-title">'
+                f'<span class="mc-card-title-left">{PX_ICON["upload"]} 上传书籍</span>'
+                f'</div>'
+                f'<div class="mc-upload-hint">支持 EPUB / PDF / MOBI / TXT / AZW3 格式</div>',
+                unsafe_allow_html=True,
+            )
+            _bottom_upload = st.file_uploader(
+                "上传新书",
+                type=SUPPORTED_FORMATS,
+                help="支持 EPUB、TXT、PDF、MOBI、AZW3",
+                key="upload_bottom_card",
+                label_visibility="collapsed",
+            )
+            if _bottom_upload:
+                st.session_state.file_bytes = _bottom_upload.getvalue()
+                st.session_state.file_name = _bottom_upload.name
+                st.rerun()
+
+        # 卡 4：阅读统计
+        with _c_stats:
+            st.markdown(
+                f'<div class="mc-card-stats"></div>'
+                f'<div class="mc-card-title">'
+                f'<span class="mc-card-title-left">{PX_ICON["chart"]} 阅读统计</span>'
+                f'<span class="mc-card-viewall">本周</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+            _stats = _compute_reading_stats()
+            # 时长行
+            _h = _stats["total_hours"]
+            _m = _stats["total_minutes"]
+            _hm = f"{_h} h {_m} m" if _h > 0 else f"{_m} m" if _m > 0 else "未开始"
+            # 连续天数 delta
+            _wd = _stats["weekly_delta_days"]
+            if _wd > 0:
+                _delta_cls, _delta_txt = "up", f"▲{_wd}"
+            elif _wd < 0:
+                _delta_cls, _delta_txt = "down", f"▼{abs(_wd)}"
+            else:
+                _delta_cls, _delta_txt = "flat", "持平"
+            _stats_html = (
+                f'<div class="mc-stats-row">'
+                f'<span class="mc-stats-icon">🕐</span>'
+                f'<span class="mc-stats-label">总阅读时长</span>'
+                f'<span class="mc-stats-value">{_hm}</span>'
+                f'</div>'
+                f'<div class="mc-stats-row">'
+                f'<span class="mc-stats-icon">📖</span>'
+                f'<span class="mc-stats-label">已读书籍</span>'
+                f'<span class="mc-stats-value">{_stats["books_read"]} 本</span>'
+                f'</div>'
+                f'<div class="mc-stats-row">'
+                f'<span class="mc-stats-icon">🔥</span>'
+                f'<span class="mc-stats-label">连续天数</span>'
+                f'<span class="mc-stats-value">{_stats["streak"]} 天</span>'
+                f'<span class="mc-stats-delta {_delta_cls}">{_delta_txt}</span>'
+                f'</div>'
+            )
+            st.markdown(_stats_html, unsafe_allow_html=True)
 
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
