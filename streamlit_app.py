@@ -887,6 +887,129 @@ st.markdown("""
     background: rgba(142, 115, 91, 0.1);
 }
 
+/* ==========================================================================
+   阶段 9 空状态（无书时的极简上传引导页）
+   ========================================================================== */
+.mc-empty-page {
+    text-align: center;
+    padding: 60px 20px 40px 20px;
+}
+.mc-empty-brand {
+    margin-bottom: 30px;
+}
+.mc-empty-brand h1 {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 64px;
+    color: var(--mc-ink);
+    letter-spacing: 12px;
+    text-shadow: 5px 5px 0 var(--mc-mustard);
+    margin: 0 0 10px 0;
+}
+.mc-empty-brand p {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 13px;
+    color: var(--mc-gray-brown);
+    letter-spacing: 4px;
+    margin: 0;
+}
+.mc-empty-book {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0 18px 0;
+}
+.mc-empty-book svg {
+    image-rendering: pixelated;
+    shape-rendering: crispEdges;
+}
+.mc-empty-cta {
+    font-family: 'Zpix', 'Noto Serif SC', serif;
+    font-size: 16px;
+    color: var(--mc-ink);
+    letter-spacing: 1.5px;
+    margin: 0 auto 24px auto;
+    max-width: 600px;
+    line-height: 1.8;
+}
+.mc-empty-library-title {
+    font-family: 'Press Start 2P', 'Zpix', monospace;
+    font-size: 14px;
+    color: var(--mc-ink);
+    letter-spacing: 2px;
+    margin: 30px 0 14px 0;
+    text-align: center;
+}
+.mc-empty-lib-cover {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border: 2px solid var(--mc-ink);
+    box-shadow: 3px 3px 0 var(--mc-wood-mid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Zpix', 'Noto Serif SC', serif;
+    font-size: 13px;
+    color: var(--mc-cream);
+    text-align: center;
+    padding: 8px;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    word-break: break-all;
+}
+.mc-empty-lib-title {
+    font-family: 'Zpix', sans-serif;
+    font-size: 12px;
+    color: var(--mc-ink);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   阶段 9 响应式：平板 / 手机折叠
+   ========================================================================== */
+@media (max-width: 1024px) {
+    /* 平板：左 nav 字号略小 */
+    .mc-nav-brand-title { font-size: 22px; letter-spacing: 4px; }
+    .mc-nav-brand-subtitle { font-size: 10px; }
+    [data-testid="stColumn"]:has(.mc-nav-brand) { min-height: 540px; }
+    [class*="st-key-nav_"] button {
+        font-size: 13px !important;
+        padding: 10px 10px !important;
+        letter-spacing: 1.5px !important;
+    }
+    .mc-topbar-title { max-width: 220px; font-size: 13px; }
+    .mc-topbar-chapter { max-width: 140px; font-size: 12px; }
+    .mc-topbar-progress-bar { width: 100px; }
+    /* 装饰缩小 */
+    .mc-reader-decor svg { transform: scale(0.85); }
+}
+
+@media (max-width: 768px) {
+    /* 手机：左 nav 和右 AI 收起，只剩书页 + 控制条 + 底部卡 */
+    [data-testid="stColumn"]:has(.mc-nav-brand),
+    [data-testid="stColumn"]:has(.mc-ai-title) {
+        display: none !important;
+    }
+    /* 中央列占满 */
+    [data-testid="stHorizontalBlock"]:has(.mc-nav-brand) > [data-testid="stColumn"]:not(:has(.mc-nav-brand)):not(:has(.mc-ai-title)) {
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+    }
+    /* 阅读器装饰隐藏 */
+    .mc-reader-decor { display: none; }
+    .mc-reader-frame { padding: 14px 8px; }
+    /* topbar 缩小 */
+    .mc-topbar-author, .mc-topbar-sep, .mc-topbar-chapter { display: none; }
+    .mc-topbar-progress-bar { width: 80px; }
+    /* 底部 4 卡叠成竖排（Streamlit 自带 st.columns 在窄屏自动 stack） */
+    /* 控制条 6 按钮简化 */
+    [class*="st-key-rd_"] > button p { font-size: 11px !important; }
+    /* 空状态品牌字号 */
+    .mc-empty-brand h1 { font-size: 44px; letter-spacing: 6px; }
+    .mc-empty-cta { font-size: 14px; }
+}
+
 /* 主标题：像素刊头（原 Caveat 手写体像素化） */
 .handwrite-title {
     font-family: 'Press Start 2P', 'Zpix', monospace;
@@ -2231,8 +2354,8 @@ st.markdown(
 SUPPORTED_FORMATS = ['epub', 'txt', 'pdf', 'mobi', 'azw3']
 _has_prev_file = "file_bytes" in st.session_state and st.session_state.file_bytes
 if _has_prev_file:
-    # 回到欢迎页：清书 + 清会话相关 state，触发 rerun 显示 zine-welcome
-    if st.sidebar.button("← 回到欢迎页", key="back_to_welcome", use_container_width=True):
+    # 阶段 9：旧欢迎页删除，按钮改名为"换一本书"，行为不变（清状态触发 rerun → 落到空状态页）
+    if st.sidebar.button("← 换一本书", key="back_to_welcome", use_container_width=True):
         for _k in (
             "file_bytes", "file_name", "loaded_book",
             "messages", "chapter_select", "last_chapter",
@@ -4578,453 +4701,73 @@ if has_file:
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
 else:
-    # 日式编辑 zine 风欢迎页（全屏覆盖 + 内嵌上传器）
-    # 拆成两段：上段（刊头 + Hero）→ 上传器 → 下段（流程 + 特性 + 底栏），
-    # 这样上传器在首屏可见，无需下滑。
-    # 随机开场签：以当天日期为种子，一天内保持同一句
-    import html as _html
-    _QUOTES = [
-        ("不去想那些遥远的事，只是走，一步一步。", "《瓦尔登湖》亨利·梭罗"),
-        ("今天的太阳照在昨天的雪上。", "《局外人》阿尔贝·加缪"),
-        ("我只是个过客，可我爱这个世界。", "《挪威的森林》村上春树"),
-        ("细节是魔鬼，也是天使。", "《包法利夫人》福楼拜"),
-        ("人只有在孤独中才能认识自己。", "《约翰·克利斯朵夫》罗曼·罗兰"),
-        ("所谓青春，就是一种永久的失去。", "《挪威的森林》村上春树"),
-        ("书是人类进步的阶梯，也是孤独时最好的伴侣。", "高尔基"),
-        ("我们都是时间的旅人，只是速度不同。", "《时间简史》霍金"),
-        ("真正的旅行不是用眼睛看，而是用心感受。", "马塞尔·普鲁斯特"),
-        ("读一本好书，就是和许多高尚的人谈话。", "歌德"),
-        ("没有什么比一本旧书更让人感到安慰的了。", "简·奥斯汀"),
-        ("世界上只有一种英雄主义，就是认清生活的真相之后依然热爱生活。", "罗曼·罗兰"),
-        ("阅读是一种孤独。", "毕淑敏"),
-        ("每一本书都是一个世界。", "爱默生"),
-        ("书给了我一个世界，而我居住其中。", "乌苏拉·勒古恩"),
-    ]
-    _q_idx = datetime.now().timetuple().tm_yday % len(_QUOTES)
-    _q_text, _q_from = _QUOTES[_q_idx]
-    st.markdown("""
-    <div class="zine-welcome zw-top">
-        <div class="zw-sparkles" aria-hidden="true">
-            <span class="sp" style="left:1%;top:18%;width:4px;height:4px;background:var(--mc-terra);animation-delay:0s;animation-duration:2.8s"></span>
-            <span class="sp" style="left:3%;top:42%;width:6px;height:6px;background:var(--mc-mustard);animation-delay:1.1s;animation-duration:3.5s"></span>
-            <span class="sp" style="left:1.5%;top:68%;width:4px;height:4px;background:var(--mc-moss);animation-delay:2.2s;animation-duration:2.5s"></span>
-            <span class="sp" style="left:4%;top:85%;width:2px;height:2px;background:var(--mc-dusty);animation-delay:0.5s;animation-duration:4s"></span>
-            <span class="sp" style="left:2.5%;top:30%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:3s;animation-duration:3.2s"></span>
-            <span class="sp" style="left:5%;top:55%;width:2px;height:2px;background:var(--mc-terra);animation-delay:1.7s;animation-duration:4.4s"></span>
-            <span class="sp" style="right:1%;top:25%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:0.7s;animation-duration:3.1s"></span>
-            <span class="sp" style="right:3%;top:58%;width:6px;height:6px;background:var(--mc-terra);animation-delay:1.8s;animation-duration:2.7s"></span>
-            <span class="sp" style="right:1.5%;top:75%;width:4px;height:4px;background:var(--mc-dusty);animation-delay:2.5s;animation-duration:3.8s"></span>
-            <span class="sp" style="right:4%;top:38%;width:2px;height:2px;background:var(--mc-moss);animation-delay:0.3s;animation-duration:4.2s"></span>
-            <span class="sp" style="right:2%;top:88%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:3.5s;animation-duration:2.9s"></span>
-            <span class="sp" style="right:5%;top:14%;width:2px;height:2px;background:var(--mc-terra);animation-delay:2.1s;animation-duration:3.6s"></span>
-            <span class="sp" style="left:8%;top:6%;width:2px;height:2px;background:var(--mc-moss);animation-delay:1.5s;animation-duration:5s"></span>
-            <span class="sp" style="right:9%;top:94%;width:2px;height:2px;background:var(--mc-mustard);animation-delay:2.8s;animation-duration:4.5s"></span>
-            <span class="sp" style="right:12%;top:4%;width:4px;height:4px;background:var(--mc-dusty);animation-delay:2s;animation-duration:4.1s"></span>
-        </div>
-        <!-- 左侧像素书架 -->
-        <div class="zw-shelf" style="position:absolute;left:8px;bottom:24px;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="52" height="122" viewBox="0 0 52 122" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;shape-rendering:crispEdges;display:block">
-            <rect x="0" y="112" width="52" height="2" fill="#2E1D12"/>
-            <rect x="1" y="68" width="8" height="44" fill="#B96A4A"/>
-            <rect x="1" y="68" width="8" height="1" fill="#7d2e21"/>
-            <rect x="1" y="111" width="8" height="1" fill="#7d2e21"/>
-            <rect x="2" y="75" width="5" height="1" fill="#F6E7C8" opacity="0.7"/>
-            <rect x="10" y="54" width="8" height="58" fill="#D7A441"/>
-            <rect x="10" y="54" width="8" height="1" fill="#8a7420"/>
-            <rect x="10" y="111" width="8" height="1" fill="#8a7420"/>
-            <rect x="11" y="62" width="5" height="1" fill="#2E1D12" opacity="0.35"/>
-            <rect x="11" y="66" width="4" height="1" fill="#2E1D12" opacity="0.35"/>
-            <g class="zw-book-pull">
-              <rect x="19" y="72" width="7" height="40" fill="#6E8B5B"/>
-              <rect x="19" y="72" width="7" height="1" fill="#2d4130"/>
-              <rect x="19" y="111" width="7" height="1" fill="#2d4130"/>
-              <rect x="20" y="79" width="4" height="1" fill="#F6E7C8" opacity="0.5"/>
-            </g>
-            <rect x="27" y="63" width="8" height="49" fill="#7a96b4"/>
-            <rect x="27" y="63" width="8" height="1" fill="#4a6878"/>
-            <rect x="27" y="111" width="8" height="1" fill="#4a6878"/>
-            <rect x="36" y="76" width="5" height="36" fill="#2E1D12"/>
-            <rect x="36" y="76" width="5" height="1" fill="#1a1209"/>
-            <rect x="36" y="111" width="5" height="1" fill="#1a1209"/>
-            <rect x="37" y="83" width="3" height="1" fill="#F6E7C8" opacity="0.3"/>
-            <rect x="42" y="70" width="9" height="42" fill="#e07b5a"/>
-            <rect x="42" y="70" width="9" height="1" fill="#B96A4A"/>
-            <rect x="42" y="111" width="9" height="1" fill="#B96A4A"/>
-          </svg>
-        </div>
-        <!-- 左侧像素星星群 -->
-        <div class="zw-stars" style="position:absolute;left:6px;top:10%;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="24" height="26" viewBox="0 0 24 26" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y=  "8" width="1" height="5" fill="#D7A441"/>
-            <rect x="1" y="10" width="5" height="1" fill="#D7A441"/>
-            <rect x="16" y="2" width="1" height="5" fill="#D7A441"/>
-            <rect x="14" y="4" width="5" height="1" fill="#D7A441"/>
-            <rect x="18" y="13" width="1" height="3" fill="#7a96b4"/>
-            <rect x="17" y="14" width="3" height="1" fill="#7a96b4"/>
-            <rect x="7" y="1" width="1" height="3" fill="#B96A4A" opacity="0.7"/>
-            <rect x="6" y="2" width="3" height="1" fill="#B96A4A" opacity="0.7"/>
-            <rect x="0" y="18" width="2" height="2" fill="#D7A441" opacity="0.5"/>
-            <rect x="11" y="9" width="2" height="2" fill="#6E8B5B" opacity="0.6"/>
-            <rect x="9" y="20" width="2" height="2" fill="#7a96b4" opacity="0.5"/>
-            <rect x="21" y="20" width="2" height="2" fill="#D7A441" opacity="0.4"/>
-          </svg>
-        </div>
-        <!-- 左侧像素蘑菇 -->
-        <div class="zw-mushroom" style="position:absolute;left:6px;top:46%;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="24" height="22" viewBox="0 0 12 11" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y="0" width="6" height="1" fill="#B96A4A"/>
-            <rect x="1" y="1" width="10" height="1" fill="#B96A4A"/>
-            <rect x="0" y="2" width="12" height="3" fill="#B96A4A"/>
-            <rect x="1" y="2" width="2" height="1" fill="#F6E7C8"/>
-            <rect x="9" y="2" width="2" height="1" fill="#F6E7C8"/>
-            <rect x="5" y="3" width="2" height="1" fill="#F6E7C8" opacity="0.7"/>
-            <rect x="1" y="5" width="10" height="1" fill="#8b3f2a"/>
-            <rect x="3" y="6" width="6" height="1" fill="#f0e6cc"/>
-            <rect x="4" y="7" width="4" height="3" fill="#e8d8b0"/>
-            <rect x="3" y="10" width="6" height="1" fill="#8b7450"/>
-          </svg>
-        </div>
-        <!-- 右侧像素火把 -->
-        <div class="zw-torch" style="position:absolute;right:8px;top:18%;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="24" height="48" viewBox="0 0 24 48" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="0" y="20" width="24" height="3" fill="#2E1D12"/>
-            <rect x="9" y="23" width="6" height="20" fill="#6b4226"/>
-            <rect x="9" y="23" width="6" height="1" fill="#4a2d16"/>
-            <rect x="6" y="14" width="12" height="8" fill="#8b5e3c"/>
-            <rect x="7" y="13" width="10" height="2" fill="#a0723c"/>
-            <rect x="6" y="21" width="12" height="1" fill="#4a2d16"/>
-            <g class="zw-f1">
-              <rect x="10" y="4" width="4" height="10" fill="#ff8c00"/>
-              <rect x="9" y="7" width="6" height="7" fill="#ff4500"/>
-              <rect x="11" y="1" width="2" height="5" fill="#ffd700"/>
-            </g>
-            <g class="zw-f2">
-              <rect x="8" y="5" width="4" height="9" fill="#ff8c00"/>
-              <rect x="7" y="8" width="7" height="6" fill="#ff4500"/>
-              <rect x="9" y="2" width="2" height="5" fill="#ffd700"/>
-            </g>
-            <g class="zw-f3">
-              <rect x="12" y="5" width="4" height="9" fill="#ff8c00"/>
-              <rect x="10" y="8" width="7" height="6" fill="#ff4500"/>
-              <rect x="13" y="2" width="2" height="5" fill="#ffd700"/>
-            </g>
-          </svg>
-        </div>
-        <!-- 右侧像素心形 -->
-        <div class="zw-hearts" style="position:absolute;right:5px;top:56%;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="56" height="24" viewBox="0 0 56 24" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <g fill="#e04040">
-              <rect x="2" y="0" width="4" height="4"/>
-              <rect x="10" y="0" width="4" height="4"/>
-              <rect x="0" y="4" width="16" height="8"/>
-              <rect x="2" y="12" width="12" height="4"/>
-              <rect x="4" y="16" width="8" height="4"/>
-              <rect x="6" y="20" width="4" height="4"/>
-            </g>
-            <rect x="2" y="2" width="3" height="2" fill="#ff6868" opacity="0.6"/>
-            <g fill="#e04040">
-              <rect x="22" y="0" width="4" height="4"/>
-              <rect x="30" y="0" width="4" height="4"/>
-              <rect x="20" y="4" width="16" height="8"/>
-              <rect x="22" y="12" width="12" height="4"/>
-              <rect x="24" y="16" width="8" height="4"/>
-              <rect x="26" y="20" width="4" height="4"/>
-            </g>
-            <rect x="22" y="2" width="3" height="2" fill="#ff6868" opacity="0.6"/>
-            <g class="zw-heart-beat" fill="#e04040">
-              <rect x="42" y="0" width="4" height="4"/>
-              <rect x="50" y="0" width="4" height="4"/>
-              <rect x="40" y="4" width="16" height="8"/>
-              <rect x="42" y="12" width="12" height="4"/>
-              <rect x="44" y="16" width="8" height="4"/>
-              <rect x="46" y="20" width="4" height="4"/>
-              <rect x="42" y="2" width="3" height="2" fill="#ff6868" opacity="0.6"/>
-            </g>
-          </svg>
-        </div>
-        <div class="zw-corner tl">[+]</div>
-        <div class="zw-corner tr">[+]</div>
-        <div class="zw-topbar">
-            <span>VOL.01 <span class="dot">■</span> EST.2026</span>
-            <b>SWEET SWEET HOMELAND</b>
-            <span>№001 <span class="dot">■</span> PIXEL EDITION</span>
-        </div>
-        <div class="zw-hero">
-            <div class="zw-hero-text">
-                <div class="zw-kicker">A READING CLUB</div>
-                <h1 class="zw-title">DUDA</h1>
-                <div class="zw-title-bar"></div>
-                <div class="zw-subtitle-zh">YOUR COZY READING PAL</div>
-                <div class="zw-desc">
-                    <span class="line line-1">在这里，每一本书都值得被深度对话。</span>
-                    <span class="line line-3">「""" + _html.escape(_q_text) + """」</span>
-                    <span class="line line-4">—— """ + _html.escape(_q_from) + """<span class="caret on"></span></span>
-                </div>
-                <div class="zw-formats">
-                    <span class="zw-tag">EPUB</span>
-                    <span class="zw-tag">TXT</span>
-                    <span class="zw-tag">PDF</span>
-                    <span class="zw-tag">MOBI</span>
-                    <span class="zw-tag">AZW3</span>
-                </div>
+    # 阶段 9：无书时的精简引导页（替代旧 zine-welcome 全屏欢迎页）
+    st.markdown(
+        '''
+        <div class="mc-empty-page">
+            <div class="mc-empty-brand">
+                <h1>嘟哒</h1>
+                <p>我的阅读伙伴</p>
             </div>
-            <div class="zw-art">
-                <svg id="zw-cat-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                    <!-- 书 1 底部 陶土红 -->
-                    <rect x="6" y="50" width="52" height="8" fill="#B96A4A"/>
-                    <rect x="6" y="50" width="52" height="1" fill="#7d2e21"/>
-                    <rect x="6" y="57" width="52" height="1" fill="#7d2e21"/>
-                    <rect x="10" y="53" width="16" height="1" fill="#F6E7C8"/>
-                    <rect x="10" y="55" width="12" height="1" fill="#F6E7C8"/>
-                    <!-- 书 2 中间 苔绿 -->
-                    <rect x="10" y="42" width="44" height="8" fill="#6E8B5B"/>
-                    <rect x="10" y="42" width="44" height="1" fill="#2d4130"/>
-                    <rect x="10" y="49" width="44" height="1" fill="#2d4130"/>
-                    <rect x="14" y="45" width="14" height="1" fill="#F6E7C8"/>
-                    <!-- 书 3 顶部 芥黄 -->
-                    <rect x="14" y="34" width="36" height="8" fill="#D7A441"/>
-                    <rect x="14" y="34" width="36" height="1" fill="#8a7420"/>
-                    <rect x="14" y="41" width="36" height="1" fill="#8a7420"/>
-                    <rect x="18" y="37" width="10" height="1" fill="#2E1D12"/>
-                    <!-- 白猫 curled 在书顶 -->
-                    <!-- 耳朵（描边 + 白填充 + 粉内耳） -->
-                    <rect x="15" y="19" width="6" height="1" fill="#2E1D12"/>
-                    <rect x="21" y="19" width="6" height="1" fill="#2E1D12"/>
-                    <rect x="15" y="20" width="1" height="4" fill="#2E1D12"/>
-                    <rect x="20" y="20" width="1" height="4" fill="#2E1D12"/>
-                    <rect x="21" y="20" width="1" height="4" fill="#2E1D12"/>
-                    <rect x="26" y="20" width="1" height="4" fill="#2E1D12"/>
-                    <rect x="16" y="20" width="4" height="4" fill="#fffef8"/>
-                    <rect x="22" y="20" width="4" height="4" fill="#fffef8"/>
-                    <rect x="17" y="22" width="2" height="2" fill="#e07b5a"/>
-                    <rect x="23" y="22" width="2" height="2" fill="#e07b5a"/>
-                    <!-- 头身描边 -->
-                    <rect x="13" y="24" width="30" height="1" fill="#2E1D12"/>
-                    <rect x="11" y="26" width="34" height="1" fill="#2E1D12"/>
-                    <rect x="11" y="31" width="34" height="1" fill="#2E1D12"/>
-                    <rect x="13" y="33" width="30" height="1" fill="#2E1D12"/>
-                    <rect x="11" y="27" width="1" height="4" fill="#2E1D12"/>
-                    <rect x="44" y="27" width="1" height="4" fill="#2E1D12"/>
-                    <rect x="13" y="25" width="1" height="8" fill="#2E1D12"/>
-                    <rect x="42" y="25" width="1" height="8" fill="#2E1D12"/>
-                    <!-- 身体（白填充） -->
-                    <rect x="14" y="24" width="28" height="10" fill="#fffef8"/>
-                    <rect x="12" y="26" width="32" height="6" fill="#fffef8"/>
-                    <!-- 底部浅灰阴影增加立体感 -->
-                    <rect x="14" y="32" width="28" height="1" fill="#e5dcc0"/>
-                    <!-- 闭眼（黑色短横线） -->
-                    <g id="zw-eyes-closed">
-                        <rect x="17" y="28" width="3" height="1" fill="#2E1D12"/>
-                        <rect x="22" y="28" width="3" height="1" fill="#2E1D12"/>
-                    </g>
-                    <!-- 睁眼（点击后短暂显示） -->
-                    <g id="zw-eyes-open" style="display:none">
-                        <rect x="17" y="27" width="3" height="3" fill="#2E1D12"/>
-                        <rect x="18" y="28" width="1" height="1" fill="#fffef8"/>
-                        <rect x="22" y="27" width="3" height="3" fill="#2E1D12"/>
-                        <rect x="23" y="28" width="1" height="1" fill="#fffef8"/>
-                    </g>
-                    <!-- 鼻 -->
-                    <rect x="20" y="30" width="2" height="1" fill="#B96A4A"/>
-                    <!-- 嘴 -->
-                    <rect x="19" y="31" width="1" height="1" fill="#2E1D12"/>
-                    <rect x="22" y="31" width="1" height="1" fill="#2E1D12"/>
-                    <!-- 腮红 -->
-                    <rect x="15" y="29" width="1" height="1" fill="#e07b5a" opacity="0.5"/>
-                    <rect x="26" y="29" width="1" height="1" fill="#e07b5a" opacity="0.5"/>
-                    <!-- 尾巴（描边 + 白填充） -->
-                    <rect x="40" y="21" width="2" height="1" fill="#2E1D12"/>
-                    <rect x="39" y="22" width="1" height="6" fill="#2E1D12"/>
-                    <rect x="42" y="22" width="1" height="6" fill="#2E1D12"/>
-                    <rect x="40" y="22" width="2" height="6" fill="#fffef8"/>
-                    <rect x="42" y="19" width="3" height="1" fill="#2E1D12"/>
-                    <rect x="42" y="20" width="1" height="2" fill="#2E1D12"/>
-                    <rect x="44" y="20" width="1" height="2" fill="#2E1D12"/>
-                    <rect x="43" y="20" width="1" height="2" fill="#fffef8"/>
-                    <!-- Z 泡泡 -->
-                    <rect x="30" y="12" width="3" height="1" fill="#7a96b4"/>
-                    <rect x="32" y="13" width="1" height="1" fill="#7a96b4"/>
-                    <rect x="30" y="14" width="3" height="1" fill="#7a96b4"/>
-                    <rect x="36" y="6" width="5" height="1" fill="#7a96b4"/>
-                    <rect x="39" y="7" width="1" height="1" fill="#7a96b4"/>
-                    <rect x="38" y="8" width="1" height="1" fill="#7a96b4"/>
-                    <rect x="37" y="9" width="1" height="1" fill="#7a96b4"/>
-                    <rect x="36" y="10" width="5" height="1" fill="#7a96b4"/>
+            <div class="mc-empty-book" aria-hidden="true">
+                <svg width="120" height="90" viewBox="0 0 32 24" shape-rendering="crispEdges">
+                    <rect x="2" y="3" width="28" height="20" fill="#B96A4A"/>
+                    <rect x="2" y="3" width="28" height="2" fill="#8B3F2A"/>
+                    <rect x="2" y="21" width="28" height="2" fill="#8B3F2A"/>
+                    <rect x="2" y="3" width="2" height="20" fill="#8B3F2A"/>
+                    <rect x="28" y="3" width="2" height="20" fill="#8B3F2A"/>
+                    <rect x="6" y="9" width="20" height="2" fill="#FFF6E8"/>
+                    <rect x="8" y="13" width="16" height="1" fill="#FFF6E8" opacity="0.7"/>
+                    <rect x="14" y="18" width="4" height="1" fill="#D7A441"/>
+                    <rect x="15" y="17" width="2" height="3" fill="#D7A441"/>
                 </svg>
-                <div class="zw-art-caption">READING CLUB · 001</div>
             </div>
+            <p class="mc-empty-cta">上传一本书，开始与你的阅读伙伴一起读书</p>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-    # 上传区：标签 + 上传器（中央居中），夹在上下两段欢迎页之间
-    _ul_col1, _ul_col2, _ul_col3 = st.columns([1, 2, 1])
-    with _ul_col2:
-        st.markdown(
-            '<div class="zw-upload-label">&gt; PRESS UPLOAD TO BEGIN<span class="caret">_</span></div>',
-            unsafe_allow_html=True,
-        )
-        _welcome_upload = st.file_uploader(
-            "上传电子书",
+        ''',
+        unsafe_allow_html=True,
+    )
+
+    # 居中上传器
+    _eu1, _eu2, _eu3 = st.columns([1, 2, 1])
+    with _eu2:
+        _empty_upload = st.file_uploader(
+            "选择电子书文件",
             type=SUPPORTED_FORMATS,
-            help="支持 EPUB、TXT、PDF、MOBI、AZW3",
-            key="upload_welcome",
+            help="支持 EPUB、TXT、PDF、MOBI、AZW3，单文件 ≤ 200MB",
+            key="upload_empty_page",
             label_visibility="collapsed",
         )
-    if _welcome_upload:
-        st.session_state.file_bytes = _welcome_upload.getvalue()
-        st.session_state.file_name = _welcome_upload.name
-        st.rerun()
+        if _empty_upload:
+            st.session_state.file_bytes = _empty_upload.getvalue()
+            st.session_state.file_name = _empty_upload.name
+            st.rerun()
 
-    st.markdown("""
-    <div class="zine-welcome zw-bottom">
-        <div class="zw-sparkles" aria-hidden="true">
-            <span class="sp" style="left:1.5%;top:28%;width:4px;height:4px;background:var(--mc-mustard);animation-delay:0.4s;animation-duration:3.2s"></span>
-            <span class="sp" style="left:3.5%;top:62%;width:6px;height:6px;background:var(--mc-moss);animation-delay:1.6s;animation-duration:2.8s"></span>
-            <span class="sp" style="left:2%;top:82%;width:2px;height:2px;background:var(--mc-terra);animation-delay:2.8s;animation-duration:4s"></span>
-            <span class="sp" style="left:5%;top:45%;width:2px;height:2px;background:var(--mc-dusty);animation-delay:3.4s;animation-duration:3.7s"></span>
-            <span class="sp" style="right:1.5%;top:20%;width:4px;height:4px;background:var(--mc-terra);animation-delay:1s;animation-duration:3.5s"></span>
-            <span class="sp" style="right:3%;top:52%;width:6px;height:6px;background:var(--mc-dusty);animation-delay:2.2s;animation-duration:2.6s"></span>
-            <span class="sp" style="right:2%;top:76%;width:2px;height:2px;background:var(--mc-mustard);animation-delay:0.6s;animation-duration:4.3s"></span>
-            <span class="sp" style="right:5%;top:38%;width:4px;height:4px;background:var(--mc-moss);animation-delay:1.9s;animation-duration:3.1s"></span>
-            <span class="sp" style="left:7%;top:90%;width:2px;height:2px;background:var(--mc-moss);animation-delay:1.8s;animation-duration:5s"></span>
-            <span class="sp" style="right:8%;top:8%;width:4px;height:4px;background:var(--mc-terra);animation-delay:3.2s;animation-duration:3.8s"></span>
-        </div>
-        <!-- 左侧像素盆栽 -->
-        <div class="zw-plant" style="position:absolute;left:6px;top:24%;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="20" height="28" viewBox="0 0 10 14" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y="0" width="4" height="1" fill="#6E8B5B"/>
-            <rect x="2" y="1" width="6" height="2" fill="#5a8060"/>
-            <rect x="0" y="3" width="4" height="2" fill="#6E8B5B"/>
-            <rect x="6" y="3" width="4" height="2" fill="#5a8060"/>
-            <rect x="1" y="4" width="2" height="1" fill="#3a5a3e"/>
-            <rect x="7" y="4" width="2" height="1" fill="#3a5a3e"/>
-            <rect x="4" y="3" width="2" height="2" fill="#6b4226"/>
-            <rect x="1" y="5" width="8" height="1" fill="#d46a4a"/>
-            <rect x="2" y="6" width="6" height="5" fill="#B96A4A"/>
-            <rect x="3" y="6" width="4" height="1" fill="#d46a4a"/>
-            <rect x="3" y="11" width="4" height="1" fill="#8b3f2a"/>
-            <rect x="4" y="12" width="2" height="2" fill="#8b3f2a"/>
-          </svg>
-        </div>
-        <!-- 右侧像素药水 -->
-        <div class="zw-potion" style="position:absolute;right:8px;top:32%;z-index:2;pointer-events:none" aria-hidden="true">
-          <svg width="20" height="30" viewBox="0 0 10 15" style="image-rendering:pixelated;shape-rendering:crispEdges">
-            <rect x="3" y="0" width="4" height="1" fill="#8b5e3c"/>
-            <rect x="3" y="1" width="4" height="2" fill="#9ab6c4"/>
-            <rect x="2" y="3" width="6" height="1" fill="#4a6878"/>
-            <rect x="1" y="4" width="8" height="8" fill="#7a96b4"/>
-            <rect x="1" y="7" width="8" height="5" fill="#5a86b4"/>
-            <rect x="2" y="4" width="2" height="3" fill="#b8d0dc" opacity="0.5"/>
-            <rect x="5" y="9" width="2" height="1" fill="#9ab6c4" opacity="0.6"/>
-            <rect x="4" y="11" width="1" height="1" fill="#9ab6c4" opacity="0.5"/>
-            <rect x="1" y="12" width="8" height="1" fill="#4a6878"/>
-            <rect x="2" y="13" width="6" height="1" fill="#3a5868"/>
-            <rect x="3" y="14" width="4" height="1" fill="#2a4858"/>
-          </svg>
-        </div>
-        <div class="zw-corner bl">[+]</div>
-        <div class="zw-corner br">[+]</div>
-        <!-- HOW IT WORKS 3 步 -->
-        <div class="zw-howto">
-            <div class="zw-howto-title">
-                <span>▶ HOW IT WORKS / 开始指南</span>
-                <span class="zw-meter">■ ■ ■ □ □</span>
-            </div>
-            <div class="zw-steps">
-                <div class="zw-step">
-                    <div class="zw-step-num">01</div>
-                    <div class="zw-step-icon">""" + PX_ICON["upload"] + """</div>
-                    <div class="zw-step-label">上传电子书</div>
-                    <div class="zw-step-sub">UPLOAD</div>
-                </div>
-                <div class="zw-step-arrow">&gt;</div>
-                <div class="zw-step">
-                    <div class="zw-step-num">02</div>
-                    <div class="zw-step-icon">""" + PX_ICON["read"] + """</div>
-                    <div class="zw-step-label">选章节阅读</div>
-                    <div class="zw-step-sub">READ</div>
-                </div>
-                <div class="zw-step-arrow">&gt;</div>
-                <div class="zw-step">
-                    <div class="zw-step-num">03</div>
-                    <div class="zw-step-icon">""" + PX_ICON["chat"] + """</div>
-                    <div class="zw-step-label">AI 深度对话</div>
-                    <div class="zw-step-sub">CHAT</div>
-                </div>
-            </div>
-        </div>
-        <!-- 特性徽章 -->
-        <div class="zw-features">
-            <span class="zw-feature"><span class="ic">""" + PX_ICON["keyboard"] + """</span> 键盘翻页</span>
-            <span class="zw-feature"><span class="ic">""" + PX_ICON["pin"] + """</span> 书签收藏</span>
-            <span class="zw-feature"><span class="ic">""" + PX_ICON["palette"] + """</span> 主题字体自定义</span>
-            <span class="zw-feature"><span class="ic">""" + PX_ICON["clock"] + """</span> 剩余时间估算</span>
-            <span class="zw-feature"><span class="ic">""" + PX_ICON["save"] + """</span> 进度自动保存</span>
-            <span class="zw-feature"><span class="ic">""" + PX_ICON["robot"] + """</span> AI 共读</span>
-        </div>
-        <!-- 底部装饰条 -->
-        <div class="zw-footer-strip">
-            <span>PRESS UPLOAD TO BEGIN</span>
-            <span class="hearts">♥ ♥ ♥</span>
-            <span>SSH · №001 · 2026</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    # 点猫眨眼：click → 睁眼 0.9s → 闭眼
-    components.html("""
-    <script>
-    (function() {
-        function attachCatBlink() {
-            const svg = window.parent.document.getElementById('zw-cat-svg');
-            if (!svg) { setTimeout(attachCatBlink, 200); return; }
-            if (svg._rb_blink_bound) return;
-            svg._rb_blink_bound = true;
-            svg.addEventListener('click', function() {
-                const closed = window.parent.document.getElementById('zw-eyes-closed');
-                const open   = window.parent.document.getElementById('zw-eyes-open');
-                if (!closed || !open) return;
-                closed.style.display = 'none';
-                open.style.display   = '';
-                setTimeout(function() {
-                    open.style.display   = 'none';
-                    closed.style.display = '';
-                }, 900);
-            });
-        }
-        attachCatBlink();
-    })();
-
-    // 猫猫 parallax：鼠标在 hero 区域移动时，猫轻微跟随偏移
-    (function() {
-        function attachParallax() {
-            const p = window.parent.document;
-            const art = p.querySelector('.zw-art');
-            if (!art) { setTimeout(attachParallax, 200); return; }
-            if (art._rb_parallax_bound) return;
-            art._rb_parallax_bound = true;
-            art.style.transition = 'transform 0.18s steps(3)';
-            let raf = null;
-            p.addEventListener('mousemove', function(e) {
-                const hero = p.querySelector('.zw-hero');
-                if (!hero) return;
-                const rect = hero.getBoundingClientRect();
-                const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
-                               e.clientY >= rect.top  && e.clientY <= rect.bottom;
-                if (!inside) { art.style.transform = 'translate(0,0)'; return; }
-                if (raf) return;
-                raf = requestAnimationFrame(function() {
-                    raf = null;
-                    const cx = rect.left + rect.width / 2;
-                    const cy = rect.top  + rect.height / 2;
-                    const dx = (e.clientX - cx) / (rect.width  / 2);
-                    const dy = (e.clientY - cy) / (rect.height / 2);
-                    const tx = Math.round(dx * 16);
-                    const ty = Math.round(dy * 10);
-                    art.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
-                });
-            });
-        }
-        attachParallax();
-    })();
-    </script>
-    """, height=0)
+    # 之前读过的书：localStorage 元数据还在，重新选取文件即可继续
+    _empty_lib = _load_library()
+    if _empty_lib:
+        st.markdown(
+            '<h3 class="mc-empty-library-title">📚 之前读过的书</h3>',
+            unsafe_allow_html=True,
+        )
+        st.caption(
+            "由于浏览器存储限制，书的内容不在本地保留。重新上传同一本书的文件即可恢复进度/笔记/AI 对话。"
+        )
+        _lib_items_e = sorted(
+            _empty_lib.items(),
+            key=lambda kv: kv[1].get("last_opened_at", ""),
+            reverse=True,
+        )[:8]
+        _ncols_e = min(4, len(_lib_items_e))
+        if _ncols_e > 0:
+            _e_cols = st.columns(_ncols_e, gap="small")
+            for _i, (_k, _meta) in enumerate(_lib_items_e):
+                with _e_cols[_i % _ncols_e]:
+                    _color_e = _meta.get("cover_color", "#8B5E3C")
+                    _title_e = _meta.get("title", _k)
+                    _short_e = _title_e[:8] + "…" if len(_title_e) > 8 else _title_e
+                    st.markdown(
+                        f'<div class="mc-empty-lib-cover" style="background:{_color_e}">{html.escape(_short_e)}</div>'
+                        f'<div class="mc-empty-lib-title">{html.escape(_title_e)}</div>',
+                        unsafe_allow_html=True,
+                    )
