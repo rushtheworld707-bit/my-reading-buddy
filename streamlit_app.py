@@ -110,6 +110,12 @@ st.markdown("""
     align-items: center;
     justify-content: center;
 }
+.mc-right-slot {
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .mc-bottom-slot {
     min-height: 200px;
     display: flex;
@@ -3271,130 +3277,134 @@ if has_file:
             st.rerun()
 
         with _mc_right:
-
-            # --- 分隔：AI 聊天区域 ---
-            st.divider()
             st.markdown(
-                f'<h3 class="ai-chat-heading">{PX_ICON["chat"]}与 AI 探讨本章内容</h3>',
+                '<div class="mc-zone-placeholder mc-right-slot">RIGHT AI<br>阶段 6 填充</div>',
                 unsafe_allow_html=True,
             )
-    
-            # 快捷分析按钮：一键让 AI 做摘要 / 生词 / 讨论问题 / 人物分析
-            st.markdown('<div class="ai-quick-actions-label">⚡ 快捷分析</div>', unsafe_allow_html=True)
-            _qa_c1, _qa_c2, _qa_c3, _qa_c4 = st.columns(4)
-            with _qa_c1:
-                if st.button("📖 本章摘要", key="qa_summary", use_container_width=True):
-                    st.session_state._queued_ai_prompt = "请用简洁清晰的语言总结本章的核心内容、主要事件和关键转折，控制在 6-10 行。"
-                    st.rerun()
-            with _qa_c2:
-                if st.button("📝 生词释义", key="qa_vocab", use_container_width=True):
-                    st.session_state._queued_ai_prompt = "请从本章找出 6-10 个较难理解的生词、成语或关键术语，用 Markdown 表格列出：| 词语 | 释义 | 在本章中的用法 |。"
-                    st.rerun()
-            with _qa_c3:
-                if st.button("💭 讨论问题", key="qa_questions", use_container_width=True):
-                    st.session_state._queued_ai_prompt = "请基于本章内容，生成 3 个值得深入思考的开放式讨论问题，每个问题后附一行简短的思考方向提示。"
-                    st.rerun()
-            with _qa_c4:
-                if st.button("🎭 人物分析", key="qa_characters", use_container_width=True):
-                    st.session_state._queued_ai_prompt = "请分析本章出场的主要人物：他们的身份、言行特点、彼此之间的关系，以及本章中展现出的性格变化或动机。如果本章是非虚构作品没有明显人物，请改为提取本章的核心论点/观点主体。"
-                    st.rerun()
-    
-            # 初始化聊天记录
-            if "messages" not in st.session_state:
-                st.session_state.messages = []
-    
-            # 在屏幕上显示之前的历史聊天记录
-            for m in st.session_state.messages:
-                with st.chat_message(m["role"]):
-                    st.write(m["content"])
-    
-            if not st.session_state.messages:
-                st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。上方 4 个快捷按钮也可以一键让 AI 帮你分析本章。")
-    
-            # 等待用户输入感悟（快捷按钮的 prompt 优先）
-            _queued_prompt = st.session_state.pop("_queued_ai_prompt", None)
-            _chat_prompt = st.chat_input("对这段有什么想法？")
-            prompt = _queued_prompt or _chat_prompt
-            if prompt:
-    
-                # 1. 存入并立刻在屏幕上显示用户发的消息
-                st.session_state.messages.append({"role": "user", "content": prompt})
-                _save_book_messages(book_key, st.session_state.messages)
-                with st.chat_message("user"):
-                    st.write(prompt)
-    
-                # 2. 构造上下文：当前章节全文（长书头尾夹） + 当前 spread 精确位置
-                _full_chapter = chapters[chapter_idx]["text"]
-                _CH_BUDGET = 8000
-                if len(_full_chapter) <= _CH_BUDGET:
-                    _chapter_ctx = _full_chapter
-                else:
-                    _half = _CH_BUDGET // 2
-                    _chapter_ctx = (
-                        _full_chapter[:_half]
-                        + '\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n'
-                        + _full_chapter[-_half:]
-                    )
-                _spread_text = pages[left_idx]
-                if right_idx is not None:
-                    _spread_text += "\n\n" + pages[right_idx]
-    
-                context_msg = (
-                    "你正在陪一位读者读书。以下是当前章节的上下文（长章节仅头尾）：\n"
-                    "========== 章节内容 ==========\n"
-                    f"{_chapter_ctx}\n"
-                    "========== 章节内容结束 ==========\n\n"
-                    f"读者现在正停在第 {left_num} 页"
-                    + (f"-{right_num}" if right_idx is not None else "")
-                    + f"（共 {total_pages} 页），这两页原文：\n"
-                    "---\n"
-                    f"{_spread_text}\n"
-                    "---\n\n"
-                    "最近的对话历史会在 messages 里给你，请结合。\n"
-                    f"读者此刻说：{prompt}"
+
+        # --- 分隔：AI 聊天区域（阶段 2 暂留主区；阶段 6 搬进右列）---
+        st.divider()
+        st.markdown(
+            f'<h3 class="ai-chat-heading">{PX_ICON["chat"]}与 AI 探讨本章内容</h3>',
+            unsafe_allow_html=True,
+        )
+
+        # 快捷分析按钮：一键让 AI 做摘要 / 生词 / 讨论问题 / 人物分析
+        st.markdown('<div class="ai-quick-actions-label">⚡ 快捷分析</div>', unsafe_allow_html=True)
+        _qa_c1, _qa_c2, _qa_c3, _qa_c4 = st.columns(4)
+        with _qa_c1:
+            if st.button("📖 本章摘要", key="qa_summary", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请用简洁清晰的语言总结本章的核心内容、主要事件和关键转折，控制在 6-10 行。"
+                st.rerun()
+        with _qa_c2:
+            if st.button("📝 生词释义", key="qa_vocab", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请从本章找出 6-10 个较难理解的生词、成语或关键术语，用 Markdown 表格列出：| 词语 | 释义 | 在本章中的用法 |。"
+                st.rerun()
+        with _qa_c3:
+            if st.button("💭 讨论问题", key="qa_questions", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请基于本章内容，生成 3 个值得深入思考的开放式讨论问题，每个问题后附一行简短的思考方向提示。"
+                st.rerun()
+        with _qa_c4:
+            if st.button("🎭 人物分析", key="qa_characters", use_container_width=True):
+                st.session_state._queued_ai_prompt = "请分析本章出场的主要人物：他们的身份、言行特点、彼此之间的关系，以及本章中展现出的性格变化或动机。如果本章是非虚构作品没有明显人物，请改为提取本章的核心论点/观点主体。"
+                st.rerun()
+
+        # 初始化聊天记录
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        # 在屏幕上显示之前的历史聊天记录
+        for m in st.session_state.messages:
+            with st.chat_message(m["role"]):
+                st.write(m["content"])
+
+        if not st.session_state.messages:
+            st.caption("对这段有什么想法？有疑惑的地方、触动你的句子，都可以聊聊。上方 4 个快捷按钮也可以一键让 AI 帮你分析本章。")
+
+        # 等待用户输入感悟（快捷按钮的 prompt 优先）
+        _queued_prompt = st.session_state.pop("_queued_ai_prompt", None)
+        _chat_prompt = st.chat_input("对这段有什么想法？")
+        prompt = _queued_prompt or _chat_prompt
+        if prompt:
+
+            # 1. 存入并立刻在屏幕上显示用户发的消息
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            _save_book_messages(book_key, st.session_state.messages)
+            with st.chat_message("user"):
+                st.write(prompt)
+
+            # 2. 构造上下文：当前章节全文（长书头尾夹） + 当前 spread 精确位置
+            _full_chapter = chapters[chapter_idx]["text"]
+            _CH_BUDGET = 8000
+            if len(_full_chapter) <= _CH_BUDGET:
+                _chapter_ctx = _full_chapter
+            else:
+                _half = _CH_BUDGET // 2
+                _chapter_ctx = (
+                    _full_chapter[:_half]
+                    + '\n\n……（中间省略，读者正在读的是下方"当前这两页"）……\n\n'
+                    + _full_chapter[-_half:]
                 )
-    
-                # 3. 召唤豆包大脑：流式输出
-                with st.chat_message("assistant"):
-                    try:
-                        client = OpenAI(
-                            api_key=st.secrets["ARK_API_KEY"],
-                            base_url="https://ark.cn-beijing.volces.com/api/v3",
+            _spread_text = pages[left_idx]
+            if right_idx is not None:
+                _spread_text += "\n\n" + pages[right_idx]
+
+            context_msg = (
+                "你正在陪一位读者读书。以下是当前章节的上下文（长章节仅头尾）：\n"
+                "========== 章节内容 ==========\n"
+                f"{_chapter_ctx}\n"
+                "========== 章节内容结束 ==========\n\n"
+                f"读者现在正停在第 {left_num} 页"
+                + (f"-{right_num}" if right_idx is not None else "")
+                + f"（共 {total_pages} 页），这两页原文：\n"
+                "---\n"
+                f"{_spread_text}\n"
+                "---\n\n"
+                "最近的对话历史会在 messages 里给你，请结合。\n"
+                f"读者此刻说：{prompt}"
+            )
+
+            # 3. 召唤豆包大脑：流式输出
+            with st.chat_message("assistant"):
+                try:
+                    client = OpenAI(
+                        api_key=st.secrets["ARK_API_KEY"],
+                        base_url="https://ark.cn-beijing.volces.com/api/v3",
+                    )
+                    # 多轮：把最近 8 条历史消息带上，让 AI 有"刚才聊过什么"的记忆
+                    _history = st.session_state.messages[-9:-1]  # 除当前用户消息外的最近 8 条
+                    _api_messages = [
+                        {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"}
+                    ]
+                    _api_messages.extend(_history)
+                    _api_messages.append({"role": "user", "content": context_msg})
+
+                    stream = client.chat.completions.create(
+                        model=st.secrets["ARK_MODEL_ID"],
+                        messages=_api_messages,
+                        stream=True,
+                    )
+
+                    def _token_iter():
+                        for chunk in stream:
+                            delta = chunk.choices[0].delta.content if chunk.choices else None
+                            if delta:
+                                yield delta
+
+                    response_text = st.write_stream(_token_iter())
+                    if response_text:
+                        st.session_state.messages.append(
+                            {"role": "assistant", "content": response_text}
                         )
-                        # 多轮：把最近 8 条历史消息带上，让 AI 有"刚才聊过什么"的记忆
-                        _history = st.session_state.messages[-9:-1]  # 除当前用户消息外的最近 8 条
-                        _api_messages = [
-                            {"role": "system", "content": "你是一个高水平的阅读助手，擅长理解复杂的人性、行为逻辑以及具有宏大设定的文学作品。"}
-                        ]
-                        _api_messages.extend(_history)
-                        _api_messages.append({"role": "user", "content": context_msg})
-    
-                        stream = client.chat.completions.create(
-                            model=st.secrets["ARK_MODEL_ID"],
-                            messages=_api_messages,
-                            stream=True,
-                        )
-    
-                        def _token_iter():
-                            for chunk in stream:
-                                delta = chunk.choices[0].delta.content if chunk.choices else None
-                                if delta:
-                                    yield delta
-    
-                        response_text = st.write_stream(_token_iter())
-                        if response_text:
-                            st.session_state.messages.append(
-                                {"role": "assistant", "content": response_text}
-                            )
-                            _save_book_messages(book_key, st.session_state.messages)
-    
-                    except Exception as e:
-                        st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
-                        if st.button("重试", key="ai_retry"):
-                            st.session_state.messages.append({"role": "user", "content": prompt})
-                            st.rerun()
-                        with st.expander("详情"):
-                            st.code(str(e))
+                        _save_book_messages(book_key, st.session_state.messages)
+
+                except Exception as e:
+                    st.error("嘟哒暂时联系不上大脑，休息一下再试吧。")
+                    if st.button("重试", key="ai_retry"):
+                        st.session_state.messages.append({"role": "user", "content": prompt})
+                        st.rerun()
+                    with st.expander("详情"):
+                        st.code(str(e))
 
         # --- BOTTOM 四卡占位（阶段 7 填充）---
         st.markdown(
