@@ -157,7 +157,10 @@ st.markdown("""
     border: 2px solid var(--mc-ink) !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 440px;
+    min-height: 360px;
+    height: 58vh;
+    max-height: 58vh;
+    overflow-y: auto;
     display: flex !important;
     flex-direction: column !important;
 }
@@ -302,10 +305,10 @@ st.markdown("""
     background: var(--mc-paper);
     border: 2px solid var(--mc-ink);
     box-shadow: 3px 3px 0 var(--mc-wood-mid);
-    padding: 6px 12px !important;
-    margin: 0 0 8px 0 !important;
+    padding: 10px 14px !important;
+    margin: 0 0 10px 0 !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 10px !important;
 }
 
 /* 左侧信息区（HTML） */
@@ -549,13 +552,9 @@ st.markdown("""
     box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
     padding: 10px 10px !important;
     margin: 0 !important;
-    min-height: 440px;
-    max-height: 440px;
-    overflow-y: auto;
-}
-/* AI 列内的聊天历史 + tab + 输入分别限高，整体不超出列高 */
-[data-testid="stColumn"]:has(.mc-ai-title) [data-testid="stChatMessage"] {
-    max-height: 200px;
+    min-height: 360px;
+    height: 58vh;
+    max-height: 58vh;
     overflow-y: auto;
 }
 
@@ -668,7 +667,7 @@ st.markdown("""
     gap: 10px !important;
 }
 
-/* 每张卡列：奶油底 + 木框 */
+/* 每张卡列：奶油底 + 木框（用 vh 锁高，超出内滚） */
 [data-testid="stColumn"]:has(.mc-card-library),
 [data-testid="stColumn"]:has(.mc-card-notes),
 [data-testid="stColumn"]:has(.mc-card-upload),
@@ -677,7 +676,9 @@ st.markdown("""
     border: 2px solid var(--mc-ink) !important;
     box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
     padding: 10px 12px !important;
-    min-height: 180px;
+    min-height: 160px;
+    max-height: 28vh;
+    overflow-y: auto;
 }
 
 /* 卡片标题 */
@@ -1090,7 +1091,10 @@ st.markdown("""
 .book-page {
     flex: 1;
     padding: 20px 26px;
-    min-height: 300px;
+    min-height: 280px;
+    height: 44vh;
+    max-height: 44vh;
+    overflow-y: auto;
     line-height: 1.75;
     letter-spacing: 0.3px;
     word-wrap: break-word;
