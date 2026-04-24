@@ -157,7 +157,7 @@ st.markdown("""
     border: 2px solid var(--mc-ink) !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 640px;
+    min-height: 440px;
     display: flex !important;
     flex-direction: column !important;
 }
@@ -170,7 +170,7 @@ st.markdown("""
 
 /* 品牌区 */
 .mc-nav-brand {
-    padding: 22px 14px 18px 14px;
+    padding: 14px 12px 10px 12px;
     text-align: center;
     border-bottom: 1px solid var(--mc-wood-mid);
     background: linear-gradient(180deg, rgba(107, 64, 36, 0.5) 0%, transparent 100%);
@@ -252,7 +252,7 @@ st.markdown("""
 
 /* 底部装饰 */
 .mc-nav-decor {
-    padding: 18px 14px 22px 14px;
+    padding: 10px 12px 14px 12px;
     text-align: center;
     border-top: 1px solid var(--mc-wood-mid);
     background: linear-gradient(0deg, rgba(107, 64, 36, 0.6) 0%, transparent 100%);
@@ -302,8 +302,8 @@ st.markdown("""
     background: var(--mc-paper);
     border: 2px solid var(--mc-ink);
     box-shadow: 3px 3px 0 var(--mc-wood-mid);
-    padding: 8px 12px !important;
-    margin: 0 0 14px 0 !important;
+    padding: 6px 12px !important;
+    margin: 0 0 8px 0 !important;
     align-items: center !important;
     gap: 8px !important;
 }
@@ -433,7 +433,7 @@ st.markdown("""
 
 /* 木质外框：包住 book-spread */
 .mc-reader-frame {
-    padding: 22px 20px;
+    padding: 14px 16px;
     background: var(--mc-wood-mid);
     border: 3px solid var(--mc-wood-deep);
     border-radius: 4px;
@@ -475,8 +475,8 @@ st.markdown("""
     background: var(--mc-paper);
     border: 2px solid var(--mc-ink);
     box-shadow: 3px 3px 0 var(--mc-wood-mid);
-    padding: 10px 14px !important;
-    margin: 14px 0 !important;
+    padding: 6px 12px !important;
+    margin: 8px 0 !important;
     align-items: center !important;
     gap: 8px !important;
 }
@@ -547,9 +547,16 @@ st.markdown("""
     background: var(--mc-cream) !important;
     border: 2px solid var(--mc-ink) !important;
     box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
-    padding: 14px 12px !important;
+    padding: 10px 10px !important;
     margin: 0 !important;
-    min-height: 640px;
+    min-height: 440px;
+    max-height: 440px;
+    overflow-y: auto;
+}
+/* AI 列内的聊天历史 + tab + 输入分别限高，整体不超出列高 */
+[data-testid="stColumn"]:has(.mc-ai-title) [data-testid="stChatMessage"] {
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 /* 顶部标题区 */
@@ -557,9 +564,9 @@ st.markdown("""
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 4px 4px 12px 4px;
+    padding: 2px 4px 8px 4px;
     border-bottom: 2px dashed var(--mc-wood-brown);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     position: relative;
 }
 .mc-ai-title-icon .px-ic { width: 22px; height: 22px; }
@@ -657,8 +664,8 @@ st.markdown("""
 /* 4 卡所在的水平块：整体框 */
 [data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .mc-card-library),
 [data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .mc-card-upload) {
-    margin-top: 18px !important;
-    gap: 12px !important;
+    margin-top: 10px !important;
+    gap: 10px !important;
 }
 
 /* 每张卡列：奶油底 + 木框 */
@@ -669,8 +676,8 @@ st.markdown("""
     background: var(--mc-cream) !important;
     border: 2px solid var(--mc-ink) !important;
     box-shadow: 3px 3px 0 var(--mc-wood-mid) !important;
-    padding: 14px 14px !important;
-    min-height: 240px;
+    padding: 10px 12px !important;
+    min-height: 180px;
 }
 
 /* 卡片标题 */
@@ -678,8 +685,8 @@ st.markdown("""
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
     border-bottom: 2px dashed var(--mc-wood-brown);
 }
 .mc-card-title-left {
@@ -1082,9 +1089,9 @@ st.markdown("""
 }
 .book-page {
     flex: 1;
-    padding: 32px 36px;
-    min-height: 420px;
-    line-height: 1.85;
+    padding: 20px 26px;
+    min-height: 300px;
+    line-height: 1.75;
     letter-spacing: 0.3px;
     word-wrap: break-word;
     position: relative;
@@ -1174,12 +1181,18 @@ body:has(.reading-area) [data-testid="stToolbar"] {
 body:has(.reading-area) [data-testid="stToolbar"]:hover {
     opacity: 1 !important;
 }
-/* 整体背景奶油色（不动 max-width / padding / min-height，避免影响 chat_input 等元素的定位） */
+/* 整体背景奶油色 + 压缩主容器顶部 padding（让主控台一屏放下） */
 body:has(.reading-area) [data-testid="stMainBlockContainer"],
 body:has(.reading-area) [data-testid="stAppViewContainer"] > .main > div,
 body:has(.reading-area) .main .block-container,
 body:has(.reading-area) [class*="block-container"] {
     background-color: var(--mc-paper) !important;
+    padding-top: 1rem !important;
+    padding-bottom: 0.5rem !important;
+}
+/* Streamlit 元素之间默认 gap 也压一压 */
+body:has(.reading-area) [data-testid="stVerticalBlock"] {
+    gap: 0.4rem !important;
 }
 
 /* A1：侧栏背景奶油 + 右侧虚线分隔（仅改最外层 section，不动任何子元素） */
@@ -2388,12 +2401,7 @@ body:has(.rd-focus-flag) iframe[title*="components"] {
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(
-    '<div class="handwrite-title">'
-    '<span class="hw-dot">■</span>SWEET SWEET HOMELAND<span class="hw-dot">■</span>'
-    '</div>',
-    unsafe_allow_html=True,
-)
+# handwrite-title "SWEET SWEET HOMELAND" 已移除（阶段 9 后：新主控台不需要顶部刊头，省出一屏空间）
 
 # 3. 上传文件：有书在读时放侧边栏，空态时放在欢迎页中央
 SUPPORTED_FORMATS = ['epub', 'txt', 'pdf', 'mobi', 'azw3']
@@ -3975,7 +3983,7 @@ if has_file:
                 })();
                 </script>
                 """,
-                height=36,
+                height=0,
             )
     
             # 双击词语查词典：悬浮小窗（萌典 API 优先 + 百度回退）
