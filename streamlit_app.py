@@ -35,6 +35,15 @@ PX_ICON = {
     "chart": '<svg xmlns="http://www.w3.org/2000/svg" class="px-ic" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="10" width="2" height="4" fill="#B96A4A"/><rect x="6" y="7" width="2" height="7" fill="#6E8B5B"/><rect x="10" y="4" width="2" height="10" fill="#D7A441"/><rect x="1" y="14" width="13" height="1" fill="#2E1D12"/></svg>',
 }
 
+# 阅读器四角装饰（阶段 8），直接输出 SVG 字符串
+MC_DECOR = {
+    "lamp": '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 16 21" shape-rendering="crispEdges" style="image-rendering:pixelated"><rect x="3" y="2" width="10" height="1" fill="#2E1D12"/><rect x="2" y="3" width="12" height="4" fill="#D7A441"/><rect x="3" y="4" width="10" height="2" fill="#F2C66D"/><rect x="2" y="7" width="12" height="1" fill="#2E1D12"/><rect x="7" y="8" width="2" height="7" fill="#6B4024"/><rect x="4" y="15" width="8" height="2" fill="#3B2416"/><rect x="3" y="17" width="10" height="1" fill="#2E1D12"/><rect x="4" y="10" width="2" height="2" fill="#F2C66D" opacity="0.7"/></svg>',
+    "plant": '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="44" viewBox="0 0 15 20" shape-rendering="crispEdges" style="image-rendering:pixelated"><rect x="5" y="2" width="5" height="2" fill="#6E8B5B"/><rect x="3" y="4" width="9" height="2" fill="#4A6D4E"/><rect x="5" y="6" width="5" height="1" fill="#6E8B5B"/><rect x="2" y="3" width="2" height="1" fill="#6E8B5B"/><rect x="11" y="3" width="2" height="1" fill="#6E8B5B"/><rect x="7" y="7" width="1" height="4" fill="#6B4024"/><rect x="2" y="11" width="11" height="1" fill="#D7A441"/><rect x="3" y="12" width="9" height="6" fill="#B96A4A"/><rect x="4" y="13" width="7" height="1" fill="#D46A4A" opacity="0.7"/><rect x="4" y="18" width="7" height="1" fill="#8B3F2A"/></svg>',
+    "coffee": '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 16 20" shape-rendering="crispEdges" style="image-rendering:pixelated"><rect x="5" y="1" width="1" height="2" fill="#8E735B" opacity="0.5"/><rect x="7" y="0" width="1" height="3" fill="#8E735B" opacity="0.5"/><rect x="9" y="1" width="1" height="2" fill="#8E735B" opacity="0.5"/><rect x="3" y="6" width="9" height="10" fill="#FFF6E8"/><rect x="3" y="6" width="9" height="1" fill="#2E1D12"/><rect x="3" y="15" width="9" height="1" fill="#2E1D12"/><rect x="3" y="6" width="1" height="10" fill="#2E1D12"/><rect x="11" y="6" width="1" height="10" fill="#2E1D12"/><rect x="4" y="7" width="7" height="3" fill="#4A2D16"/><rect x="4" y="10" width="7" height="1" fill="#6B4226" opacity="0.5"/><rect x="12" y="9" width="3" height="1" fill="#2E1D12"/><rect x="14" y="10" width="1" height="3" fill="#2E1D12"/><rect x="12" y="13" width="3" height="1" fill="#2E1D12"/></svg>',
+    "notebook": '<svg xmlns="http://www.w3.org/2000/svg" width="44" height="28" viewBox="0 0 20 12" shape-rendering="crispEdges" style="image-rendering:pixelated"><rect x="1" y="4" width="18" height="7" fill="#FFF6E8"/><rect x="1" y="4" width="18" height="1" fill="#2E1D12"/><rect x="1" y="10" width="18" height="1" fill="#2E1D12"/><rect x="1" y="4" width="1" height="7" fill="#2E1D12"/><rect x="18" y="4" width="1" height="7" fill="#2E1D12"/><rect x="9" y="4" width="2" height="7" fill="#2E1D12"/><rect x="2" y="6" width="6" height="1" fill="#E5DCC0"/><rect x="2" y="8" width="5" height="1" fill="#E5DCC0"/><rect x="11" y="6" width="7" height="1" fill="#E5DCC0"/><rect x="11" y="8" width="5" height="1" fill="#E5DCC0"/><rect x="13" y="2" width="1" height="3" fill="#B96A4A"/><rect x="14" y="1" width="1" height="4" fill="#D7A441"/></svg>',
+    "mini_books": '<svg xmlns="http://www.w3.org/2000/svg" width="42" height="26" viewBox="0 0 20 12" shape-rendering="crispEdges" style="image-rendering:pixelated"><rect x="1" y="5" width="18" height="6" fill="#6B4024"/><rect x="2" y="2" width="3" height="9" fill="#B96A4A"/><rect x="2" y="3" width="3" height="1" fill="#D46A4A"/><rect x="6" y="4" width="3" height="7" fill="#6E8B5B"/><rect x="6" y="5" width="3" height="1" fill="#7FA169"/><rect x="10" y="1" width="3" height="10" fill="#D7A441"/><rect x="10" y="2" width="3" height="1" fill="#E6B859"/><rect x="14" y="3" width="4" height="8" fill="#7a96b4"/><rect x="14" y="4" width="4" height="1" fill="#8DABC4"/></svg>',
+}
+
 # 左侧导航菜单（spec v1 §9 模块 A；key → Chinese label + emoji icon，阶段 8 会换像素 SVG）
 NAV_ITEMS = [
     ("shelf",    "书架",      "📚"),
@@ -441,6 +450,25 @@ st.markdown("""
 }
 .mc-reader-frame::before { top: 6px; left: 8px; }
 .mc-reader-frame::after  { bottom: 6px; right: 8px; }
+
+/* 四角装饰（阶段 8） */
+.mc-reader-decor {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    image-rendering: pixelated;
+}
+.mc-reader-decor.decor-tl { top: -14px; left: 20px; }
+.mc-reader-decor.decor-tr { top: -18px; right: 20px; }
+.mc-reader-decor.decor-bl { bottom: -12px; left: 24px; }
+.mc-reader-decor.decor-br { bottom: -14px; right: 24px; }
+/* 底部装饰：小书堆放中间偏右 */
+.mc-reader-decor.decor-shelf { bottom: -10px; right: 100px; }
+
+/* 手机端隐藏装饰（避免拥挤） */
+@media (max-width: 900px) {
+    .mc-reader-decor { display: none; }
+}
 
 /* 6 按钮控制条：st.columns 所在的水平块 */
 [data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] .st-key-rd_prev) {
@@ -3443,9 +3471,15 @@ if has_file:
                 _celebrate_html = _bursts_html + '<div class="rb-banner">★ 本章读完 ★</div>'
     
             # 阶段 5：book-spread 外套 mc-reader-frame；page-indicator/nav-row 迁到下方控制条
+            # 阶段 8：木框四角加像素装饰（灯/盆栽/咖啡杯/笔记本/小书堆）
             reading_html = f'''
             <div class="reading-area">
                 <div class="mc-reader-frame">
+                    <div class="mc-reader-decor decor-tl" aria-hidden="true">{MC_DECOR["plant"]}</div>
+                    <div class="mc-reader-decor decor-tr" aria-hidden="true">{MC_DECOR["lamp"]}</div>
+                    <div class="mc-reader-decor decor-bl" aria-hidden="true">{MC_DECOR["notebook"]}</div>
+                    <div class="mc-reader-decor decor-br" aria-hidden="true">{MC_DECOR["coffee"]}</div>
+                    <div class="mc-reader-decor decor-shelf" aria-hidden="true">{MC_DECOR["mini_books"]}</div>
                     <div class="book-spread" data-page="{current_page}" style="{theme_css} font-size: {fs}px; font-family: {ff_css};">
                         <div class="book-page book-page-left">
                             {left_html}
