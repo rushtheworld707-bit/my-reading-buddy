@@ -965,6 +965,38 @@ st.markdown("""
     white-space: nowrap;
 }
 
+/* 中央列空态（无书时书页占位） */
+.mc-empty-center-inner {
+    min-height: 420px;
+    background: var(--mc-cream);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 40px 20px;
+}
+.mc-empty-center-inner .mc-empty-book {
+    margin: 0;
+}
+.mc-empty-center-inner .mc-empty-cta {
+    font-family: 'Zpix', 'Noto Serif SC', serif;
+    font-size: 16px;
+    color: var(--mc-ink);
+    letter-spacing: 1px;
+    margin: 0;
+    text-align: center;
+}
+.mc-empty-center-inner .mc-empty-sub {
+    font-family: 'Zpix', sans-serif;
+    font-size: 12px;
+    color: var(--mc-gray-brown);
+    margin: 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
 /* ==========================================================================
    阶段 9 响应式：平板 / 手机折叠
    ========================================================================== */
@@ -4701,73 +4733,290 @@ if has_file:
     else:
         st.warning("书本解析失败，请确认文件是否损坏，或换一本书试试。")
 else:
-    # 阶段 9：无书时的精简引导页（替代旧 zine-welcome 全屏欢迎页）
-    st.markdown(
-        '''
-        <div class="mc-empty-page">
-            <div class="mc-empty-brand">
-                <h1>嘟哒</h1>
-                <p>我的阅读伙伴</p>
-            </div>
-            <div class="mc-empty-book" aria-hidden="true">
-                <svg width="120" height="90" viewBox="0 0 32 24" shape-rendering="crispEdges">
-                    <rect x="2" y="3" width="28" height="20" fill="#B96A4A"/>
-                    <rect x="2" y="3" width="28" height="2" fill="#8B3F2A"/>
-                    <rect x="2" y="21" width="28" height="2" fill="#8B3F2A"/>
-                    <rect x="2" y="3" width="2" height="20" fill="#8B3F2A"/>
-                    <rect x="28" y="3" width="2" height="20" fill="#8B3F2A"/>
-                    <rect x="6" y="9" width="20" height="2" fill="#FFF6E8"/>
-                    <rect x="8" y="13" width="16" height="1" fill="#FFF6E8" opacity="0.7"/>
-                    <rect x="14" y="18" width="4" height="1" fill="#D7A441"/>
-                    <rect x="15" y="17" width="2" height="3" fill="#D7A441"/>
-                </svg>
-            </div>
-            <p class="mc-empty-cta">上传一本书，开始与你的阅读伙伴一起读书</p>
-        </div>
-        ''',
-        unsafe_allow_html=True,
+    # 无书时直接渲染完整 4 区主控台（中央区改成闭合书 + 上传）
+    if "_active_nav" not in st.session_state:
+        st.session_state._active_nav = "reading"
+    _active_nav = st.session_state._active_nav
+
+    # ===== 顶部状态条（空态 placeholders）=====
+    _etb_info, _etb_s, _etb_t, _etb_f, _etb_b, _etb_a = st.columns(
+        [60, 8, 8, 8, 8, 8], gap="small"
     )
-
-    # 居中上传器
-    _eu1, _eu2, _eu3 = st.columns([1, 2, 1])
-    with _eu2:
-        _empty_upload = st.file_uploader(
-            "选择电子书文件",
-            type=SUPPORTED_FORMATS,
-            help="支持 EPUB、TXT、PDF、MOBI、AZW3，单文件 ≤ 200MB",
-            key="upload_empty_page",
-            label_visibility="collapsed",
-        )
-        if _empty_upload:
-            st.session_state.file_bytes = _empty_upload.getvalue()
-            st.session_state.file_name = _empty_upload.name
-            st.rerun()
-
-    # 之前读过的书：localStorage 元数据还在，重新选取文件即可继续
-    _empty_lib = _load_library()
-    if _empty_lib:
+    with _etb_info:
         st.markdown(
-            '<h3 class="mc-empty-library-title">📚 之前读过的书</h3>',
+            f'<div class="mc-topbar-info">'
+            f'<span class="mc-topbar-book-icon">{PX_ICON["read"]}</span>'
+            f'<span class="mc-topbar-title">—</span>'
+            f'<span class="mc-topbar-sep">·</span>'
+            f'<span class="mc-topbar-chapter">尚未选择书籍</span>'
+            f'<div class="mc-topbar-progress">'
+            f'<span class="mc-topbar-progress-label">0%</span>'
+            f'<div class="mc-topbar-progress-bar"><div class="mc-topbar-progress-fill" style="width:0%"></div></div>'
+            f'</div></div>',
             unsafe_allow_html=True,
         )
-        st.caption(
-            "由于浏览器存储限制，书的内容不在本地保留。重新上传同一本书的文件即可恢复进度/笔记/AI 对话。"
+    with _etb_s:
+        st.button("🔍", key="etb_search", help="上传一本书后可用", disabled=True, use_container_width=True)
+    with _etb_t:
+        st.button("☀", key="etb_theme", help="上传一本书后可调主题", disabled=True, use_container_width=True)
+    with _etb_f:
+        st.button("Aa", key="etb_font", help="上传一本书后可调字号", disabled=True, use_container_width=True)
+    with _etb_b:
+        st.button("🔖", key="etb_bm", help="上传一本书后可加书签", disabled=True, use_container_width=True)
+    with _etb_a:
+        with st.popover("👤", use_container_width=True, help="账号与偏好", key="etb_avatar"):
+            st.markdown("**👤 我**")
+            st.caption("当前书库：本地浏览器")
+
+    # ===== 3 列骨架 =====
+    _mc_nav, _mc_center, _mc_right = st.columns([16, 56, 28], gap="small")
+
+    # 左侧导航（与 has_file 版本一致）
+    with _mc_nav:
+        st.markdown("""
+        <div class="mc-nav-brand">
+            <h1 class="mc-nav-brand-title">嘟哒</h1>
+            <p class="mc-nav-brand-subtitle">我的阅读伙伴</p>
+            <div class="mc-nav-brand-figure" aria-hidden="true">
+                <svg width="44" height="44" viewBox="0 0 22 22">
+                    <rect x="5" y="1" width="12" height="6" fill="#4A2D1A"/>
+                    <rect x="6" y="3" width="10" height="6" fill="#E5C9A3"/>
+                    <rect x="5" y="7" width="2" height="2" fill="#4A2D1A"/>
+                    <rect x="15" y="7" width="2" height="2" fill="#4A2D1A"/>
+                    <rect x="8" y="5" width="2" height="1" fill="#2E1D12"/>
+                    <rect x="12" y="5" width="2" height="1" fill="#2E1D12"/>
+                    <rect x="7" y="7" width="1" height="1" fill="#E8A08F"/>
+                    <rect x="14" y="7" width="1" height="1" fill="#E8A08F"/>
+                    <rect x="10" y="7" width="2" height="1" fill="#B96A4A"/>
+                    <rect x="9" y="9" width="4" height="1" fill="#E5C9A3"/>
+                    <rect x="5" y="10" width="12" height="7" fill="#6E8B5B"/>
+                    <rect x="3" y="11" width="2" height="5" fill="#6E8B5B"/>
+                    <rect x="17" y="11" width="2" height="5" fill="#6E8B5B"/>
+                    <rect x="4" y="14" width="2" height="2" fill="#E5C9A3"/>
+                    <rect x="16" y="14" width="2" height="2" fill="#E5C9A3"/>
+                    <rect x="6" y="14" width="10" height="4" fill="#B96A4A"/>
+                    <rect x="7" y="15" width="8" height="2" fill="#F6E7C8"/>
+                    <rect x="2" y="19" width="18" height="3" fill="#8B5E3C"/>
+                    <rect x="1" y="20" width="20" height="2" fill="#6B4024"/>
+                </svg>
+                <svg width="28" height="36" viewBox="0 0 14 18">
+                    <rect x="5" y="1" width="4" height="1" fill="#D7A441"/>
+                    <rect x="4" y="2" width="6" height="2" fill="#D7A441"/>
+                    <rect x="5" y="4" width="4" height="1" fill="#D7A441"/>
+                    <rect x="6" y="2" width="2" height="2" fill="#B96A4A"/>
+                    <rect x="6" y="5" width="2" height="6" fill="#6E8B5B"/>
+                    <rect x="3" y="8" width="3" height="1" fill="#6E8B5B"/>
+                    <rect x="8" y="9" width="3" height="1" fill="#6E8B5B"/>
+                    <rect x="2" y="11" width="10" height="1" fill="#D7A441"/>
+                    <rect x="2" y="12" width="10" height="4" fill="#B96A4A"/>
+                    <rect x="3" y="16" width="8" height="1" fill="#8B3F2A"/>
+                </svg>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        for _nav_key, _nav_label, _nav_emoji in NAV_ITEMS:
+            if st.button(
+                f"{_nav_emoji}  {_nav_label}",
+                key=f"nav_empty_{_nav_key}",
+                use_container_width=True,
+            ):
+                st.session_state._active_nav = _nav_key
+                st.rerun()
+        st.markdown("""
+        <div class="mc-nav-decor" aria-hidden="true">
+            <svg width="40" height="48" viewBox="0 0 16 20">
+                <rect x="2" y="2" width="12" height="2" fill="#2E1D12"/>
+                <rect x="3" y="4" width="10" height="4" fill="#D7A441"/>
+                <rect x="4" y="5" width="8" height="2" fill="#F2C66D"/>
+                <rect x="7" y="8" width="2" height="8" fill="#6B4024"/>
+                <rect x="4" y="16" width="8" height="2" fill="#3B2416"/>
+            </svg>
+            <svg width="40" height="22" viewBox="0 0 16 10" style="margin-top:8px">
+                <rect x="2" y="3" width="12" height="2" fill="#6E8B5B"/>
+                <rect x="1" y="5" width="14" height="2" fill="#B96A4A"/>
+                <rect x="2" y="7" width="12" height="1" fill="#8B3F2A"/>
+            </svg>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <style>
+        .st-key-nav_empty_{_active_nav} button {{
+            background: var(--mc-wood-light) !important;
+            border-left-color: var(--mc-mustard) !important;
+            font-weight: 700 !important;
+        }}
+        .st-key-nav_empty_{_active_nav} button p {{
+            font-weight: 700 !important;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
+    # 中央：木框里装闭合书 SVG + 上传 CTA
+    with _mc_center:
+        st.markdown(
+            '''
+            <div class="reading-area">
+                <div class="mc-reader-frame">
+                    <div class="mc-empty-center-inner">
+                        <div class="mc-empty-book" aria-hidden="true">
+                            <svg width="140" height="106" viewBox="0 0 32 24" shape-rendering="crispEdges">
+                                <rect x="2" y="3" width="28" height="20" fill="#B96A4A"/>
+                                <rect x="2" y="3" width="28" height="2" fill="#8B3F2A"/>
+                                <rect x="2" y="21" width="28" height="2" fill="#8B3F2A"/>
+                                <rect x="2" y="3" width="2" height="20" fill="#8B3F2A"/>
+                                <rect x="28" y="3" width="2" height="20" fill="#8B3F2A"/>
+                                <rect x="6" y="9" width="20" height="2" fill="#FFF6E8"/>
+                                <rect x="8" y="13" width="16" height="1" fill="#FFF6E8" opacity="0.7"/>
+                                <rect x="14" y="18" width="4" height="1" fill="#D7A441"/>
+                                <rect x="15" y="17" width="2" height="3" fill="#D7A441"/>
+                            </svg>
+                        </div>
+                        <p class="mc-empty-cta">上传一本书，开始与你的阅读伙伴一起读书</p>
+                        <p class="mc-empty-sub">↓ 从下方「上传书籍」卡片选择文件</p>
+                    </div>
+                </div>
+            </div>
+            ''',
+            unsafe_allow_html=True,
         )
-        _lib_items_e = sorted(
-            _empty_lib.items(),
+
+    # 右侧 AI：禁用态 placeholder
+    with _mc_right:
+        st.markdown(
+            f'<div class="mc-ai-title">'
+            f'<span class="mc-ai-title-icon">{PX_ICON["robot"]}</span>'
+            f'<span class="mc-ai-title-text">AI 助读</span>'
+            f'<span class="mc-ai-title-pin">📍</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<p style="padding:30px 10px;text-align:center;color:var(--mc-gray-brown);'
+            'font-family:Zpix,sans-serif;font-size:13px;line-height:1.8;">'
+            '先上传一本书吧～<br>嘟哒要和你一起翻，才能帮你理解细节。</p>',
+            unsafe_allow_html=True,
+        )
+
+    # ===== 底部 4 卡 =====
+    _c_lib, _c_notes, _c_upload, _c_stats = st.columns([30, 24, 22, 24], gap="small")
+
+    # 卡 1：我的书架
+    with _c_lib:
+        st.markdown(
+            f'<div class="mc-card-library"></div>'
+            f'<div class="mc-card-title">'
+            f'<span class="mc-card-title-left">{PX_ICON["shelf"]} 我的书架</span>'
+            f'<span class="mc-card-viewall">查看全部 ›</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        _lib_all_e = _load_library()
+        _recent_e = sorted(
+            _lib_all_e.items(),
             key=lambda kv: kv[1].get("last_opened_at", ""),
             reverse=True,
-        )[:8]
-        _ncols_e = min(4, len(_lib_items_e))
-        if _ncols_e > 0:
-            _e_cols = st.columns(_ncols_e, gap="small")
-            for _i, (_k, _meta) in enumerate(_lib_items_e):
-                with _e_cols[_i % _ncols_e]:
-                    _color_e = _meta.get("cover_color", "#8B5E3C")
-                    _title_e = _meta.get("title", _k)
-                    _short_e = _title_e[:8] + "…" if len(_title_e) > 8 else _title_e
-                    st.markdown(
-                        f'<div class="mc-empty-lib-cover" style="background:{_color_e}">{html.escape(_short_e)}</div>'
-                        f'<div class="mc-empty-lib-title">{html.escape(_title_e)}</div>',
-                        unsafe_allow_html=True,
+        )[:4]
+        if not _recent_e:
+            st.markdown(
+                '<div class="mc-lib-empty">还没有书～<br>右侧上传你的第一本书</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            _progress_store_e = _load_progress()
+            _lib_html_e = '<div class="mc-lib-grid">'
+            for _bk_e, _bm_e in _recent_e:
+                _cover_e = _bm_e.get("cover_color", "#8B5E3C")
+                _title_disp_e = _bm_e.get("title", _bk_e)
+                _title_short_e = _title_disp_e[:8] + "…" if len(_title_disp_e) > 8 else _title_disp_e
+                _prog_e = _progress_store_e.get(_bk_e, {})
+                _pct_e = 0
+                if _bm_e.get("chapter_count"):
+                    _pct_e = int(
+                        (int(_prog_e.get("chapter_idx", 0)) + 1) / max(1, int(_bm_e["chapter_count"])) * 100
                     )
+                    _pct_e = min(max(_pct_e, 0), 100)
+                _lib_html_e += (
+                    f'<div class="mc-lib-item">'
+                    f'<div class="mc-lib-cover" style="background:{_cover_e}">{html.escape(_title_short_e)}</div>'
+                    f'<div class="mc-lib-name">{html.escape(_title_disp_e)}</div>'
+                    f'<div class="mc-lib-progress-wrap"><div class="mc-lib-progress-fill" style="width:{_pct_e}%"></div></div>'
+                    f'<div class="mc-lib-percent">{_pct_e}%</div>'
+                    f'</div>'
+                )
+            _lib_html_e += '</div>'
+            st.markdown(_lib_html_e, unsafe_allow_html=True)
+
+    # 卡 2：摘录笔记（空态）
+    with _c_notes:
+        st.markdown(
+            f'<div class="mc-card-notes"></div>'
+            f'<div class="mc-card-title">'
+            f'<span class="mc-card-title-left">{PX_ICON["save"]} 摘录与笔记</span>'
+            f'<span class="mc-card-viewall">查看全部 ›</span>'
+            f'</div>'
+            '<div class="mc-lib-empty">暂无摘录<br>上传一本书开始阅读，选段即可保存</div>',
+            unsafe_allow_html=True,
+        )
+
+    # 卡 3：上传书籍（主 CTA）
+    with _c_upload:
+        st.markdown(
+            f'<div class="mc-card-upload"></div>'
+            f'<div class="mc-card-title">'
+            f'<span class="mc-card-title-left">{PX_ICON["upload"]} 上传书籍</span>'
+            f'</div>'
+            f'<div class="mc-upload-hint">支持 EPUB / PDF / MOBI / TXT / AZW3 格式</div>',
+            unsafe_allow_html=True,
+        )
+        _empty_upload_card = st.file_uploader(
+            "上传新书",
+            type=SUPPORTED_FORMATS,
+            help="支持 EPUB、TXT、PDF、MOBI、AZW3",
+            key="upload_bottom_empty",
+            label_visibility="collapsed",
+        )
+        if _empty_upload_card:
+            st.session_state.file_bytes = _empty_upload_card.getvalue()
+            st.session_state.file_name = _empty_upload_card.name
+            st.rerun()
+
+    # 卡 4：阅读统计
+    with _c_stats:
+        st.markdown(
+            f'<div class="mc-card-stats"></div>'
+            f'<div class="mc-card-title">'
+            f'<span class="mc-card-title-left">{PX_ICON["chart"]} 阅读统计</span>'
+            f'<span class="mc-card-viewall">本周</span>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+        _stats_e = _compute_reading_stats()
+        _h_e = _stats_e["total_hours"]
+        _m_e = _stats_e["total_minutes"]
+        _hm_e = f"{_h_e} h {_m_e} m" if _h_e > 0 else f"{_m_e} m" if _m_e > 0 else "未开始"
+        _wd_e = _stats_e["weekly_delta_days"]
+        if _wd_e > 0:
+            _dcls_e, _dtxt_e = "up", f"▲{_wd_e}"
+        elif _wd_e < 0:
+            _dcls_e, _dtxt_e = "down", f"▼{abs(_wd_e)}"
+        else:
+            _dcls_e, _dtxt_e = "flat", "持平"
+        _stats_html_e = (
+            f'<div class="mc-stats-row">'
+            f'<span class="mc-stats-icon">🕐</span>'
+            f'<span class="mc-stats-label">总阅读时长</span>'
+            f'<span class="mc-stats-value">{_hm_e}</span>'
+            f'</div>'
+            f'<div class="mc-stats-row">'
+            f'<span class="mc-stats-icon">📖</span>'
+            f'<span class="mc-stats-label">已读书籍</span>'
+            f'<span class="mc-stats-value">{_stats_e["books_read"]} 本</span>'
+            f'</div>'
+            f'<div class="mc-stats-row">'
+            f'<span class="mc-stats-icon">🔥</span>'
+            f'<span class="mc-stats-label">连续天数</span>'
+            f'<span class="mc-stats-value">{_stats_e["streak"]} 天</span>'
+            f'<span class="mc-stats-delta {_dcls_e}">{_dtxt_e}</span>'
+            f'</div>'
+        )
+        st.markdown(_stats_html_e, unsafe_allow_html=True)
