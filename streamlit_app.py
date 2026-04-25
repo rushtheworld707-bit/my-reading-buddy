@@ -45,90 +45,71 @@ MC_DECOR = {
 }
 
 # 左侧导航底部装饰：木桌 + 暖光台灯 + 红/棕/黄三本书堆 + 盆栽（设计图同款）
-MC_NAV_DECOR_SVG = '''
-<div class="mc-nav-decor" aria-hidden="true">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64" shape-rendering="crispEdges" style="image-rendering:pixelated">
-    <!-- 暖光晕（衬底） -->
-    <rect x="22" y="8" width="36" height="40" fill="#F2C66D" opacity="0.12"/>
-    <rect x="26" y="6" width="28" height="44" fill="#F4D27A" opacity="0.10"/>
-
-    <!-- 台灯：吊钩 + 顶盖 + 玻璃罩（暖光） + 铜底座 -->
-    <rect x="39" y="2" width="2" height="2" fill="#3B2416"/>
-    <rect x="38" y="4" width="4" height="1" fill="#3B2416"/>
-    <rect x="34" y="5" width="12" height="2" fill="#5C3A1F"/>
-    <rect x="33" y="7" width="14" height="2" fill="#3B2416"/>
-    <rect x="32" y="9" width="16" height="2" fill="#8B5E3C"/>
-    <rect x="33" y="11" width="14" height="2" fill="#5C3A1F"/>
-    <!-- 玻璃罩 + 暖光 -->
-    <rect x="33" y="13" width="14" height="18" fill="#F2C66D"/>
-    <rect x="34" y="14" width="12" height="16" fill="#FFE08A"/>
-    <rect x="35" y="15" width="10" height="14" fill="#FFF0B0"/>
-    <rect x="37" y="17" width="6" height="10" fill="#FFFBE0"/>
-    <rect x="38" y="19" width="4" height="6" fill="#FFFFFF" opacity="0.85"/>
-    <!-- 玻璃罩竖筋 -->
-    <rect x="36" y="13" width="1" height="18" fill="#5C3A1F" opacity="0.45"/>
-    <rect x="43" y="13" width="1" height="18" fill="#5C3A1F" opacity="0.45"/>
-    <rect x="33" y="22" width="14" height="1" fill="#5C3A1F" opacity="0.30"/>
-    <!-- 罩底盖 -->
-    <rect x="33" y="31" width="14" height="2" fill="#5C3A1F"/>
-    <rect x="32" y="33" width="16" height="2" fill="#8B5E3C"/>
-    <rect x="34" y="35" width="12" height="2" fill="#3B2416"/>
-    <!-- 铜底座 -->
-    <rect x="36" y="37" width="8" height="6" fill="#5C3A1F"/>
-    <rect x="37" y="38" width="6" height="4" fill="#8B5E3C"/>
-    <rect x="34" y="43" width="12" height="2" fill="#3B2416"/>
-
-    <!-- 木桌面 -->
-    <rect x="0" y="45" width="80" height="3" fill="#8B5E3C"/>
-    <rect x="0" y="48" width="80" height="2" fill="#5C3A1F"/>
-    <rect x="0" y="50" width="80" height="2" fill="#3B2416"/>
-    <!-- 桌纹 -->
-    <rect x="6" y="46" width="10" height="1" fill="#A77E2A" opacity="0.4"/>
-    <rect x="22" y="46" width="14" height="1" fill="#A77E2A" opacity="0.4"/>
-    <rect x="44" y="46" width="12" height="1" fill="#A77E2A" opacity="0.4"/>
-    <rect x="60" y="46" width="14" height="1" fill="#A77E2A" opacity="0.4"/>
-    <!-- 灯光投射在桌面 -->
-    <rect x="26" y="45" width="28" height="1" fill="#FFE08A" opacity="0.5"/>
-    <rect x="30" y="48" width="20" height="1" fill="#F2C66D" opacity="0.3"/>
-
-    <!-- 右侧书堆 -->
-    <!-- 底书：深红 -->
-    <rect x="52" y="38" width="22" height="7" fill="#7A2E1E"/>
-    <rect x="52" y="38" width="22" height="1" fill="#5A1E12"/>
-    <rect x="52" y="44" width="22" height="1" fill="#5A1E12"/>
-    <rect x="73" y="39" width="1" height="5" fill="#F6E7C8"/>
-    <rect x="55" y="40" width="3" height="1" fill="#D7A441"/>
-    <!-- 中书：棕红 -->
-    <rect x="54" y="32" width="20" height="6" fill="#B96A4A"/>
-    <rect x="54" y="32" width="20" height="1" fill="#8B3F2A"/>
-    <rect x="54" y="37" width="20" height="1" fill="#8B3F2A"/>
-    <rect x="73" y="33" width="1" height="4" fill="#F6E7C8"/>
-    <!-- 顶书：芥黄 -->
-    <rect x="56" y="27" width="16" height="5" fill="#D7A441"/>
-    <rect x="56" y="27" width="16" height="1" fill="#A77E2A"/>
-    <rect x="56" y="31" width="16" height="1" fill="#A77E2A"/>
-    <rect x="71" y="28" width="1" height="3" fill="#F6E7C8"/>
-
-    <!-- 左侧盆栽 -->
-    <!-- 叶 -->
-    <rect x="11" y="22" width="2" height="14" fill="#5A7349"/>
-    <rect x="13" y="20" width="2" height="16" fill="#6E8B5B"/>
-    <rect x="9"  y="24" width="2" height="12" fill="#6E8B5B"/>
-    <rect x="15" y="24" width="2" height="12" fill="#5A7349"/>
-    <rect x="7"  y="28" width="2" height="8"  fill="#8AA670"/>
-    <rect x="17" y="26" width="2" height="10" fill="#8AA670"/>
-    <rect x="10" y="20" width="2" height="2"  fill="#6E8B5B"/>
-    <rect x="14" y="18" width="2" height="2"  fill="#8AA670"/>
-    <rect x="12" y="16" width="2" height="2"  fill="#6E8B5B"/>
-    <!-- 花盆 -->
-    <rect x="5"  y="36" width="16" height="2" fill="#8B3F2A"/>
-    <rect x="6"  y="38" width="14" height="6" fill="#B96A4A"/>
-    <rect x="7"  y="39" width="12" height="1" fill="#D2876A" opacity="0.55"/>
-    <rect x="6"  y="44" width="14" height="1" fill="#5A1E12"/>
-    <rect x="7"  y="36" width="12" height="1" fill="#3B2416"/>
-  </svg>
-</div>
-'''
+# 单行字符串：避免 Streamlit markdown 解析多行 HTML 时把缩进/空行当成 code block
+MC_NAV_DECOR_SVG = (
+    '<div class="mc-nav-decor" aria-hidden="true">'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64" shape-rendering="crispEdges" style="image-rendering:pixelated">'
+    '<rect x="22" y="8" width="36" height="40" fill="#F2C66D" opacity="0.12"/>'
+    '<rect x="26" y="6" width="28" height="44" fill="#F4D27A" opacity="0.1"/>'
+    '<rect x="39" y="2" width="2" height="2" fill="#3B2416"/>'
+    '<rect x="38" y="4" width="4" height="1" fill="#3B2416"/>'
+    '<rect x="34" y="5" width="12" height="2" fill="#5C3A1F"/>'
+    '<rect x="33" y="7" width="14" height="2" fill="#3B2416"/>'
+    '<rect x="32" y="9" width="16" height="2" fill="#8B5E3C"/>'
+    '<rect x="33" y="11" width="14" height="2" fill="#5C3A1F"/>'
+    '<rect x="33" y="13" width="14" height="18" fill="#F2C66D"/>'
+    '<rect x="34" y="14" width="12" height="16" fill="#FFE08A"/>'
+    '<rect x="35" y="15" width="10" height="14" fill="#FFF0B0"/>'
+    '<rect x="37" y="17" width="6" height="10" fill="#FFFBE0"/>'
+    '<rect x="38" y="19" width="4" height="6" fill="#FFFFFF" opacity="0.85"/>'
+    '<rect x="36" y="13" width="1" height="18" fill="#5C3A1F" opacity="0.45"/>'
+    '<rect x="43" y="13" width="1" height="18" fill="#5C3A1F" opacity="0.45"/>'
+    '<rect x="33" y="22" width="14" height="1" fill="#5C3A1F" opacity="0.3"/>'
+    '<rect x="33" y="31" width="14" height="2" fill="#5C3A1F"/>'
+    '<rect x="32" y="33" width="16" height="2" fill="#8B5E3C"/>'
+    '<rect x="34" y="35" width="12" height="2" fill="#3B2416"/>'
+    '<rect x="36" y="37" width="8" height="6" fill="#5C3A1F"/>'
+    '<rect x="37" y="38" width="6" height="4" fill="#8B5E3C"/>'
+    '<rect x="34" y="43" width="12" height="2" fill="#3B2416"/>'
+    '<rect x="0" y="45" width="80" height="3" fill="#8B5E3C"/>'
+    '<rect x="0" y="48" width="80" height="2" fill="#5C3A1F"/>'
+    '<rect x="0" y="50" width="80" height="2" fill="#3B2416"/>'
+    '<rect x="6" y="46" width="10" height="1" fill="#A77E2A" opacity="0.4"/>'
+    '<rect x="22" y="46" width="14" height="1" fill="#A77E2A" opacity="0.4"/>'
+    '<rect x="44" y="46" width="12" height="1" fill="#A77E2A" opacity="0.4"/>'
+    '<rect x="60" y="46" width="14" height="1" fill="#A77E2A" opacity="0.4"/>'
+    '<rect x="26" y="45" width="28" height="1" fill="#FFE08A" opacity="0.5"/>'
+    '<rect x="30" y="48" width="20" height="1" fill="#F2C66D" opacity="0.3"/>'
+    '<rect x="52" y="38" width="22" height="7" fill="#7A2E1E"/>'
+    '<rect x="52" y="38" width="22" height="1" fill="#5A1E12"/>'
+    '<rect x="52" y="44" width="22" height="1" fill="#5A1E12"/>'
+    '<rect x="73" y="39" width="1" height="5" fill="#F6E7C8"/>'
+    '<rect x="55" y="40" width="3" height="1" fill="#D7A441"/>'
+    '<rect x="54" y="32" width="20" height="6" fill="#B96A4A"/>'
+    '<rect x="54" y="32" width="20" height="1" fill="#8B3F2A"/>'
+    '<rect x="54" y="37" width="20" height="1" fill="#8B3F2A"/>'
+    '<rect x="73" y="33" width="1" height="4" fill="#F6E7C8"/>'
+    '<rect x="56" y="27" width="16" height="5" fill="#D7A441"/>'
+    '<rect x="56" y="27" width="16" height="1" fill="#A77E2A"/>'
+    '<rect x="56" y="31" width="16" height="1" fill="#A77E2A"/>'
+    '<rect x="71" y="28" width="1" height="3" fill="#F6E7C8"/>'
+    '<rect x="11" y="22" width="2" height="14" fill="#5A7349"/>'
+    '<rect x="13" y="20" width="2" height="16" fill="#6E8B5B"/>'
+    '<rect x="9" y="24" width="2" height="12" fill="#6E8B5B"/>'
+    '<rect x="15" y="24" width="2" height="12" fill="#5A7349"/>'
+    '<rect x="7" y="28" width="2" height="8" fill="#8AA670"/>'
+    '<rect x="17" y="26" width="2" height="10" fill="#8AA670"/>'
+    '<rect x="10" y="20" width="2" height="2" fill="#6E8B5B"/>'
+    '<rect x="14" y="18" width="2" height="2" fill="#8AA670"/>'
+    '<rect x="12" y="16" width="2" height="2" fill="#6E8B5B"/>'
+    '<rect x="5" y="36" width="16" height="2" fill="#8B3F2A"/>'
+    '<rect x="6" y="38" width="14" height="6" fill="#B96A4A"/>'
+    '<rect x="7" y="39" width="12" height="1" fill="#D2876A" opacity="0.55"/>'
+    '<rect x="6" y="44" width="14" height="1" fill="#5A1E12"/>'
+    '<rect x="7" y="36" width="12" height="1" fill="#3B2416"/>'
+    '</svg>'
+    '</div>'
+)
 
 # 左侧导航菜单（spec v1 §9 模块 A；key → Chinese label + emoji icon，阶段 8 会换像素 SVG）
 NAV_ITEMS = [
