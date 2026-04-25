@@ -564,24 +564,36 @@ st.markdown("""
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 2px 4px 8px 4px;
+    padding: 4px 4px 10px 4px;
     border-bottom: 2px dashed var(--mc-wood-brown);
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     position: relative;
+    min-height: 36px;
 }
-.mc-ai-title-icon .px-ic { width: 22px; height: 22px; }
+.mc-ai-title-icon .px-ic { width: 20px; height: 20px; }
 .mc-ai-title-text {
-    font-family: 'Press Start 2P', 'Zpix', monospace;
-    font-size: 16px;
+    font-family: 'Zpix', 'Noto Sans SC', monospace;
+    font-size: 14px;
+    font-weight: 700;
     color: var(--mc-ink);
     letter-spacing: 2px;
     flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .mc-ai-title-pin {
-    font-size: 16px;
+    font-size: 14px;
     color: var(--mc-terra);
     transform: rotate(20deg);
     margin-right: 4px;
+    flex-shrink: 0;
+}
+
+/* AI 列内：tab 行与标题之间留白 */
+[data-testid="stColumn"]:has(.mc-ai-title) [data-testid="stHorizontalBlock"]:has([class*="st-key-ai_tab_"]) {
+    margin-top: 4px !important;
+    margin-bottom: 12px !important;
 }
 
 /* 4 个 tab 按钮：通过 st-key-ai_tab_* 命中 */
