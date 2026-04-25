@@ -44,6 +44,92 @@ MC_DECOR = {
     "mini_books": '<svg xmlns="http://www.w3.org/2000/svg" width="42" height="26" viewBox="0 0 20 12" shape-rendering="crispEdges" style="image-rendering:pixelated"><rect x="1" y="5" width="18" height="6" fill="#6B4024"/><rect x="2" y="2" width="3" height="9" fill="#B96A4A"/><rect x="2" y="3" width="3" height="1" fill="#D46A4A"/><rect x="6" y="4" width="3" height="7" fill="#6E8B5B"/><rect x="6" y="5" width="3" height="1" fill="#7FA169"/><rect x="10" y="1" width="3" height="10" fill="#D7A441"/><rect x="10" y="2" width="3" height="1" fill="#E6B859"/><rect x="14" y="3" width="4" height="8" fill="#7a96b4"/><rect x="14" y="4" width="4" height="1" fill="#8DABC4"/></svg>',
 }
 
+# 左侧导航底部装饰：木桌 + 暖光台灯 + 红/棕/黄三本书堆 + 盆栽（设计图同款）
+MC_NAV_DECOR_SVG = '''
+<div class="mc-nav-decor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 64" shape-rendering="crispEdges" style="image-rendering:pixelated">
+    <!-- 暖光晕（衬底） -->
+    <rect x="22" y="8" width="36" height="40" fill="#F2C66D" opacity="0.12"/>
+    <rect x="26" y="6" width="28" height="44" fill="#F4D27A" opacity="0.10"/>
+
+    <!-- 台灯：吊钩 + 顶盖 + 玻璃罩（暖光） + 铜底座 -->
+    <rect x="39" y="2" width="2" height="2" fill="#3B2416"/>
+    <rect x="38" y="4" width="4" height="1" fill="#3B2416"/>
+    <rect x="34" y="5" width="12" height="2" fill="#5C3A1F"/>
+    <rect x="33" y="7" width="14" height="2" fill="#3B2416"/>
+    <rect x="32" y="9" width="16" height="2" fill="#8B5E3C"/>
+    <rect x="33" y="11" width="14" height="2" fill="#5C3A1F"/>
+    <!-- 玻璃罩 + 暖光 -->
+    <rect x="33" y="13" width="14" height="18" fill="#F2C66D"/>
+    <rect x="34" y="14" width="12" height="16" fill="#FFE08A"/>
+    <rect x="35" y="15" width="10" height="14" fill="#FFF0B0"/>
+    <rect x="37" y="17" width="6" height="10" fill="#FFFBE0"/>
+    <rect x="38" y="19" width="4" height="6" fill="#FFFFFF" opacity="0.85"/>
+    <!-- 玻璃罩竖筋 -->
+    <rect x="36" y="13" width="1" height="18" fill="#5C3A1F" opacity="0.45"/>
+    <rect x="43" y="13" width="1" height="18" fill="#5C3A1F" opacity="0.45"/>
+    <rect x="33" y="22" width="14" height="1" fill="#5C3A1F" opacity="0.30"/>
+    <!-- 罩底盖 -->
+    <rect x="33" y="31" width="14" height="2" fill="#5C3A1F"/>
+    <rect x="32" y="33" width="16" height="2" fill="#8B5E3C"/>
+    <rect x="34" y="35" width="12" height="2" fill="#3B2416"/>
+    <!-- 铜底座 -->
+    <rect x="36" y="37" width="8" height="6" fill="#5C3A1F"/>
+    <rect x="37" y="38" width="6" height="4" fill="#8B5E3C"/>
+    <rect x="34" y="43" width="12" height="2" fill="#3B2416"/>
+
+    <!-- 木桌面 -->
+    <rect x="0" y="45" width="80" height="3" fill="#8B5E3C"/>
+    <rect x="0" y="48" width="80" height="2" fill="#5C3A1F"/>
+    <rect x="0" y="50" width="80" height="2" fill="#3B2416"/>
+    <!-- 桌纹 -->
+    <rect x="6" y="46" width="10" height="1" fill="#A77E2A" opacity="0.4"/>
+    <rect x="22" y="46" width="14" height="1" fill="#A77E2A" opacity="0.4"/>
+    <rect x="44" y="46" width="12" height="1" fill="#A77E2A" opacity="0.4"/>
+    <rect x="60" y="46" width="14" height="1" fill="#A77E2A" opacity="0.4"/>
+    <!-- 灯光投射在桌面 -->
+    <rect x="26" y="45" width="28" height="1" fill="#FFE08A" opacity="0.5"/>
+    <rect x="30" y="48" width="20" height="1" fill="#F2C66D" opacity="0.3"/>
+
+    <!-- 右侧书堆 -->
+    <!-- 底书：深红 -->
+    <rect x="52" y="38" width="22" height="7" fill="#7A2E1E"/>
+    <rect x="52" y="38" width="22" height="1" fill="#5A1E12"/>
+    <rect x="52" y="44" width="22" height="1" fill="#5A1E12"/>
+    <rect x="73" y="39" width="1" height="5" fill="#F6E7C8"/>
+    <rect x="55" y="40" width="3" height="1" fill="#D7A441"/>
+    <!-- 中书：棕红 -->
+    <rect x="54" y="32" width="20" height="6" fill="#B96A4A"/>
+    <rect x="54" y="32" width="20" height="1" fill="#8B3F2A"/>
+    <rect x="54" y="37" width="20" height="1" fill="#8B3F2A"/>
+    <rect x="73" y="33" width="1" height="4" fill="#F6E7C8"/>
+    <!-- 顶书：芥黄 -->
+    <rect x="56" y="27" width="16" height="5" fill="#D7A441"/>
+    <rect x="56" y="27" width="16" height="1" fill="#A77E2A"/>
+    <rect x="56" y="31" width="16" height="1" fill="#A77E2A"/>
+    <rect x="71" y="28" width="1" height="3" fill="#F6E7C8"/>
+
+    <!-- 左侧盆栽 -->
+    <!-- 叶 -->
+    <rect x="11" y="22" width="2" height="14" fill="#5A7349"/>
+    <rect x="13" y="20" width="2" height="16" fill="#6E8B5B"/>
+    <rect x="9"  y="24" width="2" height="12" fill="#6E8B5B"/>
+    <rect x="15" y="24" width="2" height="12" fill="#5A7349"/>
+    <rect x="7"  y="28" width="2" height="8"  fill="#8AA670"/>
+    <rect x="17" y="26" width="2" height="10" fill="#8AA670"/>
+    <rect x="10" y="20" width="2" height="2"  fill="#6E8B5B"/>
+    <rect x="14" y="18" width="2" height="2"  fill="#8AA670"/>
+    <rect x="12" y="16" width="2" height="2"  fill="#6E8B5B"/>
+    <!-- 花盆 -->
+    <rect x="5"  y="36" width="16" height="2" fill="#8B3F2A"/>
+    <rect x="6"  y="38" width="14" height="6" fill="#B96A4A"/>
+    <rect x="7"  y="39" width="12" height="1" fill="#D2876A" opacity="0.55"/>
+    <rect x="6"  y="44" width="14" height="1" fill="#5A1E12"/>
+    <rect x="7"  y="36" width="12" height="1" fill="#3B2416"/>
+  </svg>
+</div>
+'''
+
 # 左侧导航菜单（spec v1 §9 模块 A；key → Chinese label + emoji icon，阶段 8 会换像素 SVG）
 NAV_ITEMS = [
     ("shelf",    "书架",      "📚"),
@@ -151,25 +237,50 @@ st.markdown("""
    —— 对照 DESIGN_SPEC §9 模块 A：深木棕立柜 + 品牌 + 7 菜单 + 底部装饰
    ========================================================================== */
 
-/* 整列背景：找到含 .mc-nav-brand 的 stColumn，应用深木棕底 */
+/* 阶段 10：左侧导航跨两行（阅读区 + 底卡）—— 设计图同款立柜 */
+/* 父级 row 锁高、允许 nav 溢出 */
+[data-testid="stHorizontalBlock"]:has(.mc-nav-brand) {
+    align-items: flex-start !important;
+    overflow: visible !important;
+}
 [data-testid="stColumn"]:has(.mc-nav-brand) {
     background: var(--mc-wood-deep) !important;
     border: 2px solid var(--mc-ink) !important;
     padding: 0 !important;
     margin: 0 !important;
     min-height: 340px;
-    /* 视口高度 - 顶部 padding 3.5rem - topbar ~70 - 底卡 30vh - 间距 ~30 */
-    height: calc(60vh - 80px);
-    max-height: calc(60vh - 80px);
+    /* 60vh(阅读区) + 28vh(底卡) + 间距 */
+    height: calc(88vh - 64px);
+    max-height: calc(88vh - 64px);
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex !important;
     flex-direction: column !important;
+    position: relative;
+    z-index: 5;
 }
 [data-testid="stColumn"]:has(.mc-nav-brand) > div {
     padding: 0 !important;
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-height: 100%;
+}
+/* 中央 + 右侧列锁回阅读区高度（不被 nav 拉高） */
+[data-testid="stColumn"]:has(.mc-reader-frame),
+[data-testid="stColumn"]:has(.mc-empty-book) {
+    min-height: 340px;
+    height: calc(60vh - 80px) !important;
+    max-height: calc(60vh - 80px) !important;
+}
+/* 底卡行第一格是空 spacer（让位给跨行的 nav），隐藏其默认 padding/边框 */
+[data-testid="stColumn"]:has(.mc-nav-spacer) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
 }
 
 /* 品牌区 */
@@ -254,16 +365,25 @@ st.markdown("""
     padding: 6px 0 0 0;
 }
 
-/* 底部装饰 */
+/* 底部装饰：台灯 + 书堆 + 盆栽 木桌场景，钉在 nav 列底部 */
+[data-testid="stColumn"]:has(.mc-nav-brand) [data-testid="stElementContainer"]:has(.mc-nav-decor) {
+    margin-top: auto !important;
+}
 .mc-nav-decor {
-    padding: 10px 12px 14px 12px;
+    padding: 12px 8px 14px 8px;
     text-align: center;
     border-top: 1px solid var(--mc-wood-mid);
-    background: linear-gradient(0deg, rgba(107, 64, 36, 0.6) 0%, transparent 100%);
+    background: linear-gradient(0deg, rgba(59, 36, 22, 0.85) 0%, transparent 100%);
+    line-height: 0;
 }
 .mc-nav-decor svg {
     image-rendering: pixelated;
     shape-rendering: crispEdges;
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
 
 /* 中央列的"即将上线"占位（非 reading 视图） */
@@ -3511,23 +3631,8 @@ if has_file:
                     st.session_state._active_nav = _nav_key
                     st.rerun()
 
-            # 底部装饰：像素台灯 + 小书堆（阶段 8 会再精细化）
-            st.markdown("""
-            <div class="mc-nav-decor" aria-hidden="true">
-                <svg width="40" height="48" viewBox="0 0 16 20">
-                    <rect x="2" y="2" width="12" height="2" fill="#2E1D12"/>
-                    <rect x="3" y="4" width="10" height="4" fill="#D7A441"/>
-                    <rect x="4" y="5" width="8" height="2" fill="#F2C66D"/>
-                    <rect x="7" y="8" width="2" height="8" fill="#6B4024"/>
-                    <rect x="4" y="16" width="8" height="2" fill="#3B2416"/>
-                </svg>
-                <svg width="40" height="22" viewBox="0 0 16 10" style="margin-top:8px">
-                    <rect x="2" y="3" width="12" height="2" fill="#6E8B5B"/>
-                    <rect x="1" y="5" width="14" height="2" fill="#B96A4A"/>
-                    <rect x="2" y="7" width="12" height="1" fill="#8B3F2A"/>
-                </svg>
-            </div>
-            """, unsafe_allow_html=True)
+            # 底部装饰：木桌 + 台灯 + 书堆 + 盆栽（设计图同款）
+            st.markdown(MC_NAV_DECOR_SVG, unsafe_allow_html=True)
 
             # 动态注入：当前激活菜单的高亮样式
             st.markdown(f"""
@@ -4610,7 +4715,12 @@ if has_file:
                             st.code(str(e))
 
         # --- 阶段 7 底部四卡 ---
-        _c_lib, _c_notes, _c_upload, _c_stats = st.columns([30, 24, 22, 24], gap="small")
+        # 第 1 列空 spacer，让位给跨行的左 nav（width 16 与 _mc_nav 同比）
+        _c_spacer, _c_lib, _c_notes, _c_upload, _c_stats = st.columns(
+            [16, 30, 24, 22, 24], gap="small"
+        )
+        with _c_spacer:
+            st.markdown('<div class="mc-nav-spacer"></div>', unsafe_allow_html=True)
 
         # 卡 1：我的书架
         with _c_lib:
@@ -4862,22 +4972,7 @@ else:
             ):
                 st.session_state._active_nav = _nav_key
                 st.rerun()
-        st.markdown("""
-        <div class="mc-nav-decor" aria-hidden="true">
-            <svg width="40" height="48" viewBox="0 0 16 20">
-                <rect x="2" y="2" width="12" height="2" fill="#2E1D12"/>
-                <rect x="3" y="4" width="10" height="4" fill="#D7A441"/>
-                <rect x="4" y="5" width="8" height="2" fill="#F2C66D"/>
-                <rect x="7" y="8" width="2" height="8" fill="#6B4024"/>
-                <rect x="4" y="16" width="8" height="2" fill="#3B2416"/>
-            </svg>
-            <svg width="40" height="22" viewBox="0 0 16 10" style="margin-top:8px">
-                <rect x="2" y="3" width="12" height="2" fill="#6E8B5B"/>
-                <rect x="1" y="5" width="14" height="2" fill="#B96A4A"/>
-                <rect x="2" y="7" width="12" height="1" fill="#8B3F2A"/>
-            </svg>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(MC_NAV_DECOR_SVG, unsafe_allow_html=True)
         st.markdown(f"""
         <style>
         .st-key-nav_empty_{_active_nav} button {{
@@ -4938,7 +5033,12 @@ else:
         )
 
     # ===== 底部 4 卡 =====
-    _c_lib, _c_notes, _c_upload, _c_stats = st.columns([30, 24, 22, 24], gap="small")
+    # 第 1 列空 spacer，让位给跨行的左 nav
+    _c_spacer, _c_lib, _c_notes, _c_upload, _c_stats = st.columns(
+        [16, 30, 24, 22, 24], gap="small"
+    )
+    with _c_spacer:
+        st.markdown('<div class="mc-nav-spacer"></div>', unsafe_allow_html=True)
 
     # 卡 1：我的书架
     with _c_lib:
